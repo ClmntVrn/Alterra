@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10251e">
+  <title>Mallorca ETM 2026 · Alterra</title>
+  <style>
+    
+    :root {
+      color-scheme: dark;
+      --bg: #0B141D;
+      --panel: #122333;
+      --panel2: #142A3D;
+      --line: #254866;
+      --text: #F4F7FC;
+      --muted: #AFC5DB;
+      --blue: #45A5FF;
+      --orange: #FFD18A;
+      --red: #FF9F91;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: max(12px, env(safe-area-inset-top)) 14px max(22px, env(safe-area-inset-bottom));
+    }
+
+    main { max-width: 680px; margin: 0 auto; }
+
+    a { color: var(--blue); }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 2px 0 18px;
+    }
+
+    .brand {
+      font-size: 12px;
+      letter-spacing: .18em;
+      font-weight: 800;
+      color: var(--blue);
+    }
+
+    .back {
+      font-size: 13px;
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 11px;
+    }
+
+    h1 {
+      font-size: clamp(28px, 8vw, 40px);
+      line-height: 1.04;
+      margin: 0 0 8px;
+      letter-spacing: -.04em;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin: 0 0 18px;
+      font-size: 14px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #142A3D, #10202E 75%);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .stat {
+      background: rgba(0, 0, 0, .18);
+      border-radius: 12px;
+      padding: 10px 8px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 21px;
+      letter-spacing: -.03em;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .section { margin-top: 20px; }
+
+    .section h2 {
+      font-size: 17px;
+      margin: 0 0 10px;
+      letter-spacing: -.02em;
+    }
+
+    .selector {
+      display: flex;
+      gap: 7px;
+    }
+
+    .selector button,
+    .smallbtn {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 11px;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .selector button.active {
+      background: var(--blue);
+      color: #071725;
+      border-color: var(--blue);
+    }
+
+    .checkpoint-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .checkpoint {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 13px;
+    }
+
+    .checkpoint.done { opacity: .48; }
+
+    .checkpoint.done .place { text-decoration: line-through; }
+
+    .place {
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    .km {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .timing { text-align: right; }
+
+    .elapsed {
+      font-size: 19px;
+      font-weight: 850;
+      color: var(--blue);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .clock {
+      font-size: 12px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .mark input {
+      accent-color: var(--blue);
+      width: 16px;
+      height: 16px;
+      margin: 0;
+    }
+
+    .callout {
+      border-radius: 14px;
+      padding: 13px 14px;
+      background: #2C2A1B;
+      border: 1px solid #665535;
+      color: #FFF1CF;
+    }
+
+    .callout strong { color: var(--orange); }
+
+    .rules {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rule {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 12px 13px;
+    }
+
+    .rule b {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .rule p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 9px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      background: var(--panel2);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .footer {
+      color: #7894AE;
+      font-size: 11px;
+      margin: 20px 2px 4px;
+    }
+
+    @media (min-width: 560px) {
+      body {
+        padding-left: 22px;
+        padding-right: 22px;
+      }
+
+      .checkpoint-list {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+  </style>
+</head>
+<body>
+<main>
+  <div class="topline">
+    <div class="brand">ALTERRA / RACE CARD</div>
+    <a class="back" href="./index.html">← Alterra</a>
+  </div>
+
+  <section class="hero">
+    <h1>Mallorca<br>by UTMB · ETM</h1>
+    <p class="sub">Samedi 31 octobre 2026 · Départ 08:00 · Selva → Port de Sóller</p>
+    <div class="stats">
+      <div class="stat"><strong>56 km</strong><span>Distance</span></div>
+      <div class="stat"><strong>2 450 m</strong><span>D+</span></div>
+      <div class="stat"><strong>7 h 20</strong><span>Temps cible</span></div>
+    </div>
+    <div class="pills">
+      <span class="pill">Arrivée cible 15:20</span>
+      <span class="pill">Barrière max. 20:00</span>
+      <span class="pill">2 Running Stones</span>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Temps de passage</h2>
+    <div class="selector" role="group" aria-label="Scénario de temps">
+      <button type="button" data-scenario="ambitious">Ambitieux<br>7 h</button>
+      <button type="button" data-scenario="target" class="active">Cible<br>7 h 20</button>
+      <button type="button" data-scenario="safe">Prudent<br>7 h 45</button>
+    </div>
+    <p class="sub" style="margin:8px 2px 11px">Temps écoulé / heure de passage estimée. Coche les points atteints pour suivre ta progression.</p>
+    <div class="checkpoint-list" id="checkpoints">
+      <article class="checkpoint" data-id="lluc">
+        <div><div class="place">Lluc</div><div class="km">KM 11 · ravito solide + boisson</div><label class="mark"><input type="checkbox"> Point atteint</label></div>
+        <div class="timing"><div class="elapsed" data-times="1:12|1:15|1:19">1h15</div><div class="clock" data-clocks="09:12|09:15|09:19">09:15</div></div>
+      </article>
+      <article class="checkpoint" data-id="cuber">
+        <div><div class="place">Cúber</div><div class="km">KM 25 · bouillon + solide + boisson</div><label class="mark"><input type="checkbox"> Point atteint</label></div>
+        <div class="timing"><div class="elapsed" data-times="3:02|3:10|3:20">3h10</div><div class="clock" data-clocks="11:02|11:10|11:20">11:10</div></div>
+      </article>
+      <article class="checkpoint" data-id="poma">
+        <div><div class="place">Coll d’en Poma</div><div class="km">KM 32 · liquide uniquement</div><label class="mark"><input type="checkbox"> Point atteint</label></div>
+        <div class="timing"><div class="elapsed" data-times="4:10|4:22|4:36">4h22</div><div class="clock" data-clocks="12:10|12:22|12:36">12:22</div></div>
+      </article>
+      <article class="checkpoint" data-id="fornalutx">
+        <div><div class="place">Fornalutx</div><div class="km">KM 41 · ravito solide + boisson</div><label class="mark"><input type="checkbox"> Point atteint</label></div>
+        <div class="timing"><div class="elapsed" data-times="5:19|5:34|5:53">5h34</div><div class="clock" data-clocks="13:19|13:34|13:53">13:34</div></div>
+      </article>
+      <article class="checkpoint" data-id="soller">
+        <div><div class="place">Sóller</div><div class="km">KM 48 · bouillon + liquide</div><label class="mark"><input type="checkbox"> Point atteint</label></div>
+        <div class="timing"><div class="elapsed" data-times="6:07|6:24|6:46">6h24</div><div class="clock" data-clocks="14:07|14:24|14:46">14:24</div></div>
+      </article>
+      <article class="checkpoint" data-id="finish">
+        <div><div class="place">Arrivée · Port de Sóller</div><div class="km">KM 56 · objectif : finir fort</div><label class="mark"><input type="checkbox"> Course terminée</label></div>
+        <div class="timing"><div class="elapsed" data-times="7:00|7:20|7:45">7h20</div><div class="clock" data-clocks="15:00|15:20|15:45">15:20</div></div>
+      </article>
+    </div>
+    <button class="smallbtn" id="reset" type="button" style="margin-top:9px;width:100%">Réinitialiser les points cochés</button>
+  </section>
+
+  <section class="section">
+    <h2>Effort : les rappels essentiels</h2>
+    <div class="rules">
+      <div class="rule">
+        <b>❤️ Fréquence cardiaque</b>
+        <p>Vise 142–150 bpm en moyenne. Plafond autour de 155 bpm dans les montées de la première moitié ; ≤145 bpm sur le plat. Le ressenti prime : ce sont des repères, pas des seuils médicaux.</p>
+      </div>
+      <div class="rule">
+        <b>🐢 Départ volontairement facile</b>
+        <p>Si tu es en avance à Lluc, ralentis. Ne cherche pas à gagner du temps pendant les 2 premières heures.</p>
+      </div>
+      <div class="rule">
+        <b>🦵 Cúber → Fornalutx : patience</b>
+        <p>Crête technique puis longue descente. Pas de chasse au chrono : protège tes quadriceps pour la fin.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Nutrition & eau</h2>
+    <div class="rules">
+      <div class="rule">
+        <b>70–80 g de glucides / heure</b>
+        <p>Environ un gel toutes les 40 min + boisson isotonique. Prends du solide à Lluc, Cúber et Fornalutx.</p>
+      </div>
+      <div class="rule">
+        <b>💧 Entre Lluc et Cúber</b>
+        <p>14 km et environ 2 h sans ravito : pars de Lluc avec au moins 1 L d’eau.</p>
+      </div>
+      <div class="callout">
+        <strong>À ne pas oublier :</strong> gobelet personnel de 15 cl minimum. Pas de gobelets fournis ; une flasque ne compte pas.
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Ravitaillements · mémo express</h2>
+    <div class="pills">
+      <span class="pill">Näak à chaque station</span>
+      <span class="pill">Bouillon à Cúber</span>
+      <span class="pill">Bouillon à Sóller</span>
+      <span class="pill">Coll d’en Poma = liquide</span>
+    </div>
+  </section>
+
+  <p class="footer">Plan indicatif construit à partir de ta note de préparation. Les horaires réels dépendent du terrain, de la météo et de ton état du jour. Vérifie les barrières horaires officielles et le guide coureur avant le départ.</p>
+</main>
+<script>
+  const scenarioButtons = [...document.querySelectorAll('[data-scenario]')];
+  const scenarioIndex = { ambitious: 0, target: 1, safe: 2 };
+  function setScenario(scenario) {
+    const index = scenarioIndex[scenario];
+    scenarioButtons.forEach(button => button.classList.toggle('active', button.dataset.scenario === scenario));
+    document.querySelectorAll('[data-times]').forEach(el => {
+      el.textContent = el.dataset.times.split('|')[index].replace(':', 'h') ;
+    });
+    document.querySelectorAll('[data-clocks]').forEach(el => {
+      el.textContent = el.dataset.clocks.split('|')[index];
+    });
+  }
+  scenarioButtons.forEach(button => button.addEventListener('click', () => setScenario(button.dataset.scenario)));
+
+  const storageKey = 'alterra-mallorca-etm-2026-checkpoints';
+  const checks = [...document.querySelectorAll('.checkpoint input[type="checkbox"]')];
+  function loadChecks() {
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch (_) {}
+    checks.forEach(input => {
+      input.checked = saved.includes(input.closest('.checkpoint').dataset.id);
+      input.closest('.checkpoint').classList.toggle('done', input.checked);
+    });
+  }
+  function saveChecks() {
+    const done = checks.filter(input => input.checked).map(input => input.closest('.checkpoint').dataset.id);
+    try { localStorage.setItem(storageKey, JSON.stringify(done)); } catch (_) {}
+    checks.forEach(input => input.closest('.checkpoint').classList.toggle('done', input.checked));
+  }
+  checks.forEach(input => input.addEventListener('change', saveChecks));
+  document.getElementById('reset').addEventListener('click', () => {
+    checks.forEach(input => input.checked = false);
+    saveChecks();
+  });
+  loadChecks();
+</script>
+</body>
+</html>

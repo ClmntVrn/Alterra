@@ -16,22 +16,25 @@
   <link rel="apple-touch-icon" href="./icon.svg">
 
   <style>
+    
     :root {
       color-scheme: dark;
-      --bg: #101A15;
-      --panel: #1B2B22;
-      --green: #A6D9A2;
-      --muted: #AAB9AE;
-      --border: #34483A;
+      --bg: #0B141D;
+      --panel: #122333;
+      --blue: #45A5FF;
+      --muted: #AFC5DB;
+      --border: #254866;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
       min-height: 100vh;
       background: var(--bg);
-      color: #F4F5EF;
+      color: #F4F7FC;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
@@ -67,7 +70,7 @@
     }
 
     .eyebrow {
-      color: var(--green);
+      color: var(--blue);
       font-size: 12px;
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -81,7 +84,9 @@
       letter-spacing: -1.5px;
     }
 
-    h1 span { color: var(--green); }
+    h1 span {
+      color: var(--blue);
+    }
 
     .intro {
       color: var(--muted);
@@ -118,8 +123,8 @@
 
     .tag {
       display: inline-block;
-      color: var(--green);
-      border: 1px solid #52765B;
+      color: var(--blue);
+      border: 1px solid #347BB5;
       border-radius: 30px;
       padding: 7px 11px;
       font-size: 11px;
@@ -127,11 +132,75 @@
     }
 
     footer {
-      color: #7F9284;
+      color: #7894AE;
       font-size: 11px;
       margin-top: 36px;
       letter-spacing: 1px;
     }
+
+    /* Carte de la prochaine course */
+
+    .race-card {
+      display: block;
+      margin: 24px 0;
+      padding: 20px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #142A3D, #10202E);
+      border: 1px solid #287FC0;
+      color: #F3F7FC;
+      text-decoration: none;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .race-card:hover {
+      border-color: var(--blue);
+      transform: translateY(-2px);
+    }
+
+    .race-card-top,
+    .race-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .race-tag {
+      color: #071725;
+      background: var(--blue);
+      border-radius: 30px;
+      padding: 7px 11px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+    }
+
+    .race-arrow {
+      color: var(--blue);
+      font-size: 20px;
+    }
+
+    .race-card h2 {
+      margin: 18px 0 5px;
+      font-size: 24px;
+    }
+
+    .race-subtitle {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .race-footer {
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .race-footer strong {
+      color: var(--blue);
+    }
+
   </style>
 </head>
 
@@ -165,6 +234,21 @@
       </p>
       <span class="tag">VERSION 0.1 · EN CONSTRUCTION</span>
     </section>
+
+    <a href="./mallorca.html" class="race-card">
+      <div class="race-card-top">
+        <span class="race-tag">PROCHAINE COURSE</span>
+        <span class="race-arrow">?</span>
+      </div>
+
+      <h2>Mallorca by UTMB</h2>
+      <p class="race-subtitle">ETM · 56 km · 2 450 m D+</p>
+
+      <div class="race-footer">
+        <span>31 octobre 2026</span>
+        <strong>Voir mon plan ?</strong>
+      </div>
+    </a>
 
     <footer>ALTERRA · BUILT FOR THE TRAIL</footer>
   </main>
