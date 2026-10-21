@@ -1,0 +1,20 @@
+
+{
+  "id": "./",
+  "name": "Alterra - Trail Performance",
+  "short_name": "Alterra",
+  "description": "Ton coach personnel de trail",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101A15",
+  "theme_color": "#14251D",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
