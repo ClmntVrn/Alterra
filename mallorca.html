@@ -262,6 +262,151 @@
       }
     }
 
+    <!-- CHECKLIST CSSS-->
+.gear-checklist {
+  margin: 24px 0;
+  border: 1px solid #254866;
+  border-radius: 18px;
+  background: #122333;
+  color: #F4F7FC;
+  overflow: hidden;
+}
+
+.gear-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.gear-summary::-webkit-details-marker {
+  display: none;
+}
+
+.gear-eyebrow {
+  color: #45A5FF;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.gear-heading h2 {
+  margin: 7px 0 4px;
+  font-size: 21px;
+}
+
+.gear-heading p,
+.gear-hint {
+  margin: 0;
+  color: #AFC5DB;
+  font-size: 12px;
+}
+
+.gear-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: #45A5FF;
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.gear-chevron {
+  font-size: 22px;
+  transition: transform .2s;
+}
+
+.gear-checklist details[open] .gear-chevron {
+  transform: rotate(180deg);
+}
+
+.gear-content {
+  padding: 0 18px 20px;
+}
+
+.gear-progress-track {
+  height: 5px;
+  background: #254866;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+#gearProgressBar {
+  height: 100%;
+  width: 0;
+  background: #45A5FF;
+  transition: width .2s;
+}
+
+.gear-hint {
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.gear-group-title {
+  color: #45A5FF;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 18px 0 10px;
+}
+
+.recommended-title {
+  color: #AFC5DB;
+  border-top: 1px solid #254866;
+  padding-top: 20px;
+}
+
+.gear-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #20384D;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.gear-item input {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+  margin: 1px 0 0;
+  accent-color: #45A5FF;
+}
+
+.gear-item:has(input:checked) span {
+  color: #829BB1;
+  text-decoration: line-through;
+}
+
+.gear-reset {
+  width: 100%;
+  margin-top: 20px;
+  padding: 12px;
+  border: 1px solid #347BB5;
+  border-radius: 10px;
+  background: transparent;
+  color: #45A5FF;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.gear-note {
+  color: #AFC5DB;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 16px 0 0;
+}
+
   </style>
 </head>
 <body>
@@ -368,6 +513,175 @@
     </div>
   </section>
 
+  <!-- CHECKLIST MATÉRIEL MALLORCA ETM -->
+  <section class="gear-checklist">
+    <details id="gearDetails">
+      <summary class="gear-summary">
+        <div class="gear-heading">
+          <span class="gear-eyebrow">AVANT LE DÉPART</span>
+          <h2>Matériel obligatoire</h2>
+          <p>ETM · Mallorca by UTMB 2026</p>
+        </div>
+        <div class="gear-progress">
+          <span id="gearCount">0/14</span>
+          <span class="gear-chevron">⌄</span>
+        </div>
+      </summary>
+
+      <div class="gear-content">
+        <div class="gear-progress-track">
+          <div id="gearProgressBar"></div>
+        </div>
+        <p class="gear-hint">Coche chaque élément une fois dans ton sac.</p>
+
+        <div class="gear-group-title">Équipement obligatoire</div>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="shoes">
+          <span>Chaussures fermées adaptées au trail</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="pack">
+          <span>Sac de course avec la puce de chronométrage fixée dessus</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="phone">
+          <span>Smartphone avec LiveTrail installé et configuré pour fonctionner en Espagne et en France</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="cup">
+          <span>Gobelet personnel de 15 cl minimum</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="water">
+          <span>Contenant(s) hermétique(s) transportant au moins 1 L d’eau — pas de poche plastique</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="lamp">
+          <span>1 lampe frontale minimum selon la colonne ETM, avec piles ou piles de rechange</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="blanket">
+          <span>Couverture de survie d’au moins 1,40 × 2 m</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="whistle">
+          <span>Sifflet</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="food">
+          <span>Réserve alimentaire (800 kcal recommandées)</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="jacket">
+          <span>Veste imperméable et respirante avec capuche, coutures thermosoudées</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="pants">
+          <span>Pantalon ou collant long couvrant entièrement les jambes</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="cap">
+          <span>Casquette ou bandana</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="thermal">
+          <span>Deuxième couche thermique conforme au poids et aux critères du règlement</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="gloves">
+          <span>Gants chauds et imperméables</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="overpants">
+          <span>Surpantalon imperméable</span>
+        </label>
+
+        <div class="gear-group-title recommended-title">
+          À prévoir aussi — recommandé
+        </div>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="warm-clothes">
+          <span>Vêtements chauds de rechange</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="tape">
+          <span>Bande élastique adhésive (100 × 6 cm minimum)</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="utensils">
+          <span>Vaisselle et ustensiles pour manger</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="poles">
+          <span>Bâtons avec protection de pointe et protection de rechange si utilisés</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="anti-chafe">
+          <span>Vaseline ou crème anti-frottements</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="gps">
+          <span>Montre GPS avec la trace chargée</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="scissors">
+          <span>Couteau ou ciseaux pour couper le ruban adhésif</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="repair">
+          <span>Boîte de travail (terme du document officiel)</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="filter">
+          <span>Pastilles de purification ou soft flask avec filtre</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="sunscreen">
+          <span>Crème solaire</span>
+        </label>
+
+        <label class="gear-item">
+          <input type="checkbox" data-gear="sunglasses">
+          <span>Lunettes de soleil</span>
+        </label>
+
+        <button type="button" id="resetGear" class="gear-reset">
+          Réinitialiser la checklist
+        </button>
+
+        <p class="gear-note">
+          Pense à garder ton téléphone allumé : le mode avion est interdit.
+          Une batterie externe est recommandée.
+        </p>
+      </div>
+    </details>
+  </section>
+
   <p class="footer">Plan indicatif construit à partir de ta note de préparation. Les horaires réels dépendent du terrain, de la météo et de ton état du jour. Vérifie les barrières horaires officielles et le guide coureur avant le départ.</p>
 </main>
 <script>
@@ -406,6 +720,62 @@
     saveChecks();
   });
   loadChecks();
+</script>
+
+<script>
+(function () {
+  const boxes = Array.from(
+    document.querySelectorAll('[data-gear]')
+  );
+  const count = document.getElementById('gearCount');
+  const bar = document.getElementById('gearProgressBar');
+  const reset = document.getElementById('resetGear');
+
+  if (!count || !bar || !reset) return;
+
+  const storageKey = 'alterra-mallorca-gear-2026';
+
+  function saveState() {
+    const state = {};
+    boxes.forEach(box => {
+      state[box.dataset.gear] = box.checked;
+    });
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    } catch (e) {}
+
+    const mandatory = boxes.filter(box =>
+      ![
+        'warm-clothes', 'tape', 'utensils', 'poles',
+        'anti-chafe', 'gps', 'scissors', 'repair',
+        'filter', 'sunscreen', 'sunglasses'
+      ].includes(box.dataset.gear)
+    );
+
+    const checked = mandatory.filter(box => box.checked).length;
+    count.textContent = checked + '/' + mandatory.length;
+    bar.style.width = (checked / mandatory.length * 100) + '%';
+  }
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    boxes.forEach(box => {
+      if (typeof saved[box.dataset.gear] === 'boolean') {
+        box.checked = saved[box.dataset.gear];
+      }
+    });
+  } catch (e) {}
+
+  boxes.forEach(box => box.addEventListener('change', saveState));
+
+  reset.addEventListener('click', () => {
+    boxes.forEach(box => box.checked = false);
+    saveState();
+  });
+
+  saveState();
+})();
 </script>
 </body>
 </html>
