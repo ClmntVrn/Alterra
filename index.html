@@ -96,6 +96,8 @@
         details: "45 km · 1 000 m D+ · Départ à 23:30"
       }
     };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const monthFormatter = new Intl.DateTimeFormat("fr-FR", {
       month: "long",
       year: "numeric"
@@ -192,6 +194,11 @@
             String(date.getMonth() + 1).padStart(2, "0"),
             String(date.getDate()).padStart(2, "0")
           ].join("-");
+          const isToday = date.getTime() === today.getTime();
+          if (isToday) {
+            dayCell.classList.add("is-today");
+            dayCell.setAttribute("aria-current", "date");
+          }
           const dayNumber = document.createElement("span");
           dayNumber.className = "calendar-date";
           dayNumber.textContent = day;
