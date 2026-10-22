@@ -96,8 +96,6 @@
         details: "45 km · 1 000 m D+ · Départ à 23:30"
       }
     };
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
     const monthFormatter = new Intl.DateTimeFormat("fr-FR", {
       month: "long",
       year: "numeric"
@@ -152,6 +150,8 @@
     }
 
     function renderCalendar() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       calendarTitle.textContent = monthFormatter.format(currentMonth);
       calendarTitle.textContent =
         calendarTitle.textContent.charAt(0).toLocaleUpperCase("fr-FR") +
@@ -242,6 +242,11 @@
       renderCalendar();
     });
     backToMonthButton.addEventListener("click", showMonthView);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && !calendarGrid.hidden) {
+        renderCalendar();
+      }
+    });
 
     renderCalendar();
   </script>
