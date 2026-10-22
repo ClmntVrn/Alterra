@@ -37,31 +37,32 @@
       </p>
     </section>
 
-    <section class="card">
-      <div class="card-label">Ton camp de base</div>
-      <h2>Bienvenue sur les sentiers.</h2>
-      <p>
-        Prépare tes prochaines aventures et garde tes
-        informations de course à portée de main. Ton espace
-        de coaching personnalisé est en préparation.
-      </p>
-      <span class="tag">PREMIÈRE VERSION · EN CONSTRUCTION</span>
+    <section class="calendar-section" aria-labelledby="calendarTitle">
+      <div class="calendar-heading">
+        <div>
+          <h2 id="calendarTitle" aria-live="polite">Octobre 2026</h2>
+        </div>
+        <div class="calendar-navigation" aria-label="Navigation du calendrier">
+          <button class="calendar-nav calendar-back" id="backToMonth" type="button" aria-label="Retour au calendrier" hidden>←</button>
+          <button class="calendar-nav" id="previousMonth" type="button" aria-label="Mois précédent">←</button>
+          <button class="calendar-nav" id="nextMonth" type="button" aria-label="Mois suivant">→</button>
+        </div>
+      </div>
+      <div class="calendar-grid" role="grid" aria-labelledby="calendarTitle">
+        <div class="calendar-weekdays" role="row">
+          <div class="calendar-weekday" role="columnheader" aria-label="Lundi">Lun</div>
+          <div class="calendar-weekday" role="columnheader" aria-label="Mardi">Mar</div>
+          <div class="calendar-weekday" role="columnheader" aria-label="Mercredi">Mer</div>
+          <div class="calendar-weekday" role="columnheader" aria-label="Jeudi">Jeu</div>
+          <div class="calendar-weekday" role="columnheader" aria-label="Vendredi">Ven</div>
+          <div class="calendar-weekday" role="columnheader" aria-label="Samedi">Sam</div>
+          <div class="calendar-weekday" role="columnheader" aria-label="Dimanche">Dim</div>
+        </div>
+        <div class="calendar-days" id="calendarDays" role="rowgroup"></div>
+      </div>
+      <div class="calendar-event-details" id="calendarEventDetails" hidden aria-live="polite"></div>
+      <p class="calendar-hint" id="calendarHint">Le point orange signale une course. Sélectionne sa date pour voir les détails.</p>
     </section>
-
-    <a href="./mallorca.html" class="race-card">
-      <div class="race-card-top">
-        <span class="race-tag">PROCHAINE COURSE</span>
-        <span class="race-arrow" aria-hidden="true">↗</span>
-      </div>
-
-      <h2>Mallorca by UTMB</h2>
-      <p class="race-subtitle">ETM · 56 km · 2 450 m D+</p>
-
-      <div class="race-footer">
-        <span>31 octobre 2026</span>
-        <strong>Découvrir le plan</strong>
-      </div>
-    </a>
 
     <footer>ALTERRA · IMAGINÉ POUR LES SENTIERS</footer>
   </main>
@@ -73,6 +74,169 @@
           .catch(error => console.error("Service worker:", error));
       });
     }
+  </script>
+  <script>
+    const calendarDays = document.getElementById("calendarDays");
+    const calendarTitle = document.getElementById("calendarTitle");
+    const calendarGrid = document.querySelector(".calendar-grid");
+    const calendarEventDetails = document.getElementById("calendarEventDetails");
+    const calendarHint = document.getElementById("calendarHint");
+    const previousMonthButton = document.getElementById("previousMonth");
+    const nextMonthButton = document.getElementById("nextMonth");
+    const backToMonthButton = document.getElementById("backToMonth");
+    const currentMonth = new Date(2026, 9, 1);
+    const events = {
+      "2026-10-31": {
+        title: "Mallorca by UTMB",
+        details: "ETM · 56 km · 2 450 m D+",
+        href: "./mallorca.html"
+      },
+      "2026-11-28": {
+        title: "SainteExpress",
+        details: "45 km · 1 000 m D+ · Départ à 23:30"
+      }
+    };
+    const monthFormatter = new Intl.DateTimeFormat("fr-FR", {
+      month: "long",
+      year: "numeric"
+    });
+    const eventDateFormatter = new Intl.DateTimeFormat("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
+    function showMonthView() {
+      calendarGrid.hidden = false;
+      calendarEventDetails.hidden = true;
+      calendarHint.hidden = false;
+      previousMonthButton.hidden = false;
+      nextMonthButton.hidden = false;
+      backToMonthButton.hidden = true;
+      renderCalendar();
+    }
+
+    function showEventDetails(date, event) {
+      calendarTitle.textContent = eventDateFormatter.format(date);
+      calendarGrid.hidden = true;
+      calendarEventDetails.replaceChildren();
+      calendarEventDetails.hidden = false;
+      calendarHint.hidden = true;
+      previousMonthButton.hidden = true;
+      nextMonthButton.hidden = true;
+      backToMonthButton.hidden = false;
+
+      const category = document.createElement("span");
+      category.className = "calendar-event-category";
+      category.textContent = "COURSE · UTMB";
+
+      const title = document.createElement("h3");
+      title.textContent = event.title;
+
+      const details = document.createElement("p");
+      details.className = "calendar-event-description";
+      details.textContent = `${eventDateFormatter.format(date)} · ${event.details}`;
+
+      calendarEventDetails.append(category, title, details);
+
+      if (event.href) {
+        const openPlan = document.createElement("a");
+        openPlan.className = "calendar-event-link";
+        openPlan.href = event.href;
+        openPlan.textContent = "Ouvrir le plan de course";
+        openPlan.setAttribute("aria-label", `Ouvrir le plan de ${event.title}`);
+        calendarEventDetails.append(openPlan);
+      }
+    }
+
+    function renderCalendar() {
+      calendarTitle.textContent = monthFormatter.format(currentMonth);
+      calendarTitle.textContent =
+        calendarTitle.textContent.charAt(0).toLocaleUpperCase("fr-FR") +
+        calendarTitle.textContent.slice(1);
+      calendarDays.replaceChildren();
+
+      const firstWeekday = (currentMonth.getDay() + 6) % 7;
+      const daysInMonth = new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth() + 1,
+        0
+      ).getDate();
+
+      const weekCount = Math.ceil((firstWeekday + daysInMonth) / 7);
+      for (let week = 0; week < weekCount; week += 1) {
+        const weekRow = document.createElement("div");
+        weekRow.className = "calendar-week";
+        weekRow.setAttribute("role", "row");
+
+        for (let weekday = 0; weekday < 7; weekday += 1) {
+          const day = week * 7 + weekday - firstWeekday + 1;
+          const dayCell = document.createElement("div");
+          dayCell.className = "calendar-day";
+          dayCell.setAttribute("role", "gridcell");
+
+          if (day < 1 || day > daysInMonth) {
+            dayCell.classList.add("is-empty");
+            dayCell.setAttribute("aria-hidden", "true");
+            weekRow.append(dayCell);
+            continue;
+          }
+
+          const date = new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth(),
+            day
+          );
+          const dateKey = [
+            date.getFullYear(),
+            String(date.getMonth() + 1).padStart(2, "0"),
+            String(date.getDate()).padStart(2, "0")
+          ].join("-");
+          const dayNumber = document.createElement("span");
+          dayNumber.className = "calendar-date";
+          dayNumber.textContent = day;
+          dayCell.append(dayNumber);
+
+          const event = events[dateKey];
+          if (event) {
+            dayCell.classList.add("has-event");
+            const eventButton = document.createElement("button");
+            eventButton.className = "calendar-date-button";
+            eventButton.type = "button";
+            eventButton.setAttribute(
+              "aria-label",
+              `${event.title}, ${eventDateFormatter.format(date)}, afficher les détails`
+            );
+
+            const dateNumber = document.createElement("span");
+            dateNumber.className = "calendar-date";
+            dateNumber.textContent = day;
+            const eventDot = document.createElement("span");
+            eventDot.className = "calendar-event-dot";
+            eventDot.setAttribute("aria-hidden", "true");
+            eventButton.append(dateNumber, eventDot);
+            eventButton.addEventListener("click", () => showEventDetails(date, event));
+            dayCell.replaceChildren(eventButton);
+          }
+
+          weekRow.append(dayCell);
+        }
+
+        calendarDays.append(weekRow);
+      }
+    }
+
+    previousMonthButton.addEventListener("click", () => {
+      currentMonth.setMonth(currentMonth.getMonth() - 1);
+      renderCalendar();
+    });
+    nextMonthButton.addEventListener("click", () => {
+      currentMonth.setMonth(currentMonth.getMonth() + 1);
+      renderCalendar();
+    });
+    backToMonthButton.addEventListener("click", showMonthView);
+
+    renderCalendar();
   </script>
 </body>
 </html>

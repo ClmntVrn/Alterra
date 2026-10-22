@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "alterra-v3";
+const CACHE_NAME = "alterra-v4";
 
 const FILES = [
   "./",
