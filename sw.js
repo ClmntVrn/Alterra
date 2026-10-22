@@ -1,14 +1,18 @@
 
-const CACHE_NAME = "alterra-v5";
+const CACHE_NAME = "alterra-v17";
 
 const FILES = [
   "./",
   "./index.html",
-  "./mallorca.html",
+  "./races/race.html",
+  "./races/race.js",
   "./styles.css",
-  "./gpx/etm-profile-data.js",
+  "./races/gpx/ETM_50_K_ea7a69720b.gpx",
+  "./races/index.json",
+  "./races/mallorca-etm-2026.json",
+  "./races/sainteexpress-2026.json",
   "./manifest.json",
-  "./icon.svg"
+  "./icon/icon.svg"
 ];
 
 self.addEventListener("install", event => {
@@ -45,6 +49,6 @@ self.addEventListener("fetch", event => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(event.request, { ignoreSearch: true }))
   );
 });

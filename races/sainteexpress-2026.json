@@ -1,0 +1,129 @@
+{
+  "id": "sainteexpress-2026",
+  "name": "SaintExpress",
+  "date": "2026-11-28",
+  "calendarDetails": "45 km · Départ en 4 vagues de 23:00 à 23:20",
+  "startTime": "en 4 vagues de 23:00 à 23:20",
+  "distanceKm": 45.8,
+  "ascentMeters": 879,
+  "targetTime": null,
+  "targetFinish": null,
+  "route": "Sainte-Catherine → Lyon",
+  "cutoff": null,
+  "stones": null,
+  "organizer": "ASICS SaintéLyon",
+  "distanceNote": "Trailboard indique 45,8 km et 879 m D+ ; le règlement officiel présente la formule comme un 45 km. Le GPX officiel 2026 n’est pas encore publié.",
+  "checkpointTitle": "Repères en course",
+  "checkpointNote": "Kilomètres indicatifs ; aucun horaire intermédiaire officiel n’est publié.",
+  "checkpoints": [
+    {
+      "id": "le-camp-saint-genou",
+      "name": "Le Camp-Saint-Genou",
+      "km": 12,
+      "description": "Ravitaillement liquide · km indicatif",
+      "label": "Point atteint"
+    },
+    {
+      "id": "soucieu-en-jarrest",
+      "name": "Soucieu-en-Jarrest",
+      "km": 26,
+      "description": "Poste indiqué · ravitaillement non précisé · km indicatif",
+      "label": "Point atteint"
+    },
+    {
+      "id": "chaponost",
+      "name": "Chaponost",
+      "km": 33,
+      "description": "Poste indiqué · ravitaillement non précisé · km indicatif",
+      "label": "Point atteint"
+    },
+    {
+      "id": "finish",
+      "name": "Arrivée · Halle Tony Garnier, Lyon",
+      "km": 45.8,
+      "description": "Arrivée",
+      "label": "Course terminée"
+    }
+  ],
+  "practicalInfo": {
+    "title": "Infos pratiques",
+    "items": [
+      {
+        "title": "Départ et transport",
+        "text": "Navette incluse depuis la Halle Tony Garnier jusqu’à Sainte-Catherine. L’accès en voiture à Sainte-Catherine est interdit."
+      },
+      {
+        "title": "Retrait du dossard",
+        "text": "Retrait individuel à la Halle Tony Garnier, avec une pièce d’identité : vendredi 27 novembre de 12:00 à 20:00 ou samedi 28 novembre de 09:00 à 17:00."
+      },
+      {
+        "title": "Arrivée",
+        "text": "Repas, douches et vestiaires à la Halle Tony Garnier. Les pages officielles divergent sur l’heure limite du dimanche 29 novembre (16:00 ou 16:30) : vérifie la dernière consigne de l’organisation."
+      },
+      {
+        "title": "Assistance",
+        "text": "Assistance extérieure interdite. Ne pas être accompagné sur le parcours, à vélo ou en roller."
+      },
+      {
+        "title": "Bâtons",
+        "text": "Bâtons interdits selon la FAQ de l’organisation."
+      }
+    ]
+  },
+  "gear": {
+    "title": "Matériel obligatoire",
+    "subtitle": "SaintExpress · ASICS SaintéLyon 2026",
+    "hint": "Coche les éléments prévus dans le règlement.",
+    "storageKey": "alterra-sainteexpress-gear-2026",
+    "groups": [
+      {
+        "title": "Kit de base obligatoire",
+        "required": true,
+        "items": [
+          { "id": "trail-pack", "text": "Sac de trail" },
+          { "id": "phone", "text": "Téléphone portable" },
+          { "id": "cup", "text": "Gobelet personnel de 15 cl minimum" },
+          { "id": "water", "text": "Réserve d’eau d’au moins 1 L" },
+          { "id": "blanket", "text": "Couverture de survie d’au moins 1,40 × 2 m" },
+          { "id": "whistle", "text": "Sifflet" },
+          { "id": "bandage", "text": "Bande élastique auto-adhésive (100 × 6 cm minimum)" },
+          { "id": "food", "text": "Réserve alimentaire" },
+          { "id": "rain-jacket", "text": "Veste de pluie" },
+          { "id": "identity", "text": "Pièce d’identité" }
+        ]
+      },
+      {
+        "title": "Kit grand froid — si activé par l’organisation",
+        "required": false,
+        "items": [
+          { "id": "waterproof-jacket", "text": "Veste imperméable" },
+          { "id": "warm-layer", "text": "Deuxième couche chaude supplémentaire" },
+          { "id": "overpants", "text": "Surpantalon imperméable" },
+          { "id": "warm-hat", "text": "Bonnet chaud" },
+          { "id": "warm-gloves", "text": "Gants chauds et imperméables" }
+        ]
+      }
+    ],
+    "note": "L’application LiveTrail installée et activée est fortement recommandée. Le kit grand froid peut être activé par l’organisation : vérifie les consignes avant le départ."
+  },
+  "sources": [
+    {
+      "label": "Fiche officielle SaintExpress 2026",
+      "url": "https://www.saintelyon.com/races/45km-saint-express"
+    },
+    {
+      "label": "Règlement officiel ASICS SaintéLyon 2026",
+      "url": "https://www.saintelyon.com/reglement"
+    },
+    {
+      "label": "Informations pratiques et FAQ officielles",
+      "url": "https://www.saintelyon.com/infos-utiles"
+    },
+    {
+      "label": "Synthèse des repères de parcours SaintExpress",
+      "url": "https://trailboard.run/explorer/saintelyon-saintexpress"
+    }
+  ],
+  "verifiedAt": "2026-10-22",
+  "footer": "Les kilomètres des postes sont indicatifs. Consulte le règlement et les informations officielles avant la course ; les consignes de l’organisation priment."
+}

@@ -1,0 +1,200 @@
+{
+  "id": "mallorca-etm-2026",
+  "name": "Mallorca by UTMB · ETM",
+  "date": "2026-10-31",
+  "calendarDetails": "ETM · 56 km · 2 450 m D+",
+  "startTime": "08:00",
+  "distanceKm": 56,
+  "ascentMeters": 2450,
+  "targetTime": "7 h 20",
+  "targetFinish": "15:20",
+  "route": "Selva → Port de Sóller",
+  "cutoff": "20:00",
+  "stones": 2,
+  "organizer": "UTMB",
+  "defaultScenario": 1,
+  "profile": {
+    "caption": "Trace GPX · 55,4 km · ravitos et altitude",
+    "gpx": "./races/gpx/ETM_50_K_ea7a69720b.gpx"
+  },
+  "scenarios": [
+    { "id": "ambitious", "name": "Ambitieux", "duration": "7 h" },
+    { "id": "target", "name": "Cible", "duration": "7 h 20" },
+    { "id": "safe", "name": "Prudent", "duration": "7 h 45" }
+  ],
+  "checkpoints": [
+    {
+      "id": "lluc",
+      "name": "Lluc",
+      "km": 11,
+      "description": "ravito solide + boisson",
+      "label": "Point atteint",
+      "elapsed": ["1:12", "1:15", "1:19"],
+      "clocks": ["09:12", "09:15", "09:19"],
+      "plan": [
+        { "label": "Manger / boire", "text": "solide + boisson, remplis tes flasques. Pars avec au moins 1 L d’eau." },
+        { "label": "Gels à emporter", "text": "3 — 2 × 30 g et 1 × 45 g." }
+      ]
+    },
+    {
+      "id": "cuber",
+      "name": "Cúber",
+      "km": 25,
+      "description": "bouillon + solide + boisson",
+      "label": "Point atteint",
+      "elapsed": ["3:02", "3:10", "3:20"],
+      "clocks": ["11:02", "11:10", "11:20"],
+      "plan": [
+        { "label": "Manger / boire", "text": "bouillon, solide + boisson." },
+        { "label": "Gels à emporter", "text": "3 — 2 × 45 g et 1 × 30 g." }
+      ]
+    },
+    {
+      "id": "poma",
+      "name": "Coll d’en Poma",
+      "km": 32,
+      "description": "liquide uniquement",
+      "label": "Point atteint",
+      "elapsed": ["4:10", "4:22", "4:36"],
+      "clocks": ["12:10", "12:22", "12:36"],
+      "plan": [
+        { "label": "Manger / boire", "text": "ravito liquide uniquement." },
+        { "label": "Gels", "text": "garde les 2 gels restants pris à Cúber — 1 × 30 g et 1 × 45 g." }
+      ]
+    },
+    {
+      "id": "fornalutx",
+      "name": "Fornalutx",
+      "km": 41,
+      "description": "ravito solide + boisson",
+      "label": "Point atteint",
+      "elapsed": ["5:19", "5:34", "5:53"],
+      "clocks": ["13:19", "13:34", "13:53"],
+      "plan": [
+        { "label": "Manger / boire", "text": "solide + boisson." },
+        { "label": "Gels à emporter", "text": "2 — 1 × 30 g et 1 × 45 g." }
+      ]
+    },
+    {
+      "id": "soller",
+      "name": "Sóller",
+      "km": 48,
+      "description": "bouillon + liquide",
+      "label": "Point atteint",
+      "elapsed": ["6:07", "6:24", "6:46"],
+      "clocks": ["14:07", "14:24", "14:46"],
+      "plan": [
+        { "label": "Manger / boire", "text": "bouillon + liquide." },
+        { "label": "Gel à emporter", "text": "1 gel de 45 g." }
+      ]
+    },
+    {
+      "id": "finish",
+      "name": "Arrivée · Port de Sóller",
+      "km": 56,
+      "description": "objectif : finir fort",
+      "label": "Course terminée",
+      "elapsed": ["7:00", "7:20", "7:45"],
+      "clocks": ["15:00", "15:20", "15:45"]
+    }
+  ],
+  "nutrition": {
+    "title": "Plan nutrition · avant le départ",
+    "headline": "Départ à 08:00 · scénario cible de 7 h 20",
+    "details": [
+      { "lead": "Rythme", "text": "un gel toutes les 45 min à partir de 08:45, en alternant : 45 g de glucides + 460 mg de sodium, puis 30 g de glucides + 100 mg de sodium." },
+      { "lead": "Total prévu", "text": "9 gels — 5 × 45 g et 4 × 30 g, soit 345 g de glucides et 2 700 mg de sodium." },
+      { "lead": "Au départ", "text": "emporte 1 gel de 45 g. Les horaires de passage changent selon le scénario, mais cette répartition des gels est calculée sur le scénario cible." },
+      "Gobelet personnel de 15 cl minimum à garder accessible ; une flasque ne le remplace pas."
+    ]
+  },
+  "reminders": {
+    "title": "Effort : les rappels essentiels",
+    "items": [
+      {
+        "title": "❤️ Fréquence cardiaque",
+        "text": "Vise 142–150 bpm en moyenne. Plafond autour de 155 bpm dans les montées de la première moitié ; ≤145 bpm sur le plat. Le ressenti prime : ce sont des repères, pas des seuils médicaux."
+      },
+      {
+        "title": "🐢 Départ volontairement facile",
+        "text": "Si tu es en avance à Lluc, ralentis. Ne cherche pas à gagner du temps pendant les 2 premières heures."
+      },
+      {
+        "title": "🦵 Cúber → Fornalutx : patience",
+        "text": "Crête technique puis longue descente. Pas de chasse au chrono : protège tes quadriceps pour la fin."
+      }
+    ]
+  },
+  "gear": {
+    "title": "Matériel obligatoire",
+    "storageKey": "alterra-mallorca-gear-2026",
+    "subtitle": "ETM · Mallorca by UTMB 2026",
+    "hint": "Coche chaque élément une fois dans ton sac.",
+    "groups": [
+      {
+        "title": "Équipement obligatoire",
+        "required": true,
+        "items": [
+          { "id": "shoes", "text": "Chaussures fermées adaptées au trail" },
+          { "id": "pack", "text": "Sac de course avec la puce de chronométrage fixée dessus" },
+          { "id": "phone", "text": "Smartphone avec LiveTrail installé et configuré pour fonctionner en Espagne et en France" },
+          { "id": "cup", "text": "Gobelet personnel de 15 cl minimum" },
+          { "id": "water", "text": "Contenant(s) hermétique(s) transportant au moins 1 L d’eau — pas de poche plastique" },
+          { "id": "lamp", "text": "1 lampe frontale minimum selon la colonne ETM, avec piles ou piles de rechange" },
+          { "id": "blanket", "text": "Couverture de survie d’au moins 1,40 × 2 m" },
+          { "id": "whistle", "text": "Sifflet" },
+          { "id": "food", "text": "Réserve alimentaire (800 kcal recommandées)" },
+          { "id": "jacket", "text": "Veste imperméable et respirante avec capuche, coutures thermosoudées" },
+          { "id": "pants", "text": "Pantalon ou collant long couvrant entièrement les jambes" },
+          { "id": "cap", "text": "Casquette ou bandana" },
+          { "id": "thermal", "text": "Deuxième couche thermique conforme au poids et aux critères du règlement" },
+          { "id": "gloves", "text": "Gants chauds et imperméables" },
+          { "id": "overpants", "text": "Surpantalon imperméable" }
+        ]
+      },
+      {
+        "title": "À prévoir aussi — recommandé",
+        "required": false,
+        "items": [
+          { "id": "warm-clothes", "text": "Vêtements chauds de rechange" },
+          { "id": "tape", "text": "Bande élastique adhésive (100 × 6 cm minimum)" },
+          { "id": "utensils", "text": "Vaisselle et ustensiles pour manger" },
+          { "id": "poles", "text": "Bâtons avec protection de pointe et protection de rechange si utilisés" },
+          { "id": "anti-chafe", "text": "Vaseline ou crème anti-frottements" },
+          { "id": "gps", "text": "Montre GPS avec la trace chargée" },
+          { "id": "scissors", "text": "Couteau ou ciseaux pour couper le ruban adhésif" },
+          { "id": "repair", "text": "Boîte de travail (terme du document officiel)" },
+          { "id": "filter", "text": "Pastilles de purification ou soft flask avec filtre" },
+          { "id": "sunscreen", "text": "Crème solaire" },
+          { "id": "sunglasses", "text": "Lunettes de soleil" }
+        ]
+      }
+    ],
+    "note": "Pense à garder ton téléphone allumé : le mode avion est interdit. Une batterie externe est recommandée."
+  },
+  "practicalInfo": {
+    "title": "Course officielle",
+    "items": [
+      {
+        "title": "Parcours",
+        "text": "Depuis Selva, le parcours traverse Caimari et Lluc, rejoint le barrage de Cúber et la crête de Sa Rateta, Na Franquesa et Puig de l’Ofre, puis descend vers Biniaraix et Fornalutx jusqu’au Port de Sóller."
+      },
+      {
+        "title": "UTMB World Series",
+        "text": "L’épreuve attribue 2 Running Stones. La page officielle indique aussi une possibilité de qualification directe pour l’OCC selon le classement général ou l’UTMB Score."
+      }
+    ]
+  },
+  "sources": [
+    {
+      "label": "Page officielle Mallorca by UTMB · 50K",
+      "url": "https://mallorca.utmb.world/fr/races/50K"
+    },
+    {
+      "label": "UTMB · fonctionnement des Running Stones et de l’UTMB Score",
+      "url": "https://utmb.world/fr/sports-system"
+    }
+  ],
+  "verifiedAt": "2026-10-22",
+  "footer": "Plan indicatif construit à partir de ta note de préparation. Les horaires réels dépendent du terrain, de la météo et de ton état du jour. Vérifie les barrières horaires officielles et le guide coureur avant le départ."
+}

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "mallorca-etm-2026",
+    "data": "./races/mallorca-etm-2026.json"
+  },
+  {
+    "id": "sainteexpress-2026",
+    "data": "./races/sainteexpress-2026.json"
+  }
+]

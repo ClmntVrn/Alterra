@@ -12,15 +12,15 @@
   <title>Alterra — Coaching trail</title>
 
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="icon" href="./icon/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon/icon.svg">
   <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body class="page-home">
   <main class="app">
     <header>
-      <img class="logo" src="./icon.svg" alt="">
+      <img class="logo" src="./icon/icon.svg" alt="">
       <div>
         <div class="brand">ALTERRA</div>
         <div class="subtitle">COACHING TRAIL &amp; MONTAGNE</div>
@@ -61,7 +61,13 @@
         <div class="calendar-days" id="calendarDays" role="rowgroup"></div>
       </div>
       <div class="calendar-event-details" id="calendarEventDetails" hidden aria-live="polite"></div>
-      <p class="calendar-hint" id="calendarHint">Le point orange signale une course. Sélectionne sa date pour voir les détails.</p>
+      <section class="calendar-create-section" id="calendarCreateSection" aria-label="Ajouter un événement" hidden>
+        <div class="calendar-create-actions">
+          <button class="calendar-create-button" type="button" disabled>＋ Ajouter course</button>
+          <button class="calendar-create-button" type="button" disabled>＋ Ajouter entraînement</button>
+        </div>
+      </section>
+      <p class="calendar-hint" id="calendarHint" hidden></p>
     </section>
 
     <footer>ALTERRA · IMAGINÉ POUR LES SENTIERS</footer>
@@ -80,22 +86,13 @@
     const calendarTitle = document.getElementById("calendarTitle");
     const calendarGrid = document.querySelector(".calendar-grid");
     const calendarEventDetails = document.getElementById("calendarEventDetails");
+    const calendarCreateSection = document.getElementById("calendarCreateSection");
     const calendarHint = document.getElementById("calendarHint");
     const previousMonthButton = document.getElementById("previousMonth");
     const nextMonthButton = document.getElementById("nextMonth");
     const backToMonthButton = document.getElementById("backToMonth");
     const currentMonth = new Date(2026, 9, 1);
-    const events = {
-      "2026-10-31": {
-        title: "Mallorca by UTMB",
-        details: "ETM · 56 km · 2 450 m D+",
-        href: "./mallorca.html"
-      },
-      "2026-11-28": {
-        title: "SainteExpress",
-        details: "45 km · 1 000 m D+ · Départ à 23:30"
-      }
-    };
+    let events = {};
     const monthFormatter = new Intl.DateTimeFormat("fr-FR", {
       month: "long",
       year: "numeric"
@@ -109,44 +106,56 @@
     function showMonthView() {
       calendarGrid.hidden = false;
       calendarEventDetails.hidden = true;
-      calendarHint.hidden = false;
+      calendarCreateSection.hidden = true;
+      calendarHint.hidden = !calendarHint.textContent;
       previousMonthButton.hidden = false;
       nextMonthButton.hidden = false;
       backToMonthButton.hidden = true;
       renderCalendar();
     }
 
-    function showEventDetails(date, event) {
+    function showDayDetails(date, event) {
       calendarTitle.textContent = eventDateFormatter.format(date);
       calendarGrid.hidden = true;
       calendarEventDetails.replaceChildren();
       calendarEventDetails.hidden = false;
+      calendarCreateSection.hidden = false;
       calendarHint.hidden = true;
       previousMonthButton.hidden = true;
       nextMonthButton.hidden = true;
       backToMonthButton.hidden = false;
 
-      const category = document.createElement("span");
-      category.className = "calendar-event-category";
-      category.textContent = "COURSE · UTMB";
+      if (event) {
+        const category = document.createElement("span");
+        category.className = "calendar-event-category";
+        category.textContent = event.organizer ? `COURSE · ${event.organizer}` : "COURSE";
 
-      const title = document.createElement("h3");
-      title.textContent = event.title;
+        const title = document.createElement("h3");
+        title.textContent = event.title;
 
-      const details = document.createElement("p");
-      details.className = "calendar-event-description";
-      details.textContent = `${eventDateFormatter.format(date)} · ${event.details}`;
+        const details = document.createElement("p");
+        details.className = "calendar-event-description";
+        details.textContent = `${eventDateFormatter.format(date)} · ${event.details}`;
 
-      calendarEventDetails.append(category, title, details);
+        calendarEventDetails.append(category, title, details);
 
-      if (event.href) {
         const openPlan = document.createElement("a");
         openPlan.className = "calendar-event-link";
-        openPlan.href = event.href;
+        openPlan.href = `./races/race.html?id=${encodeURIComponent(event.id)}`;
         openPlan.textContent = "Ouvrir le plan de course";
-        openPlan.setAttribute("aria-label", `Ouvrir le plan de ${event.title}`);
+        openPlan.setAttribute("aria-label", `Ouvrir la fiche de ${event.title}`);
         calendarEventDetails.append(openPlan);
+      } else {
+        const category = document.createElement("span");
+        category.className = "calendar-event-category";
+        category.textContent = "JOURNÉE";
+
+        const title = document.createElement("h3");
+        title.textContent = "Aucun événement prévu";
+
+        calendarEventDetails.append(category, title);
       }
+
     }
 
     function renderCalendar() {
@@ -199,32 +208,27 @@
             dayCell.classList.add("is-today");
             dayCell.setAttribute("aria-current", "date");
           }
-          const dayNumber = document.createElement("span");
-          dayNumber.className = "calendar-date";
-          dayNumber.textContent = day;
-          dayCell.append(dayNumber);
-
           const event = events[dateKey];
+          const dateButton = document.createElement("button");
+          dateButton.className = "calendar-date-button";
+          dateButton.type = "button";
+          dateButton.setAttribute(
+            "aria-label",
+            `${event ? `${event.title}, ` : ""}${eventDateFormatter.format(date)}, afficher la journée`
+          );
+          const dateNumber = document.createElement("span");
+          dateNumber.className = "calendar-date";
+          dateNumber.textContent = day;
+          dateButton.append(dateNumber);
           if (event) {
             dayCell.classList.add("has-event");
-            const eventButton = document.createElement("button");
-            eventButton.className = "calendar-date-button";
-            eventButton.type = "button";
-            eventButton.setAttribute(
-              "aria-label",
-              `${event.title}, ${eventDateFormatter.format(date)}, afficher les détails`
-            );
-
-            const dateNumber = document.createElement("span");
-            dateNumber.className = "calendar-date";
-            dateNumber.textContent = day;
             const eventDot = document.createElement("span");
             eventDot.className = "calendar-event-dot";
             eventDot.setAttribute("aria-hidden", "true");
-            eventButton.append(dateNumber, eventDot);
-            eventButton.addEventListener("click", () => showEventDetails(date, event));
-            dayCell.replaceChildren(eventButton);
+            dateButton.append(eventDot);
           }
+          dateButton.addEventListener("click", () => showDayDetails(date, event));
+          dayCell.append(dateButton);
 
           weekRow.append(dayCell);
         }
@@ -248,7 +252,33 @@
       }
     });
 
-    renderCalendar();
+    fetch("./races/index.json")
+      .then(response => {
+        if (!response.ok) throw new Error(`Catalogue indisponible (${response.status}).`);
+        return response.json();
+      })
+      .then(catalog => Promise.all(catalog.map(async entry => {
+        const response = await fetch(entry.data);
+        if (!response.ok) throw new Error(`Données indisponibles pour ${entry.id} (${response.status}).`);
+        const race = await response.json();
+        if (race.id !== entry.id) throw new Error(`Identifiant de course incohérent : ${entry.id}.`);
+        return race;
+      })))
+      .then(races => {
+        events = Object.fromEntries(races.map(race => [
+          race.date,
+          { id: race.id, title: race.name, details: race.calendarDetails, organizer: race.organizer }
+        ]));
+        calendarHint.textContent = "";
+        calendarHint.hidden = true;
+        renderCalendar();
+      })
+      .catch(error => {
+        console.error("Impossible de charger les courses du calendrier.", error);
+        calendarHint.textContent = "Impossible de charger les courses. Réessaie avec une connexion Internet.";
+        calendarHint.hidden = false;
+        renderCalendar();
+      });
   </script>
 </body>
 </html>
