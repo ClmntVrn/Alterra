@@ -13,3 +13,8 @@ Site statique de préparation au trail, avec calendrier et fiches de course adap
 Le modèle générique est `races/race.html` avec son script `races/race.js`. Le calendrier et la fiche utilisent le même catalogue ; les détails propres à une course restent dans son fichier JSON. Les textes et conseils de course doivent être vérifiés, pas déduits automatiquement.
 
 Les icônes du site sont rangées dans `icon/`.
+
+## Documentation du projet
+
+- [Plan de développement](./plan.md)
+- [Architecture proposée et décisions techniques](./architecture.md)
