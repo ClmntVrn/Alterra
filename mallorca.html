@@ -3,413 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#10251e">
+  <meta name="theme-color" content="#20262b">
   <title>Mallorca ETM 2026 · Alterra</title>
-  <style>
-    
-    :root {
-      color-scheme: dark;
-      --bg: #0B141D;
-      --panel: #122333;
-      --panel2: #142A3D;
-      --line: #254866;
-      --text: #F4F7FC;
-      --muted: #AFC5DB;
-      --blue: #45A5FF;
-      --orange: #FFD18A;
-      --red: #FF9F91;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font: 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      padding: max(12px, env(safe-area-inset-top)) 14px max(22px, env(safe-area-inset-bottom));
-    }
-
-    main { max-width: 680px; margin: 0 auto; }
-
-    a { color: var(--blue); }
-
-    .topline {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin: 2px 0 18px;
-    }
-
-    .brand {
-      font-size: 12px;
-      letter-spacing: .18em;
-      font-weight: 800;
-      color: var(--blue);
-    }
-
-    .back {
-      font-size: 13px;
-      text-decoration: none;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 7px 11px;
-    }
-
-    h1 {
-      font-size: clamp(28px, 8vw, 40px);
-      line-height: 1.04;
-      margin: 0 0 8px;
-      letter-spacing: -.04em;
-    }
-
-    .sub {
-      color: var(--muted);
-      margin: 0 0 18px;
-      font-size: 14px;
-    }
-
-    .hero {
-      background: linear-gradient(135deg, #142A3D, #10202E 75%);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 18px;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 16px;
-    }
-
-    .stat {
-      background: rgba(0, 0, 0, .18);
-      border-radius: 12px;
-      padding: 10px 8px;
-    }
-
-    .stat strong {
-      display: block;
-      font-size: 21px;
-      letter-spacing: -.03em;
-    }
-
-    .stat span {
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-    }
-
-    .section { margin-top: 20px; }
-
-    .section h2 {
-      font-size: 17px;
-      margin: 0 0 10px;
-      letter-spacing: -.02em;
-    }
-
-    .selector {
-      display: flex;
-      gap: 7px;
-    }
-
-    .selector button,
-    .smallbtn {
-      border: 1px solid var(--line);
-      background: var(--panel);
-      color: var(--text);
-      border-radius: 11px;
-      padding: 10px 12px;
-      font-weight: 700;
-      font-size: 13px;
-      flex: 1;
-    }
-
-    .selector button.active {
-      background: var(--blue);
-      color: #071725;
-      border-color: var(--blue);
-    }
-
-    .checkpoint-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .checkpoint {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 12px 13px;
-    }
-
-    .checkpoint.done { opacity: .48; }
-
-    .checkpoint.done .place { text-decoration: line-through; }
-
-    .place {
-      font-weight: 800;
-      font-size: 16px;
-    }
-
-    .km {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 2px;
-    }
-
-    .timing { text-align: right; }
-
-    .elapsed {
-      font-size: 19px;
-      font-weight: 850;
-      color: var(--blue);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .clock {
-      font-size: 12px;
-      color: var(--muted);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .mark {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      margin-top: 5px;
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .mark input {
-      accent-color: var(--blue);
-      width: 16px;
-      height: 16px;
-      margin: 0;
-    }
-
-    .callout {
-      border-radius: 14px;
-      padding: 13px 14px;
-      background: #2C2A1B;
-      border: 1px solid #665535;
-      color: #FFF1CF;
-    }
-
-    .callout strong { color: var(--orange); }
-
-    .rules {
-      display: grid;
-      gap: 8px;
-    }
-
-    .rule {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 13px;
-      padding: 12px 13px;
-    }
-
-    .rule b {
-      display: block;
-      margin-bottom: 3px;
-    }
-
-    .rule p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin-top: 9px;
-    }
-
-    .pill {
-      border: 1px solid var(--line);
-      background: var(--panel2);
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 750;
-    }
-
-    .footer {
-      color: #7894AE;
-      font-size: 11px;
-      margin: 20px 2px 4px;
-    }
-
-    @media (min-width: 560px) {
-      body {
-        padding-left: 22px;
-        padding-right: 22px;
-      }
-
-      .checkpoint-list {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
-    <!-- CHECKLIST CSSS-->
-.gear-checklist {
-  margin: 24px 0;
-  border: 1px solid #254866;
-  border-radius: 18px;
-  background: #122333;
-  color: #F4F7FC;
-  overflow: hidden;
-}
-
-.gear-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 20px;
-  cursor: pointer;
-  list-style: none;
-}
-
-.gear-summary::-webkit-details-marker {
-  display: none;
-}
-
-.gear-eyebrow {
-  color: #45A5FF;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-}
-
-.gear-heading h2 {
-  margin: 7px 0 4px;
-  font-size: 21px;
-}
-
-.gear-heading p,
-.gear-hint {
-  margin: 0;
-  color: #AFC5DB;
-  font-size: 12px;
-}
-
-.gear-progress {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  color: #45A5FF;
-  font-size: 14px;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-
-.gear-chevron {
-  font-size: 22px;
-  transition: transform .2s;
-}
-
-.gear-checklist details[open] .gear-chevron {
-  transform: rotate(180deg);
-}
-
-.gear-content {
-  padding: 0 18px 20px;
-}
-
-.gear-progress-track {
-  height: 5px;
-  background: #254866;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 12px;
-}
-
-#gearProgressBar {
-  height: 100%;
-  width: 0;
-  background: #45A5FF;
-  transition: width .2s;
-}
-
-.gear-hint {
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.gear-group-title {
-  color: #45A5FF;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  margin: 18px 0 10px;
-}
-
-.recommended-title {
-  color: #AFC5DB;
-  border-top: 1px solid #254866;
-  padding-top: 20px;
-}
-
-.gear-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #20384D;
-  font-size: 13px;
-  line-height: 1.5;
-  cursor: pointer;
-}
-
-.gear-item input {
-  width: 19px;
-  height: 19px;
-  flex-shrink: 0;
-  margin: 1px 0 0;
-  accent-color: #45A5FF;
-}
-
-.gear-item:has(input:checked) span {
-  color: #829BB1;
-  text-decoration: line-through;
-}
-
-.gear-reset {
-  width: 100%;
-  margin-top: 20px;
-  padding: 12px;
-  border: 1px solid #347BB5;
-  border-radius: 10px;
-  background: transparent;
-  color: #45A5FF;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.gear-note {
-  color: #AFC5DB;
-  font-size: 12px;
-  line-height: 1.6;
-  margin: 16px 0 0;
-}
-
-  </style>
+  <link rel="stylesheet" href="./styles.css">
 </head>
-<body>
+<body class="page-race">
 <main>
   <div class="topline">
     <div class="brand">ALTERRA / RACE CARD</div>
@@ -431,41 +29,88 @@
     </div>
   </section>
 
+  <section class="section elevation-section">
+    <div class="elevation-heading">
+      <div>
+        <h2>Profil de la course</h2>
+        <p class="elevation-caption">Trace GPX · 55,4 km · ravitos et altitude</p>
+      </div>
+      <span class="elevation-ascent">2 450 m D+</span>
+    </div>
+    <svg class="elevation-chart" id="elevationChart" viewBox="0 0 900 285" role="img" aria-labelledby="elevationTitle elevationDescription">
+      <title id="elevationTitle">Profil d’altitude Mallorca by UTMB ETM</title>
+      <desc id="elevationDescription">Profil de la trace GPX avec le départ, les ravitaillements et l’arrivée. Les points atteints sont colorés en orange.</desc>
+    </svg>
+    <p class="elevation-progress" id="elevationProgress" aria-live="polite">Chargement du profil…</p>
+    <p class="elevation-hint">Coche les ravitos dans « En course » pour actualiser ta progression sur le profil. Tu peux aussi toucher un repère.</p>
+  </section>
+
   <section class="section">
-    <h2>Temps de passage</h2>
+    <h2>En course · ravitos</h2>
     <div class="selector" role="group" aria-label="Scénario de temps">
       <button type="button" data-scenario="ambitious">Ambitieux<br>7 h</button>
       <button type="button" data-scenario="target" class="active">Cible<br>7 h 20</button>
       <button type="button" data-scenario="safe">Prudent<br>7 h 45</button>
     </div>
-    <p class="sub" style="margin:8px 2px 11px">Temps écoulé / heure de passage estimée. Coche les points atteints pour suivre ta progression.</p>
+    <p class="sub scenario-help">Temps écoulé · heure de passage estimée. Coche chaque ravito atteint.</p>
     <div class="checkpoint-list" id="checkpoints">
       <article class="checkpoint" data-id="lluc">
         <div><div class="place">Lluc</div><div class="km">KM 11 · ravito solide + boisson</div><label class="mark"><input type="checkbox"> Point atteint</label></div>
         <div class="timing"><div class="elapsed" data-times="1:12|1:15|1:19">1h15</div><div class="clock" data-clocks="09:12|09:15|09:19">09:15</div></div>
+        <div class="checkpoint-plan">
+          <p><strong>Manger / boire :</strong> solide + boisson, remplis tes flasques. Pars avec au moins 1 L d’eau.</p>
+          <p><strong>Gels à emporter :</strong> 3 — 2 × 30 g et 1 × 45 g.</p>
+        </div>
       </article>
       <article class="checkpoint" data-id="cuber">
         <div><div class="place">Cúber</div><div class="km">KM 25 · bouillon + solide + boisson</div><label class="mark"><input type="checkbox"> Point atteint</label></div>
         <div class="timing"><div class="elapsed" data-times="3:02|3:10|3:20">3h10</div><div class="clock" data-clocks="11:02|11:10|11:20">11:10</div></div>
+        <div class="checkpoint-plan">
+          <p><strong>Manger / boire :</strong> bouillon, solide + boisson.</p>
+          <p><strong>Gels à emporter :</strong> 3 — 2 × 45 g et 1 × 30 g.</p>
+        </div>
       </article>
       <article class="checkpoint" data-id="poma">
         <div><div class="place">Coll d’en Poma</div><div class="km">KM 32 · liquide uniquement</div><label class="mark"><input type="checkbox"> Point atteint</label></div>
         <div class="timing"><div class="elapsed" data-times="4:10|4:22|4:36">4h22</div><div class="clock" data-clocks="12:10|12:22|12:36">12:22</div></div>
+        <div class="checkpoint-plan">
+          <p><strong>Manger / boire :</strong> ravito liquide uniquement.</p>
+          <p><strong>Gels :</strong> garde les 2 gels restants pris à Cúber — 1 × 30 g et 1 × 45 g.</p>
+        </div>
       </article>
       <article class="checkpoint" data-id="fornalutx">
         <div><div class="place">Fornalutx</div><div class="km">KM 41 · ravito solide + boisson</div><label class="mark"><input type="checkbox"> Point atteint</label></div>
         <div class="timing"><div class="elapsed" data-times="5:19|5:34|5:53">5h34</div><div class="clock" data-clocks="13:19|13:34|13:53">13:34</div></div>
+        <div class="checkpoint-plan">
+          <p><strong>Manger / boire :</strong> solide + boisson.</p>
+          <p><strong>Gels à emporter :</strong> 2 — 1 × 30 g et 1 × 45 g.</p>
+        </div>
       </article>
       <article class="checkpoint" data-id="soller">
         <div><div class="place">Sóller</div><div class="km">KM 48 · bouillon + liquide</div><label class="mark"><input type="checkbox"> Point atteint</label></div>
         <div class="timing"><div class="elapsed" data-times="6:07|6:24|6:46">6h24</div><div class="clock" data-clocks="14:07|14:24|14:46">14:24</div></div>
+        <div class="checkpoint-plan">
+          <p><strong>Manger / boire :</strong> bouillon + liquide.</p>
+          <p><strong>Gel à emporter :</strong> 1 gel de 45 g.</p>
+        </div>
       </article>
       <article class="checkpoint" data-id="finish">
         <div><div class="place">Arrivée · Port de Sóller</div><div class="km">KM 56 · objectif : finir fort</div><label class="mark"><input type="checkbox"> Course terminée</label></div>
         <div class="timing"><div class="elapsed" data-times="7:00|7:20|7:45">7h20</div><div class="clock" data-clocks="15:00|15:20|15:45">15:20</div></div>
       </article>
     </div>
-    <button class="smallbtn" id="reset" type="button" style="margin-top:9px;width:100%">Réinitialiser les points cochés</button>
+    <button class="smallbtn" id="reset" type="button">Réinitialiser les points cochés</button>
+  </section>
+
+  <section class="section fuel-section">
+    <h2>Plan nutrition · avant le départ</h2>
+    <div class="fuel-overview">
+      <strong>Départ à 08:00 · scénario cible de 7 h 20</strong>
+      <p>Un gel toutes les 45 min à partir de 08:45, en alternant : 45 g de glucides + 460 mg de sodium, puis 30 g de glucides + 100 mg de sodium.</p>
+      <p><strong>Total prévu :</strong> 9 gels — 5 × 45 g et 4 × 30 g, soit 345 g de glucides et 2 700 mg de sodium.</p>
+      <p><strong>Au départ :</strong> emporte 1 gel de 45 g. Les horaires de passage changent selon le scénario, mais cette répartition des gels est calculée sur le scénario cible.</p>
+      <p>Gobelet personnel de 15 cl minimum à garder accessible ; une flasque ne le remplace pas.</p>
+    </div>
   </section>
 
   <section class="section">
@@ -483,33 +128,6 @@
         <b>🦵 Cúber → Fornalutx : patience</b>
         <p>Crête technique puis longue descente. Pas de chasse au chrono : protège tes quadriceps pour la fin.</p>
       </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>Nutrition & eau</h2>
-    <div class="rules">
-      <div class="rule">
-        <b>70–80 g de glucides / heure</b>
-        <p>Environ un gel toutes les 40 min + boisson isotonique. Prends du solide à Lluc, Cúber et Fornalutx.</p>
-      </div>
-      <div class="rule">
-        <b>💧 Entre Lluc et Cúber</b>
-        <p>14 km et environ 2 h sans ravito : pars de Lluc avec au moins 1 L d’eau.</p>
-      </div>
-      <div class="callout">
-        <strong>À ne pas oublier :</strong> gobelet personnel de 15 cl minimum. Pas de gobelets fournis ; une flasque ne compte pas.
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>Ravitaillements · mémo express</h2>
-    <div class="pills">
-      <span class="pill">Näak à chaque station</span>
-      <span class="pill">Bouillon à Cúber</span>
-      <span class="pill">Bouillon à Sóller</span>
-      <span class="pill">Coll d’en Poma = liquide</span>
     </div>
   </section>
 
@@ -684,6 +302,7 @@
 
   <p class="footer">Plan indicatif construit à partir de ta note de préparation. Les horaires réels dépendent du terrain, de la météo et de ton état du jour. Vérifie les barrières horaires officielles et le guide coureur avant le départ.</p>
 </main>
+<script src="./gpx/etm-profile-data.js"></script>
 <script>
   const scenarioButtons = [...document.querySelectorAll('[data-scenario]')];
   const scenarioIndex = { ambitious: 0, target: 1, safe: 2 };
@@ -713,6 +332,7 @@
     const done = checks.filter(input => input.checked).map(input => input.closest('.checkpoint').dataset.id);
     try { localStorage.setItem(storageKey, JSON.stringify(done)); } catch (_) {}
     checks.forEach(input => input.closest('.checkpoint').classList.toggle('done', input.checked));
+    updateElevationProgress();
   }
   checks.forEach(input => input.addEventListener('change', saveChecks));
   document.getElementById('reset').addEventListener('click', () => {
@@ -720,6 +340,175 @@
     saveChecks();
   });
   loadChecks();
+
+  const elevationChart = document.getElementById('elevationChart');
+  const elevationProgress = document.getElementById('elevationProgress');
+  const routeProfile = window.alterraEtmProfile;
+
+  function updateElevationProgress() {
+    if (!elevationChart || !routeProfile) return;
+
+    const stopIds = routeProfile.markers
+      .filter(marker => marker.id !== 'start')
+      .map(marker => marker.id);
+    let completedIndex = -1;
+
+    for (const stopId of stopIds) {
+      const check = document.querySelector(`.checkpoint[data-id="${stopId}"] input[type="checkbox"]`);
+      if (!check || !check.checked) break;
+      completedIndex += 1;
+    }
+
+    const currentMarker = routeProfile.markers[completedIndex + 1];
+    const progressKm = currentMarker.km;
+    const progressX = currentMarker.x;
+    const samples = routeProfile.samples;
+    const progressPoints = samples.filter(point => point[0] <= progressX);
+    const nextPoint = samples.find(point => point[0] > progressX);
+
+    if (nextPoint && progressPoints.length) {
+      const previousPoint = progressPoints[progressPoints.length - 1];
+      const ratio = (progressX - previousPoint[0]) / (nextPoint[0] - previousPoint[0]);
+      progressPoints.push([
+        progressX,
+        previousPoint[1] + ratio * (nextPoint[1] - previousPoint[1])
+      ]);
+    }
+
+    const progressLine = elevationChart.querySelector('#profileCompleted');
+    progressLine.setAttribute('points', progressPoints.map(point => point.join(',')).join(' '));
+
+    const progressMarker = elevationChart.querySelector('#profileCurrent');
+    progressMarker.setAttribute('cx', currentMarker.x);
+    progressMarker.setAttribute('cy', currentMarker.y);
+    progressMarker.setAttribute('visibility', progressKm > 0 ? 'visible' : 'hidden');
+
+    const currentName = currentMarker.id === 'start'
+      ? 'Départ'
+      : document.querySelector(`.checkpoint[data-id="${currentMarker.id}"] .place`).textContent;
+    const remainingKm = Math.max(0, routeProfile.distanceKm - progressKm);
+    elevationProgress.textContent = `${currentName} · KM ${progressKm.toLocaleString('fr-FR')} · ${remainingKm.toFixed(1).replace('.', ',')} km restants`;
+
+    routeProfile.markers.forEach(marker => {
+      if (marker.id === 'start') return;
+      const check = document.querySelector(`.checkpoint[data-id="${marker.id}"] input[type="checkbox"]`);
+      const markerCircle = elevationChart.querySelector(`[data-profile-stop="${marker.id}"]`);
+      const isDone = Boolean(check && check.checked);
+      markerCircle.classList.toggle('is-done', isDone);
+      markerCircle.setAttribute('aria-pressed', String(isDone));
+    });
+  }
+
+  if (!elevationChart || !elevationProgress || !routeProfile) {
+    console.error('Le profil d’altitude est indisponible.');
+    if (elevationProgress) elevationProgress.textContent = 'Profil d’altitude indisponible.';
+  } else {
+    const svgNamespace = 'http://www.w3.org/2000/svg';
+    const createSvgElement = (name, attributes, text) => {
+      const element = document.createElementNS(svgNamespace, name);
+      Object.entries(attributes).forEach(([attribute, value]) => element.setAttribute(attribute, value));
+      if (text) element.textContent = text;
+      return element;
+    };
+    const plotBottom = 213;
+    const firstSample = routeProfile.samples[0];
+    const lastSample = routeProfile.samples[routeProfile.samples.length - 1];
+    const areaPoints = [
+      `${firstSample[0]},${plotBottom}`,
+      ...routeProfile.samples.map(point => point.join(',')),
+      `${lastSample[0]},${plotBottom}`
+    ].join(' ');
+    const routePoints = routeProfile.samples.map(point => point.join(',')).join(' ');
+    const routeArea = createSvgElement('polygon', { class: 'elevation-area', points: areaPoints });
+    const grid = createSvgElement('g', { class: 'elevation-grid' });
+    const routeLine = createSvgElement('polyline', { class: 'elevation-line', points: routePoints });
+    const progressLine = createSvgElement('polyline', {
+      class: 'elevation-completed',
+      id: 'profileCompleted',
+      points: ''
+    });
+    const axis = createSvgElement('path', { class: 'elevation-axis', d: 'M 52 26 V 213 H 884' });
+    const markerLayer = createSvgElement('g', { class: 'elevation-markers' });
+    const currentMarker = createSvgElement('circle', {
+      class: 'elevation-current',
+      id: 'profileCurrent',
+      cx: '0',
+      cy: '0',
+      r: '7',
+      visibility: 'hidden'
+    });
+
+    [0, 600, 1200].forEach(elevation => {
+      const y = 26 + (1250 - elevation) / 1250 * 187;
+      grid.append(
+        createSvgElement('line', { x1: 52, y1: y, x2: 884, y2: y }),
+        createSvgElement('text', { x: 44, y: y + 4, 'text-anchor': 'end' }, `${elevation} m`)
+      );
+    });
+
+    for (let km = 0; km <= 50; km += 10) {
+      const x = 52 + km / routeProfile.distanceKm * 832;
+      grid.append(
+        createSvgElement('line', { x1: x, y1: 213, x2: x, y2: 218 }),
+        createSvgElement('text', { x, y: 231, 'text-anchor': 'middle' }, `${km}`)
+      );
+    }
+    grid.append(createSvgElement('text', { x: 884, y: 231, 'text-anchor': 'end' }, 'km'));
+
+    routeProfile.markers.forEach(marker => {
+      const stopName = marker.id === 'start'
+        ? 'Départ'
+        : marker.id === 'finish'
+          ? 'Arrivée'
+          : document.querySelector(`.checkpoint[data-id="${marker.id}"] .place`).textContent;
+      const stop = createSvgElement('g', {
+        class: 'elevation-stop',
+        transform: `translate(${marker.x} ${marker.y})`
+      });
+      const labelY = marker.y < 53 ? 15 : -11;
+      const circle = createSvgElement('circle', {
+        class: 'elevation-stop-dot',
+        r: 5,
+        'data-profile-stop': marker.id,
+        tabindex: marker.id === 'start' ? -1 : 0,
+        role: marker.id === 'start' ? 'img' : 'button',
+        'aria-label': marker.id === 'start'
+          ? 'Départ, kilomètre zéro'
+          : `Marquer ${stopName} comme atteint`,
+        'aria-pressed': 'false'
+      });
+      const label = createSvgElement('text', {
+        class: 'elevation-stop-label',
+        x: 0,
+        y: labelY,
+        'text-anchor': marker.id === 'start'
+          ? 'start'
+          : marker.id === 'finish'
+            ? 'end'
+            : 'middle'
+      }, stopName);
+      stop.append(circle, label);
+
+      if (marker.id !== 'start') {
+        const toggleStop = () => {
+          const check = document.querySelector(`.checkpoint[data-id="${marker.id}"] input[type="checkbox"]`);
+          check.checked = !check.checked;
+          saveChecks();
+        };
+        circle.addEventListener('click', toggleStop);
+        circle.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleStop();
+          }
+        });
+      }
+      markerLayer.append(stop);
+    });
+
+    elevationChart.append(routeArea, grid, routeLine, progressLine, axis, markerLayer, currentMarker);
+    updateElevationProgress();
+  }
 </script>
 
 <script>

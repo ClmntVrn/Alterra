@@ -1,9 +1,12 @@
 
-const CACHE_NAME = "alterra-v1";
+const CACHE_NAME = "alterra-v3";
 
 const FILES = [
   "./",
   "./index.html",
+  "./mallorca.html",
+  "./styles.css",
+  "./gpx/etm-profile-data.js",
   "./manifest.json",
   "./icon.svg"
 ];

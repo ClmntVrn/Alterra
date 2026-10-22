@@ -4,242 +4,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#14251D">
+  <meta name="theme-color" content="#20262b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Alterra">
 
-  <title>Alterra — Trail Coaching</title>
+  <title>Alterra — Coaching trail</title>
 
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icon.svg">
-
-  <style>
-    
-    :root {
-      color-scheme: dark;
-      --bg: #0B141D;
-      --panel: #122333;
-      --blue: #45A5FF;
-      
-      --muted: #AFC5DB;
-      --border: #254866;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
-      color: #F4F7FC;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-
-    .app {
-      width: min(100% - 36px, 560px);
-      margin: 0 auto;
-      padding: 30px 0 48px;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 46px;
-    }
-
-    .logo {
-      width: 46px;
-      height: 46px;
-    }
-
-    .brand {
-      font-size: 23px;
-      font-weight: 800;
-      letter-spacing: 3px;
-    }
-
-    .subtitle {
-      color: var(--muted);
-      font-size: 11px;
-      letter-spacing: 2px;
-      margin-top: 4px;
-    }
-
-    .eyebrow {
-      color: var(--blue);
-      font-size: 12px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    h1 {
-      font-size: clamp(34px, 9vw, 48px);
-      line-height: 1.08;
-      margin: 14px 0;
-      letter-spacing: -1.5px;
-    }
-
-    h1 span {
-      color: var(--blue);
-    }
-
-    .intro {
-      color: var(--muted);
-      font-size: 15px;
-      line-height: 1.7;
-      max-width: 420px;
-    }
-
-    .card {
-      margin-top: 32px;
-      padding: 23px;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      border-radius: 20px;
-    }
-
-    .card-label {
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-    }
-
-    .card h2 {
-      margin: 12px 0 8px;
-      font-size: 23px;
-    }
-
-    .card p {
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .tag {
-      display: inline-block;
-      color: var(--blue);
-      border: 1px solid #347BB5;
-      border-radius: 30px;
-      padding: 7px 11px;
-      font-size: 11px;
-      margin-top: 10px;
-    }
-
-    footer {
-      color: #7894AE;
-      font-size: 11px;
-      margin-top: 36px;
-      letter-spacing: 1px;
-    }
-
-    /* Carte de la prochaine course */
-
-    .race-card {
-      display: block;
-      margin: 24px 0;
-      padding: 20px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, #142A3D, #10202E);
-      border: 1px solid #287FC0;
-      color: #F3F7FC;
-      text-decoration: none;
-      transition: border-color 0.2s, transform 0.2s;
-    }
-
-    .race-card:hover {
-      border-color: var(--blue);
-      transform: translateY(-2px);
-    }
-
-    .race-card-top,
-    .race-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .race-tag {
-      color: #071725;
-      background: var(--blue);
-      border-radius: 30px;
-      padding: 7px 11px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .12em;
-    }
-
-    .race-arrow {
-      color: var(--blue);
-      font-size: 20px;
-    }
-
-    .race-card h2 {
-      margin: 18px 0 5px;
-      font-size: 24px;
-    }
-
-    .race-subtitle {
-      margin: 0 0 22px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .race-footer {
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-      font-size: 13px;
-    }
-
-    .race-footer strong {
-      color: var(--blue);
-    }
-
-  </style>
+  <link rel="stylesheet" href="./styles.css">
 </head>
 
-<body>
+<body class="page-home">
   <main class="app">
     <header>
       <img class="logo" src="./icon.svg" alt="">
       <div>
         <div class="brand">ALTERRA</div>
-        <div class="subtitle">TRAIL PERFORMANCE</div>
+        <div class="subtitle">COACHING TRAIL &amp; MONTAGNE</div>
       </div>
     </header>
 
-    <section>
-      <div class="eyebrow">Your mountain. Your progress.</div>
-      <h1>Train smarter.<br><span>Go further.</span></h1>
+    <section class="home-hero">
+      <div class="eyebrow">Le trail, à ton rythme</div>
+      <h1>Prépare tes<br><span>prochaines crêtes.</span></h1>
       <p class="intro">
-        Un coach trail qui apprend de tes sorties,
-        comprend tes objectifs et t'aide à progresser
-        kilomètre après kilomètre.
+        Un espace pensé pour tes sorties en montagne :
+        des repères clairs, des objectifs qui te ressemblent
+        et une progression, kilomètre après kilomètre.
       </p>
     </section>
 
     <section class="card">
-      <div class="card-label">Ton espace personnel</div>
-      <h2>Bienvenue sur Alterra.</h2>
+      <div class="card-label">Ton camp de base</div>
+      <h2>Bienvenue sur les sentiers.</h2>
       <p>
-        Ton entraînement mérite mieux qu'un plan figé.
-        Ton futur coach sera ici pour analyser tes sorties
-        et adapter tes prochaines séances.
+        Prépare tes prochaines aventures et garde tes
+        informations de course à portée de main. Ton espace
+        de coaching personnalisé est en préparation.
       </p>
-      <span class="tag">VERSION 0.1 · EN CONSTRUCTION</span>
+      <span class="tag">PREMIÈRE VERSION · EN CONSTRUCTION</span>
     </section>
 
     <a href="./mallorca.html" class="race-card">
       <div class="race-card-top">
         <span class="race-tag">PROCHAINE COURSE</span>
-        <span class="race-arrow">?</span>
+        <span class="race-arrow" aria-hidden="true">↗</span>
       </div>
 
       <h2>Mallorca by UTMB</h2>
@@ -247,11 +59,11 @@
 
       <div class="race-footer">
         <span>31 octobre 2026</span>
-        <strong>Voir mon plan ?</strong>
+        <strong>Découvrir le plan</strong>
       </div>
     </a>
 
-    <footer>ALTERRA · BUILT FOR THE TRAIL</footer>
+    <footer>ALTERRA · IMAGINÉ POUR LES SENTIERS</footer>
   </main>
 
   <script>
