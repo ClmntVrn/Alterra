@@ -24,7 +24,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - [x] Calendrier des courses et navigation vers des fiches génériques alimentées par JSON.
 - [x] Fiches Mallorca et SaintExpress avec informations de course, matériel et sources.
 - [x] Cadrage de la progression gratuite puis backend et fonctionnalités payantes validé.
-- [ ] Aucun compte utilisateur, stockage personnel persistant, synchronisation ou gestion d’entraînements n’est encore implémenté.
+- [ ] Aucun compte ni synchronisation n’est encore implémenté ; le stockage personnel local est en place, mais la gestion des entraînements reste à construire.
 - [ ] Les tableaux de bord KPI et la comparaison planifié/réalisé restent à concevoir et à construire.
 
 ## Feuille de route
@@ -52,7 +52,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - Des boutons accessibles depuis l’accueil permettent d’exporter une sauvegarde complète vers un fichier et de la restaurer manuellement sur un autre appareil. La sauvegarde comprend aussi les données personnelles du plan Mallorca.
 - Suppression d’une entrée ou de toutes les données locales avec confirmation.
 - Aucune donnée personnelle envoyée automatiquement à GitHub ou synchronisée vers un autre appareil pendant la phase locale.
-- Les éléments personnalisés Mallorca (objectif/scénarios, horaires de passage personnels, nutrition et rappels d’effort) seront déplacés hors du JSON public de course vers le stockage personnel ; le JSON public gardera les informations de course de référence.
+- Les éléments personnalisés Mallorca (objectif/scénarios, horaires de passage personnels, nutrition et rappels d’effort) sont déplacés hors du JSON public de course vers le stockage personnel ; le JSON public garde les informations de course de référence.
 - Les données personnelles Mallorca ont déjà été poussées dans le dépôt public et peuvent donc rester visibles dans l’historique Git même après leur déplacement. Ne pas y ajouter d’informations privées ; toute purge d’historique sera évaluée séparément.
 - Garder sur l’accueil le calendrier mensuel actuel, son titre et son court descriptif ; décider plus tard si le descriptif doit être supprimé.
 - Permettre de naviguer entre les mois. Signaler dans chaque jour les entraînements et courses, avec leur état prévu ou réalisé. Employer des repères accessibles qui ne dépendent pas seulement de la couleur.
@@ -85,14 +85,15 @@ Voir l’[architecture validée](./architecture.md).
 
 **Statut :** en cours
 
-**Prochaine étape :** déployer cette version, copier le plan Mallorca depuis la fiche sur le téléphone, vérifier sa persistance et son export, puis retirer les champs personnels du JSON public.
+**Prochaine étape :** déployer le nouveau format de sauvegarde, exporter la base complète depuis le téléphone et vérifier le fichier avant de retirer le catalogue et les GPX du dépôt.
 
-- [x] Implémenter IndexedDB pour enregistrer les données personnelles dans le navigateur.
+- [x] Implémenter IndexedDB pour enregistrer les données personnelles et le catalogue local dans le navigateur.
 - Permettre de consulter et modifier ces données hors ligne sur l’appareil.
 - [x] Ajouter sur l’accueil des actions visibles pour sauvegarder toutes les données dans un fichier et importer/restaurer une sauvegarde depuis l’appareil (notamment via l’app Fichiers sur iPhone).
-- [x] Inclure dans cette sauvegarde les informations personnelles Mallorca déplacées vers les données privées.
+- [x] Inclure dans cette sauvegarde les fiches de course de référence, leurs traces GPX, les informations privées Mallorca et l’état des checklists.
 - [x] Afficher clairement qu’à ce stade les appareils ne se synchronisent pas automatiquement.
-- [x] Ajouter un transfert volontaire du plan Mallorca vers le stockage privé local ; effectuer et vérifier le transfert sur le téléphone avant de retirer les données du JSON public.
+- [x] Transférer le plan Mallorca vers le stockage privé local et retirer ses champs personnels du JSON public après vérification de la sauvegarde sur le téléphone.
+- [ ] Vérifier sur le téléphone un export format 2 contenant les courses, leurs GPX et le plan Mallorca ; ne retirer les données de course du dépôt qu’après cette vérification.
 
 **Validation :** les données survivent à la fermeture et au redémarrage de l’application ; un export peut être restauré ; les fonctions principales sont utilisables hors ligne.
 

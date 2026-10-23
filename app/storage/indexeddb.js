@@ -1,7 +1,7 @@
 import { PERSONAL_DATA_COLLECTIONS, validatePersonalData } from "../domain/models.js";
 
 const DATABASE_NAME = "alterra-personal-data";
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 const SETTINGS_KEY = "root";
 
 function openDatabase() {
@@ -88,14 +88,6 @@ export function createIndexedDbAdapter() {
       await transactionComplete(transaction);
     },
 
-    async create(collection, record) {
-      assertCollection(collection);
-      const db = await getDatabase();
-      const transaction = db.transaction(collection, "readwrite");
-      transaction.objectStore(collection).add(record);
-      await transactionComplete(transaction);
-    },
-
     async remove(collection, id) {
       assertCollection(collection);
       const db = await getDatabase();
@@ -125,6 +117,36 @@ export function createIndexedDbAdapter() {
         transaction
       );
       return entry?.value ?? {};
+    },
+
+    async saveSettings(value) {
+      if (!value || typeof value !== "object" || Array.isArray(value)) {
+        throw new TypeError("Les préférences personnelles doivent être un objet.");
+      }
+      const db = await getDatabase();
+      const transaction = db.transaction("settings", "readwrite");
+      transaction.objectStore("settings").put({ key: SETTINGS_KEY, value });
+      await transactionComplete(transaction);
+    },
+
+    async initializeRaceCatalog(records) {
+      const db = await getDatabase();
+      const settings = await this.getSettings();
+      if (settings.raceCatalogInitialized) {
+        const existing = db.transaction("raceCatalog", "readonly");
+        return requestResult(existing.objectStore("raceCatalog").getAll(), existing);
+      }
+      const transaction = db.transaction(["raceCatalog", "settings"], "readwrite");
+      const catalog = transaction.objectStore("raceCatalog");
+      const settingsStore = transaction.objectStore("settings");
+      catalog.clear();
+      records.forEach(record => catalog.put(record));
+      settingsStore.put({
+        key: SETTINGS_KEY,
+        value: { ...settings, raceCatalogInitialized: true }
+      });
+      await transactionComplete(transaction);
+      return records;
     },
 
     async replaceAll(data) {

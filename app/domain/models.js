@@ -1,9 +1,10 @@
-export const PERSONAL_DATA_FORMAT_VERSION = 1;
+export const PERSONAL_DATA_FORMAT_VERSION = 2;
 
 export const PERSONAL_DATA_COLLECTIONS = Object.freeze([
   "plannedSessions",
   "activities",
   "raceEvents",
+  "raceCatalog",
   "racePlans",
   "nutritionProducts",
   "equipment"
@@ -15,6 +16,7 @@ export const PERSONAL_DATA_COLLECTIONS = Object.freeze([
  * @property {Array<Object>} plannedSessions
  * @property {Array<Object>} activities
  * @property {Array<Object>} raceEvents
+ * @property {Array<Object>} raceCatalog
  * @property {Array<Object>} racePlans
  * @property {Array<Object>} nutritionProducts
  * @property {Array<Object>} equipment
@@ -27,6 +29,7 @@ export function createEmptyPersonalData() {
     plannedSessions: [],
     activities: [],
     raceEvents: [],
+    raceCatalog: [],
     racePlans: [],
     nutritionProducts: [],
     equipment: [],
@@ -38,11 +41,14 @@ export function validatePersonalData(data) {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     throw new TypeError("Les données personnelles doivent être un objet.");
   }
-  if (data.formatVersion !== PERSONAL_DATA_FORMAT_VERSION) {
+  if (data.formatVersion !== 1 && data.formatVersion !== PERSONAL_DATA_FORMAT_VERSION) {
     throw new Error(`Version des données non prise en charge : ${data.formatVersion}.`);
   }
 
   for (const collection of PERSONAL_DATA_COLLECTIONS) {
+    if (data.formatVersion === 1 && collection === "raceCatalog" && data[collection] === undefined) {
+      data[collection] = [];
+    }
     if (!Array.isArray(data[collection])) {
       throw new TypeError(`La collection « ${collection} » doit être une liste.`);
     }
@@ -56,11 +62,33 @@ export function validatePersonalData(data) {
         throw new Error(`Identifiant en double dans « ${collection} » : ${item.id}.`);
       }
       ids.add(item.id);
+      if (collection === "raceCatalog") {
+        if (typeof item.name !== "string" || typeof item.date !== "string" ||
+            typeof item.calendarDetails !== "string" ||
+            !Number.isFinite(item.distanceKm) || !Number.isFinite(item.ascentMeters)) {
+          throw new TypeError(`La course « ${item.id} » ne contient pas ses informations de référence.`);
+        }
+        if (item.profile?.gpx && typeof item.profile.gpxData !== "string") {
+          throw new TypeError(`La trace GPX de « ${item.id} » est absente de la sauvegarde.`);
+        }
+      }
     }
   }
   if (!data.settings || typeof data.settings !== "object" || Array.isArray(data.settings)) {
     throw new TypeError("Les préférences personnelles doivent être un objet.");
   }
+  if (data.settings.browserStorage !== undefined) {
+    const browserStorage = data.settings.browserStorage;
+    if (!browserStorage || typeof browserStorage !== "object" || Array.isArray(browserStorage)) {
+      throw new TypeError("L’état local du navigateur doit être un objet.");
+    }
+    for (const [key, value] of Object.entries(browserStorage)) {
+      if (!key.startsWith("alterra-") || typeof value !== "string") {
+        throw new TypeError("Une donnée locale du navigateur n’est pas valide.");
+      }
+    }
+  }
+  if (data.formatVersion === 1) data.formatVersion = PERSONAL_DATA_FORMAT_VERSION;
 
   return data;
 }

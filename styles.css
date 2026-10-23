@@ -147,8 +147,7 @@ button {
   line-height: 1.75;
 }
 
-.personal-data-tools,
-.personal-plan-tools {
+.personal-data-tools {
   margin-top: 16px;
   padding: 18px;
   border: 1px solid var(--color-line);
@@ -157,15 +156,13 @@ button {
   box-shadow: var(--shadow-card);
 }
 
-.personal-data-tools h2,
-.personal-plan-tools h2 {
+.personal-data-tools h2 {
   margin: 0 0 6px;
   color: var(--color-charcoal);
   font-size: 17px;
 }
 
-.personal-data-tools p,
-.personal-plan-tools p {
+.personal-data-tools p {
   margin: 6px 0 12px;
   color: var(--color-muted);
   font-size: 13px;
@@ -177,8 +174,7 @@ button {
   gap: 8px;
 }
 
-.personal-data-actions button,
-.personal-plan-copy {
+.personal-data-actions button {
   min-height: 44px;
   padding: 10px 14px;
   border: 1px solid var(--color-line);
@@ -189,8 +185,7 @@ button {
   font-weight: 750;
 }
 
-.personal-data-actions button:disabled,
-.personal-plan-copy:disabled {
+.personal-data-actions button:disabled {
   cursor: wait;
   opacity: .65;
 }
@@ -204,12 +199,18 @@ button {
 }
 
 .personal-plan-tools {
-  margin: 16px 0;
+  margin: 20px 4px 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 65%);
+  box-shadow: none;
 }
 
-.personal-plan-copy {
-  border-color: var(--color-accent-bright);
-  background: var(--color-accent-bright);
+.personal-plan-tools p {
+  margin: 0 0 8px;
+  color: var(--color-muted);
+  font-size: 12px;
 }
 
 .card-label {

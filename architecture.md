@@ -61,7 +61,7 @@ Ne créer que les modules nécessaires à la première fonctionnalité ; éviter
 
 ### Données publiques du site
 
-Les JSON du catalogue et les fiches de course publiques restent des ressources versionnées dans le dépôt. Elles décrivent les parcours et les informations de référence, pas le profil privé de l’utilisateur.
+Le catalogue actuel dans `races/` ne sert que de source initiale temporaire, copiée dans IndexedDB sur le premier appareil. Après export et vérification d’une archive autonome, les données de course versionnées seront retirées du dépôt. Les ajouts et modifications de courses doivent ensuite vivre dans la base locale et sa sauvegarde.
 
 ### Données privées de l’utilisateur
 
@@ -72,11 +72,12 @@ Elles sont enregistrées dans IndexedDB sur l’appareil et ne sont pas :
 - envoyées à un serveur pendant la phase locale ;
 - partagées avec un autre compte.
 
-Collections locales envisagées :
+Collections locales :
 
 - `plannedSessions` : entraînements prévus, objectifs, étapes, notes, nutrition et équipement prévus, statut ;
 - `activities` : séances réellement faites, saisies manuellement ou, plus tard, importées ;
 - `raceEvents` : courses ajoutées par l’utilisateur à son calendrier, distinctes des fiches publiques du catalogue ;
+- `raceCatalog` : fiches de référence des courses et contenu GPX, copiés depuis le catalogue initial pour être inclus dans l’export autonome ;
 - `nutritionProducts` : produits personnels et valeurs nutritionnelles ;
 - `equipment` : chaussures, vêtements, sac et matériel ;
 - `settings` : version du format de données et préférences non sensibles.
@@ -104,11 +105,11 @@ Les règles détaillées de remplacement et les cas limites sont suivis dans [pl
 
 IndexedDB sert de base locale structurée. Une petite couche de repositories fournit les opérations métier ; les écrans ne manipulent pas directement les transactions IndexedDB. Le schéma possède un numéro de version pour permettre des migrations locales sans effacer les données existantes.
 
-Les sauvegardes exportées sont des fichiers JSON versionnés validés avant restauration. Restaurer remplace toutes les données Alterra de l’appareil après confirmation. Le transfert initial du plan personnel Mallorca est déclenché depuis sa fiche, puis une copie privée locale doit être vérifiée sur le téléphone avant de retirer ses champs du JSON public. Les données locales ne sont pas synchronisées automatiquement.
+Les sauvegardes exportées sont des fichiers JSON versionnés validés avant restauration. Elles incluent toutes les collections locales, les fiches de référence complètes et leurs traces GPX embarquées, ainsi que les états d’interface actuellement stockés dans le navigateur. Restaurer remplace toutes les données Alterra de l’appareil après confirmation. Une fois le catalogue initial importé localement, le dépôt peut ne contenir que le code de l’application ; une sauvegarde restaure courses, données privées et traces sans dépendre des fichiers de course du dépôt. Les données locales ne sont pas synchronisées automatiquement.
 
-L’accueil proposera un accès visible à « Sauvegarder mes données » et « Importer une sauvegarde ». Sur iPhone, l’export ouvrira le partage ou l’enregistrement de fichier pour permettre de choisir l’app Fichiers, iCloud Drive ou un autre emplacement. L’import permettra de sélectionner le fichier de sauvegarde depuis l’appareil.
+L’accueil propose l’export de la base complète vers un fichier JSON et l’import d’un fichier depuis l’appareil. Sur iPhone, le navigateur gère le téléchargement ; le fichier peut ensuite être conservé dans Fichiers ou un autre emplacement.
 
-La sauvegarde complète contient les données privées locales, dont le plan personnel Mallorca. La restauration valide le format avant import et demande confirmation avant toute modification des données existantes ; le mode de restauration (remplacement complet ou fusion) reste à décider lors de la conception de l’import. L’utilisateur peut supprimer une entrée ou effacer toutes les données locales avec confirmation.
+La sauvegarde complète contient les fiches de course de référence, les traces GPX, les données privées, les réglages et les états locaux du navigateur. La restauration valide le format avant import et, après confirmation, remplace entièrement la base et les états concernés.
 
 **Limites à afficher clairement :**
 
@@ -134,7 +135,7 @@ L’intégration Garmin et l’IA viendront après. Les secrets d’API ne seron
 
 ## 7. Données Mallorca et confidentialité
 
-Le dépôt GitHub est public. Certaines informations de préparation propres à Mallorca (objectif de temps, scénarios et horaires de passage, nutrition et rappels d’effort) se trouvent actuellement dans le JSON de course versionné. La décision est prise de les déplacer à terme dans les données personnelles locales, incluses dans le fichier de sauvegarde privé. Le JSON de course gardera les informations générales et officielles nécessaires à la fiche.
+Le dépôt GitHub est public. Les informations de préparation propres à Mallorca (objectif de temps, scénarios et horaires de passage, nutrition et rappels d’effort) ont été retirées du JSON courant de la course et sont conservées dans les données personnelles locales, incluses dans l’archive complète. La fiche du catalogue initial et son GPX sont également inclus dans cette archive.
 
 Ces informations ont déjà été publiées dans le dépôt et peuvent rester présentes dans l’historique Git, même après leur déplacement. Ne pas y ajouter de nouvelles données personnelles. Une éventuelle purge de l’historique est une décision distincte qui devra être discutée avant toute action, car elle réécrit les commits du dépôt.
 
@@ -143,8 +144,8 @@ Ces informations ont déjà été publiées dans le dépôt et peuvent rester pr
 1. [x] Valider cette architecture et le modèle minimal des données.
 2. [x] Extraire le code du calendrier en modules sans changer son comportement.
 3. [x] Définir le format personnel initial et l’interface du repository.
-4. [ ] Créer et tester la base IndexedDB, son versionnage et l’adaptateur.
-5. [ ] Ajouter les fonctions d’export, de validation/restauration et de suppression.
+4. [x] Créer et tester la base IndexedDB, son versionnage et l’adaptateur.
+5. [x] Ajouter les fonctions d’export et de validation/restauration des sauvegardes.
 6. [ ] Relier ensuite les formulaires du calendrier aux données locales.
 7. [ ] Ajouter les activités, les KPIs et les autres domaines par étapes, avec tests des règles prévu/réalisé.
 

@@ -1,4 +1,5 @@
 import { createPersonalDataStore } from "../app/personal-data.js";
+import { loadRaceCatalog } from "../app/race-catalog.js";
 
 const content = document.getElementById("raceContent");
 const raceId = new URLSearchParams(location.search).get("id");
@@ -97,7 +98,9 @@ function renderElevationSection(race) {
   progress.id = "elevationProgress";
   progress.setAttribute("aria-live", "polite");
   section.append(progress);
-  section.append(makeElement("p", "elevation-hint", "Coche les ravitos dans « En course » pour actualiser ta progression sur le profil. Tu peux aussi toucher un repère."));
+  section.append(makeElement("p", "elevation-hint", race.checkpoints?.length
+    ? "Coche les ravitos dans « En course » pour actualiser ta progression sur le profil. Tu peux aussi toucher un repère."
+    : "Profil d’altitude du parcours."));
 
   return section;
 }
@@ -587,7 +590,6 @@ function renderRace(race, personalPlan = null, storageError = null) {
   const displayRace = applyPersonalPlan(race, personalPlan);
   document.title = `${displayRace.name} · Alterra`;
   content.replaceChildren(renderHero(displayRace));
-  content.append(renderPersonalPlanControls(race, personalPlan, storageError));
   if (displayRace.profile?.gpx) content.append(renderElevationSection(displayRace));
   if (displayRace.checkpoints?.length) content.append(renderCheckpoints(displayRace));
   if (displayRace.nutrition) content.append(renderNutrition(displayRace.nutrition));
@@ -596,51 +598,37 @@ function renderRace(race, personalPlan = null, storageError = null) {
   if (displayRace.gear?.groups?.length) content.append(renderGear(displayRace, displayRace.gear));
   if (displayRace.sources?.length) content.append(renderSources(displayRace.sources, displayRace.verifiedAt));
   if (displayRace.footer) addText(content, "p", "footer", displayRace.footer);
+  const personalPlanStatus = renderPersonalPlanControls(personalPlan, storageError);
+  if (personalPlanStatus) content.append(personalPlanStatus);
   if (displayRace.checkpoints?.length) setupCheckpoints(displayRace);
   if (displayRace.gear?.groups?.length) setupGear(displayRace.id, displayRace.gear);
   if (displayRace.profile?.gpx) loadElevation(displayRace);
 }
 
-function hasLegacyPersonalPlan(race) {
-  return Boolean(
-    race.scenarios?.length ||
-    race.checkpoints?.some(checkpoint => checkpoint.elapsed?.length || checkpoint.clocks?.length || checkpoint.plan?.length) ||
-    race.nutrition ||
-    race.reminders?.items?.length
-  );
-}
-
-function personalPlanFromRace(race) {
-  return {
-    id: race.id,
-    raceId: race.id,
-    scenarios: race.scenarios || [],
-    defaultScenario: race.defaultScenario ?? 0,
-    checkpoints: (race.checkpoints || [])
-      .filter(checkpoint => checkpoint.elapsed?.length || checkpoint.clocks?.length || checkpoint.plan?.length)
-      .map(checkpoint => ({
-        id: checkpoint.id,
-        elapsed: checkpoint.elapsed || [],
-        clocks: checkpoint.clocks || [],
-        plan: checkpoint.plan || []
-      })),
-    nutrition: race.nutrition || null,
-    reminders: race.reminders || null,
-    updatedAt: new Date().toISOString()
-  };
-}
-
 function applyPersonalPlan(race, plan) {
   if (!plan) return race;
+  const scenarios = Array.isArray(plan.scenarios) ? plan.scenarios : [];
+  const defaultScenario = Number.isInteger(plan.defaultScenario) &&
+    plan.defaultScenario >= 0 &&
+    plan.defaultScenario < scenarios.length
+    ? plan.defaultScenario
+    : 0;
   const privateCheckpoints = new Map(
     (Array.isArray(plan.checkpoints) ? plan.checkpoints : [])
       .filter(checkpoint => checkpoint && typeof checkpoint.id === "string")
       .map(checkpoint => [checkpoint.id, checkpoint])
   );
+  const finishCheckpoint = privateCheckpoints.get("finish");
   return {
     ...race,
-    scenarios: Array.isArray(plan.scenarios) ? plan.scenarios : [],
-    defaultScenario: plan.defaultScenario ?? 0,
+    targetTime: typeof plan.targetTime === "string"
+      ? plan.targetTime
+      : scenarios[defaultScenario]?.duration,
+    targetFinish: typeof plan.targetFinish === "string"
+      ? plan.targetFinish
+      : finishCheckpoint?.clocks?.[defaultScenario],
+    scenarios,
+    defaultScenario,
     checkpoints: (race.checkpoints || []).map(checkpoint => ({
       ...checkpoint,
       ...(privateCheckpoints.get(checkpoint.id) || {})
@@ -650,60 +638,38 @@ function applyPersonalPlan(race, plan) {
   };
 }
 
-function renderPersonalPlanControls(race, plan = null, storageError = null) {
-  const section = makeElement("section", "section personal-plan-tools");
-  addText(section, "h2", "", "Plan personnel");
+function renderPersonalPlanControls(plan, storageError = null) {
+  if (!plan && !storageError) return null;
+  const section = makeElement("aside", "personal-plan-tools");
+  section.setAttribute("aria-label", "État du plan personnel");
   const status = makeElement("p", "sub personal-plan-status");
   status.setAttribute("role", "status");
   status.setAttribute("aria-live", "polite");
 
   if (plan) {
-    status.textContent = "Ton plan personnel est enregistré dans le stockage local de cet appareil.";
+    status.textContent = "Plan personnel enregistré sur cet appareil.";
     section.append(status);
     return section;
   }
 
   if (storageError) {
-    status.textContent = "Le stockage local est indisponible. Le plan public reste affiché, mais sa copie privée n’a pas pu être vérifiée.";
+    status.textContent = "Le plan personnel ne peut pas être chargé depuis le stockage local de cet appareil.";
     section.append(status);
     return section;
   }
-
-  if (!hasLegacyPersonalPlan(race)) {
-    status.textContent = "Aucun plan personnel n’est enregistré ici. Tu peux en récupérer un en restaurant une sauvegarde depuis l’accueil.";
-    section.append(status);
-    return section;
-  }
-
-  status.textContent = "Enregistre une copie privée sur cet appareil. Les données encore présentes dans le fichier public ne seront retirées qu’après vérification de cette copie.";
-  const button = makeElement("button", "personal-plan-copy", "Enregistrer mon plan sur cet appareil");
-  button.type = "button";
-  button.addEventListener("click", async () => {
-    button.disabled = true;
-    status.textContent = "Enregistrement du plan sur cet appareil…";
-    try {
-      const planToSave = personalPlanFromRace(race);
-      await personalData.repository.create("racePlans", planToSave);
-      renderRace(race, planToSave);
-    } catch (error) {
-      console.error("Échec de l’enregistrement du plan personnel Mallorca.", error);
-      status.textContent = error.name === "ConstraintError"
-        ? "Un plan est déjà enregistré sur cet appareil. Actualise la fiche pour l’afficher sans le remplacer."
-        : "Enregistrement impossible. Vérifie l’espace disponible et réessaie.";
-      button.disabled = false;
-    }
-  });
-  section.append(status, button);
-  return section;
 }
 
 async function loadElevation(race) {
   const chart = content.querySelector(".elevation-chart");
   const progress = document.getElementById("elevationProgress");
   try {
-    const response = await fetch(new URL(race.profile.gpx, siteRoot));
-    if (!response.ok) throw new Error(`GPX indisponible (${response.status}).`);
-    const profile = parseGpxProfile(await response.text(), race);
+    let gpxText = race.profile.gpxData;
+    if (typeof gpxText !== "string") {
+      const response = await fetch(new URL(race.profile.gpx, siteRoot));
+      if (!response.ok) throw new Error(`GPX indisponible (${response.status}).`);
+      gpxText = await response.text();
+    }
+    const profile = parseGpxProfile(gpxText, race);
     drawElevation(race, profile, chart, progress);
   } catch (error) {
     showProfileError(progress, "Impossible de charger ou de lire la trace GPX.");
@@ -729,14 +695,9 @@ async function loadRace() {
     return;
   }
   try {
-    const response = await fetch(new URL("./races/index.json", siteRoot));
-    if (!response.ok) throw new Error(`Catalogue indisponible (${response.status}).`);
-    const catalog = await response.json();
-    const entry = catalog.find(race => race.id === raceId);
-    if (!entry) throw new Error(`Course inconnue : ${raceId}.`);
-    const raceResponse = await fetch(new URL(entry.data, siteRoot));
-    if (!raceResponse.ok) throw new Error(`Données de course indisponibles (${raceResponse.status}).`);
-    const race = await raceResponse.json();
+    const catalog = await loadRaceCatalog(personalData);
+    const race = catalog.find(entry => entry.id === raceId);
+    if (!race) throw new Error(`Course inconnue : ${raceId}.`);
     let personalPlan = null;
     let storageError = null;
     try {

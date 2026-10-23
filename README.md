@@ -2,23 +2,19 @@
 
 Site statique de préparation au trail, avec calendrier et fiches de course adaptées aux écrans mobiles.
 
-## Ajouter une course
+## Catalogue de courses
 
-1. Créer un JSON de course dans `races/` avec un identifiant unique, le nom, la date (`AAAA-MM-JJ`), le résumé de calendrier, le départ, la distance et le D+.
-2. Ajouter dans `races/index.json` une entrée qui associe cet identifiant au chemin du JSON.
-3. Ajouter les sections seulement si les données sont disponibles : `profile`, `scenarios` et `checkpoints`, `nutrition`, `reminders`, `practicalInfo`, `gear`, `sources`, `distanceNote` et `footer`. Les points de course peuvent être listés sans horaires ni scénarios ; la fiche générique masque les sections absentes.
-4. Pour afficher le profil d’altitude, ranger le fichier GPX dans `races/gpx/` et renseigner son chemin dans `profile.gpx`. La fiche lit la trace, dessine le profil et place les repères en fonction des kilomètres indiqués dans les ravitos.
-5. Ajouter les nouveaux fichiers de données (JSON, GPX et autres ressources) au précache `FILES` dans `sw.js`, puis incrémenter `CACHE_NAME`.
+`races/` contient temporairement le catalogue de départ, copié dans IndexedDB au premier lancement afin de permettre un premier export autonome. Ne pas y ajouter de nouvelles données évolutives ou personnelles. Après validation d’une sauvegarde complète sur le téléphone, ces fichiers et leurs entrées de précache pourront être retirés ; les courses restaurées seront alors lues depuis la base locale.
 
-Le modèle générique est `races/race.html` avec son script `races/race.js`. Le calendrier et la fiche utilisent le même catalogue ; les détails propres à une course restent dans son fichier JSON. Les textes et conseils de course doivent être vérifiés, pas déduits automatiquement.
+Le modèle générique est `races/race.html` avec son script `races/race.js`. La sauvegarde embarque chaque fiche de course et son GPX, sans dépendre ensuite de fichiers de données versionnés.
 
 Les icônes du site sont rangées dans `icon/`.
 
 ## Données personnelles sur l’appareil
 
-Depuis la fiche Mallorca, utilise **Enregistrer mon plan sur cet appareil** pour copier le plan dans le stockage local du navigateur. Vérifie ensuite qu’il reste affiché après fermeture/réouverture de l’application et télécharge une sauvegarde depuis l’accueil avant que les champs personnels soient retirés du JSON public.
+La base locale comprend le catalogue complet des courses et leurs traces GPX, les plans personnels, les entraînements, activités, réglages et états de checklist. L’export est autonome : il contient les données de course de référence et privées nécessaires à la restauration, sans dépendre des JSON/GPX du dépôt. Les courses du catalogue initial y sont copiées au premier démarrage.
 
-Les sauvegardes sont des fichiers JSON. La restauration depuis l’accueil remplace les données Alterra de l’appareil après confirmation. Les données locales ne sont pas synchronisées automatiquement entre appareils ; conserve le fichier de sauvegarde dans un endroit sûr.
+L’export et l’import se font depuis l’accueil. L’import remplace toutes les données Alterra de l’appareil après confirmation. Les fichiers JSON ne sont pas synchronisés automatiquement entre appareils ; conserve l’export complet dans un endroit sûr.
 
 ## Documentation du projet
 

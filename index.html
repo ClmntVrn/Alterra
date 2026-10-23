@@ -37,17 +37,6 @@
       </p>
     </section>
 
-    <section class="personal-data-tools" aria-labelledby="personalDataTitle">
-      <h2 id="personalDataTitle">Tes données sur cet appareil</h2>
-      <p>Pas de synchronisation automatique entre appareils. Sauvegarde régulièrement tes données et garde le fichier en lieu sûr.</p>
-      <div class="personal-data-actions">
-        <button id="exportPersonalData" type="button">Télécharger une sauvegarde</button>
-        <button id="importPersonalData" type="button">Restaurer une sauvegarde</button>
-        <input id="personalDataFile" type="file" accept="application/json,.json" hidden>
-      </div>
-      <p id="personalDataStatus" class="personal-data-status" role="status" aria-live="polite"></p>
-    </section>
-
     <section class="calendar-section" aria-labelledby="calendarTitle">
       <div class="calendar-heading">
         <div>
@@ -79,6 +68,17 @@
         </div>
       </section>
       <p class="calendar-hint" id="calendarHint" hidden></p>
+    </section>
+
+    <section class="personal-data-tools" aria-labelledby="personalDataTitle">
+      <h2 id="personalDataTitle">Ta base Alterra sur cet appareil</h2>
+      <p>La sauvegarde complète inclut tes courses, leurs traces et tes données personnelles. Elle n’est pas synchronisée automatiquement ; garde le fichier en lieu sûr.</p>
+      <div class="personal-data-actions">
+        <button id="exportPersonalData" type="button">Exporter la base complète</button>
+        <button id="importPersonalData" type="button">Importer une base</button>
+        <input id="personalDataFile" type="file" accept="application/json,.json" hidden>
+      </div>
+      <p id="personalDataStatus" class="personal-data-status" role="status" aria-live="polite"></p>
     </section>
 
     <footer>ALTERRA · IMAGINÉ POUR LES SENTIERS</footer>

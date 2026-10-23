@@ -20,7 +20,6 @@ function assertRecord(record) {
  * @property {(collection: string) => Promise<Array<Object>>} list
  * @property {(collection: string, id: string) => Promise<Object|null>} get
  * @property {(collection: string, record: Object) => Promise<void>} save
- * @property {(collection: string, record: Object) => Promise<void>} [create]
  * @property {(collection: string, id: string) => Promise<boolean>} remove
  */
 
@@ -61,15 +60,6 @@ export function createPersonalDataRepository(adapter) {
       assertCollection(collection);
       assertRecord(record);
       await adapter.save(collection, record);
-    },
-
-    async create(collection, record) {
-      assertCollection(collection);
-      assertRecord(record);
-      if (typeof adapter.create !== "function") {
-        throw new TypeError("L’adaptateur de stockage ne permet pas la création sans remplacement.");
-      }
-      await adapter.create(collection, record);
     },
 
     async remove(collection, id) {

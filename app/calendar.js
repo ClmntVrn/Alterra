@@ -20,6 +20,21 @@ const eventDateFormatter = new Intl.DateTimeFormat("fr-FR", {
   year: "numeric"
 });
 
+function showLoadedRaces(races) {
+  events = Object.fromEntries(races.map(race => [
+    race.date,
+    {
+      id: race.id,
+      title: race.name,
+      details: race.calendarDetails,
+      organizer: race.organizer
+    }
+  ]));
+  calendarHint.textContent = "";
+  calendarHint.hidden = true;
+  renderCalendar();
+}
+
 function showMonthView() {
   calendarGrid.hidden = false;
   calendarEventDetails.hidden = true;
@@ -152,27 +167,7 @@ function renderCalendar() {
   }
 }
 
-async function loadRaceEvents() {
-  const response = await fetch("./races/index.json");
-  if (!response.ok) throw new Error(`Catalogue indisponible (${response.status}).`);
-  const catalog = await response.json();
-  const races = await Promise.all(catalog.map(async entry => {
-    const raceResponse = await fetch(entry.data);
-    if (!raceResponse.ok) {
-      throw new Error(`Données indisponibles pour ${entry.id} (${raceResponse.status}).`);
-    }
-    const race = await raceResponse.json();
-    if (race.id !== entry.id) throw new Error(`Identifiant de course incohérent : ${entry.id}.`);
-    return race;
-  }));
-
-  return Object.fromEntries(races.map(race => [
-    race.date,
-    { id: race.id, title: race.name, details: race.calendarDetails, organizer: race.organizer }
-  ]));
-}
-
-export function initializeCalendar() {
+export function initializeCalendar(racesPromise) {
   previousMonthButton.addEventListener("click", () => {
     currentMonth.setMonth(currentMonth.getMonth() - 1);
     renderCalendar();
@@ -187,16 +182,13 @@ export function initializeCalendar() {
   });
 
   renderCalendar();
-  loadRaceEvents()
-    .then(raceEvents => {
-      events = raceEvents;
-      calendarHint.textContent = "";
-      calendarHint.hidden = true;
-      renderCalendar();
-    })
+  Promise.resolve(racesPromise)
+    .then(showLoadedRaces)
     .catch(error => {
       console.error("Impossible de charger les courses du calendrier.", error);
       calendarHint.textContent = "Impossible de charger les courses. Réessaie avec une connexion Internet.";
       calendarHint.hidden = false;
     });
+
+  return showLoadedRaces;
 }

@@ -1,5 +1,6 @@
 import { initializeCalendar } from "./calendar.js";
 import { createPersonalDataStore } from "./personal-data.js";
+import { loadRaceCatalog } from "./race-catalog.js";
 
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
@@ -8,13 +9,13 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   });
 }
 
-initializeCalendar();
-
 const exportButton = document.getElementById("exportPersonalData");
 const importButton = document.getElementById("importPersonalData");
 const importInput = document.getElementById("personalDataFile");
 const status = document.getElementById("personalDataStatus");
 const personalData = createPersonalDataStore();
+let raceCatalogPromise = loadRaceCatalog(personalData);
+const refreshCalendar = initializeCalendar(raceCatalogPromise);
 
 function showPersonalDataStatus(message, isError = false) {
   status.textContent = message;
@@ -25,6 +26,7 @@ exportButton.addEventListener("click", async () => {
   exportButton.disabled = true;
   showPersonalDataStatus("Préparation de la sauvegarde…");
   try {
+    await raceCatalogPromise;
     const data = await personalData.exportAll();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -35,7 +37,7 @@ exportButton.addEventListener("click", async () => {
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showPersonalDataStatus("Sauvegarde téléchargée. Garde ce fichier en lieu sûr.");
+    showPersonalDataStatus("Base complète exportée. Garde ce fichier en lieu sûr.");
   } catch (error) {
     console.error("Échec de la sauvegarde des données personnelles.", error);
     showPersonalDataStatus("La sauvegarde a échoué. Vérifie le stockage de cet appareil.", true);
@@ -51,11 +53,13 @@ importInput.addEventListener("change", async () => {
   importButton.disabled = true;
   try {
     const data = JSON.parse(await file.text());
-    if (!window.confirm("Cette restauration remplacera toutes les données Alterra enregistrées sur cet appareil. Continuer ?")) {
+    if (!window.confirm("Cette importation remplacera toutes les données Alterra de cet appareil, y compris les courses et états de checklist. Continuer ?")) {
       return;
     }
     await personalData.restore(data);
-    showPersonalDataStatus("Sauvegarde restaurée sur cet appareil.");
+    raceCatalogPromise = loadRaceCatalog(personalData);
+    refreshCalendar(await raceCatalogPromise);
+    showPersonalDataStatus("Base complète restaurée sur cet appareil.");
   } catch (error) {
     console.error("Échec de la restauration des données personnelles.", error);
     showPersonalDataStatus(`Restauration impossible : ${error.message}`, true);
