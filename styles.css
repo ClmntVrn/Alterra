@@ -21,6 +21,7 @@
 
 html {
   scroll-behavior: smooth;
+  touch-action: manipulation;
 }
 
 body {
@@ -766,6 +767,7 @@ button {
   border-radius: 10px;
   background: #fff;
   color: var(--color-text);
+  font-size: 16px;
 }
 
 .training-form textarea {
