@@ -683,9 +683,6 @@ function showError(message, error) {
   const section = makeElement("section", "section race-error");
   addText(section, "h1", "", "Fiche course indisponible");
   addText(section, "p", "", message);
-  const back = makeElement("a", "back", "← Retour au calendrier");
-  back.href = "../index.html";
-  section.append(back);
   content.append(section);
 }
 

@@ -1,9 +1,10 @@
 
-const CACHE_NAME = "alterra-v30";
+const CACHE_NAME = "alterra-v33";
 
 const FILES = [
   "./",
   "./index.html",
+  "./versions.html",
   "./app/main.js",
   "./app/calendar.js",
   "./app/domain/models.js",
