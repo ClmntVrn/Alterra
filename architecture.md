@@ -1,6 +1,6 @@
 # Architecture proposée pour Alterra
 
-**Statut :** architecture validée le 22 octobre 2026 ; étape 2 en cours  
+**Statut :** architecture validée le 22 octobre 2026 ; étape 3 terminée
 **Mise à jour :** 22 octobre 2026
 
 Ce document décrit une évolution progressive de l’application actuelle, sans backend ni frais au départ. Les choix déjà confirmés par l’utilisateur sont marqués comme tels ; les détails techniques restent modifiables avant de coder.
@@ -14,7 +14,7 @@ Alterra est actuellement une PWA statique en HTML, CSS et JavaScript natif :
 - `app/domain/models.js` définit la version et la validation de base du format personnel.
 - `app/storage/repository.js` définit l’interface entre les fonctions de l’application et l’adaptateur de stockage, sans encore persister de données.
 - `races/race.html` et `races/race.js` affichent les fiches de course génériques.
-- Les courses de référence sont décrites dans des fichiers JSON sous `races/`.
+- Les fiches génériques affichent les courses stockées dans la base locale.
 - `sw.js` met en cache l’interface et les ressources du site pour l’utilisation hors ligne.
 
 Cette base peut évoluer sans introduire immédiatement de framework, de compte utilisateur ou de service payant.
@@ -61,7 +61,7 @@ Ne créer que les modules nécessaires à la première fonctionnalité ; éviter
 
 ### Données publiques du site
 
-Le catalogue actuel dans `races/` ne sert que de source initiale temporaire, copiée dans IndexedDB sur le premier appareil. Après export et vérification d’une archive autonome, les données de course versionnées seront retirées du dépôt. Les ajouts et modifications de courses doivent ensuite vivre dans la base locale et sa sauvegarde.
+Le dépôt ne contient pas de données de course. Une installation neuve démarre avec un calendrier vide ; les courses et leurs traces GPX sont ajoutées à la base locale par import d’une sauvegarde autonome. Les ajouts et modifications doivent vivre dans cette base personnelle et sa sauvegarde.
 
 ### Données privées de l’utilisateur
 
@@ -77,7 +77,7 @@ Collections locales :
 - `plannedSessions` : entraînements prévus, objectifs, étapes, notes, nutrition et équipement prévus, statut ;
 - `activities` : séances réellement faites, saisies manuellement ou, plus tard, importées ;
 - `raceEvents` : courses ajoutées par l’utilisateur à son calendrier, distinctes des fiches publiques du catalogue ;
-- `raceCatalog` : fiches de référence des courses et contenu GPX, copiés depuis le catalogue initial pour être inclus dans l’export autonome ;
+- `raceCatalog` : fiches de référence des courses et contenu GPX, inclus dans l’export autonome ;
 - `nutritionProducts` : produits personnels et valeurs nutritionnelles ;
 - `equipment` : chaussures, vêtements, sac et matériel ;
 - `settings` : version du format de données et préférences non sensibles.
@@ -86,7 +86,7 @@ Chaque entrée reçoit un identifiant stable. Une activité peut référencer un
 
 Les champs validés pour les activités et les séances figurent dans [plan.md](./plan.md). Les unités de référence sont métriques : km, mètres, durée en heures/minutes/secondes, allure en min/km et fréquence cardiaque en bpm. Les traces GPS restent hors du premier modèle ; ce choix est reporté.
 
-Les informations personnelles propres à Mallorca — objectif de temps, scénarios et horaires de passage personnels, plan nutritionnel et rappels d’effort — seront séparées des données publiques de la course. Elles seront stockées dans les données locales privées et incluses dans le fichier de sauvegarde personnel ; elles ne devront pas être ajoutées au JSON public de course versionné dans GitHub.
+Les informations personnelles propres à Mallorca — objectif de temps, scénarios et horaires de passage personnels, plan nutritionnel et rappels d’effort — sont conservées dans la base locale et l’archive personnelle, pas dans les fichiers versionnés du dépôt.
 
 ## 4. Calendrier et calcul des KPIs
 
@@ -135,9 +135,9 @@ L’intégration Garmin et l’IA viendront après. Les secrets d’API ne seron
 
 ## 7. Données Mallorca et confidentialité
 
-Le dépôt GitHub est public. Les informations de préparation propres à Mallorca (objectif de temps, scénarios et horaires de passage, nutrition et rappels d’effort) ont été retirées du JSON courant de la course et sont conservées dans les données personnelles locales, incluses dans l’archive complète. La fiche du catalogue initial et son GPX sont également inclus dans cette archive.
+Le dépôt GitHub est public. Les données de course (fiches JSON et GPX) ont été retirées du dépôt après vérification d’une archive complète sur le téléphone. Les données de Mallorca, y compris les informations personnelles de préparation, sont conservées dans la base locale et l’archive personnelle.
 
-Ces informations ont déjà été publiées dans le dépôt et peuvent rester présentes dans l’historique Git, même après leur déplacement. Ne pas y ajouter de nouvelles données personnelles. Une éventuelle purge de l’historique est une décision distincte qui devra être discutée avant toute action, car elle réécrit les commits du dépôt.
+Des données privées de Mallorca ont déjà été publiées dans le dépôt et peuvent rester présentes dans l’historique Git, même après leur retrait de la version courante. Ne pas y ajouter de nouvelles données personnelles. Une éventuelle purge de l’historique est une décision distincte qui devra être discutée avant toute action, car elle réécrit les commits du dépôt.
 
 ## 8. Ordre d’implémentation proposé
 

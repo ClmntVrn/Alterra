@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "alterra-v21";
+const CACHE_NAME = "alterra-v22";
 
 const FILES = [
   "./",
@@ -14,10 +14,6 @@ const FILES = [
   "./races/race.html",
   "./races/race.js",
   "./styles.css",
-  "./races/gpx/ETM_50_K_ea7a69720b.gpx",
-  "./races/index.json",
-  "./races/mallorca-etm-2026.json",
-  "./races/sainteexpress-2026.json",
   "./manifest.json",
   "./icon/icon.svg"
 ];

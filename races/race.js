@@ -697,7 +697,13 @@ async function loadRace() {
   try {
     const catalog = await loadRaceCatalog(personalData);
     const race = catalog.find(entry => entry.id === raceId);
-    if (!race) throw new Error(`Course inconnue : ${raceId}.`);
+    if (!race) {
+      showError(
+        "Cette course n’est pas dans la base de cet appareil. Importe une sauvegarde complète pour la restaurer.",
+        new Error(`Course inconnue : ${raceId}.`)
+      );
+      return;
+    }
     let personalPlan = null;
     let storageError = null;
     try {

@@ -83,9 +83,9 @@ Voir l’[architecture validée](./architecture.md).
 
 ### Étape 3 — Stockage personnel sur l’appareil
 
-**Statut :** en cours
+**Statut :** réalisée — archive vérifiée sur le téléphone
 
-**Prochaine étape :** déployer le nouveau format de sauvegarde, exporter la base complète depuis le téléphone et vérifier le fichier avant de retirer le catalogue et les GPX du dépôt.
+L’application démarre désormais sans données de course ; l’import d’une archive complète restaure le catalogue, les GPX et les données personnelles.
 
 - [x] Implémenter IndexedDB pour enregistrer les données personnelles et le catalogue local dans le navigateur.
 - Permettre de consulter et modifier ces données hors ligne sur l’appareil.
@@ -93,7 +93,7 @@ Voir l’[architecture validée](./architecture.md).
 - [x] Inclure dans cette sauvegarde les fiches de course de référence, leurs traces GPX, les informations privées Mallorca et l’état des checklists.
 - [x] Afficher clairement qu’à ce stade les appareils ne se synchronisent pas automatiquement.
 - [x] Transférer le plan Mallorca vers le stockage privé local et retirer ses champs personnels du JSON public après vérification de la sauvegarde sur le téléphone.
-- [ ] Vérifier sur le téléphone un export format 2 contenant les courses, leurs GPX et le plan Mallorca ; ne retirer les données de course du dépôt qu’après cette vérification.
+- [x] Vérifier sur le téléphone un export format 2 contenant les courses, leurs GPX et le plan Mallorca avant de retirer les données de course du dépôt.
 
 **Validation :** les données survivent à la fermeture et au redémarrage de l’application ; un export peut être restauré ; les fonctions principales sont utilisables hors ligne.
 
