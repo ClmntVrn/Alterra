@@ -104,6 +104,8 @@ Les règles détaillées de remplacement et les cas limites sont suivis dans [pl
 
 IndexedDB sert de base locale structurée. Une petite couche de repositories fournit les opérations métier ; les écrans ne manipulent pas directement les transactions IndexedDB. Le schéma possède un numéro de version pour permettre des migrations locales sans effacer les données existantes.
 
+Les sauvegardes exportées sont des fichiers JSON versionnés validés avant restauration. Restaurer remplace toutes les données Alterra de l’appareil après confirmation. Le transfert initial du plan personnel Mallorca est déclenché depuis sa fiche, puis une copie privée locale doit être vérifiée sur le téléphone avant de retirer ses champs du JSON public. Les données locales ne sont pas synchronisées automatiquement.
+
 L’accueil proposera un accès visible à « Sauvegarder mes données » et « Importer une sauvegarde ». Sur iPhone, l’export ouvrira le partage ou l’enregistrement de fichier pour permettre de choisir l’app Fichiers, iCloud Drive ou un autre emplacement. L’import permettra de sélectionner le fichier de sauvegarde depuis l’appareil.
 
 La sauvegarde complète contient les données privées locales, dont le plan personnel Mallorca. La restauration valide le format avant import et demande confirmation avant toute modification des données existantes ; le mode de restauration (remplacement complet ou fusion) reste à décider lors de la conception de l’import. L’utilisateur peut supprimer une entrée ou effacer toutes les données locales avec confirmation.

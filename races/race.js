@@ -1,3 +1,5 @@
+import { createPersonalDataStore } from "../app/personal-data.js";
+
 const content = document.getElementById("raceContent");
 const raceId = new URLSearchParams(location.search).get("id");
 const siteRoot = new URL("../", location.href);
@@ -6,6 +8,7 @@ const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
   month: "long",
   year: "numeric"
 });
+const personalData = createPersonalDataStore();
 
 function makeElement(tag, className, text) {
   const node = document.createElement(tag);
@@ -577,23 +580,121 @@ function drawElevation(race, profile, chart, progress) {
   window.updateElevationProgress();
 }
 
-function renderRace(race) {
+function renderRace(race, personalPlan = null, storageError = null) {
   if (!race.id || !race.name || !race.date || !Number.isFinite(race.distanceKm) || !Number.isFinite(race.ascentMeters)) {
     throw new Error("Les données principales de la course sont incomplètes.");
   }
-  document.title = `${race.name} · Alterra`;
-  content.replaceChildren(renderHero(race));
-  if (race.profile?.gpx) content.append(renderElevationSection(race));
-  if (race.checkpoints?.length) content.append(renderCheckpoints(race));
-  if (race.nutrition) content.append(renderNutrition(race.nutrition));
-  if (race.reminders?.items?.length) content.append(renderReminders(race.reminders));
-  if (race.practicalInfo?.items?.length) content.append(renderPracticalInfo(race.practicalInfo));
-  if (race.gear?.groups?.length) content.append(renderGear(race, race.gear));
-  if (race.sources?.length) content.append(renderSources(race.sources, race.verifiedAt));
-  if (race.footer) addText(content, "p", "footer", race.footer);
-  if (race.checkpoints?.length) setupCheckpoints(race);
-  if (race.gear?.groups?.length) setupGear(race.id, race.gear);
-  if (race.profile?.gpx) loadElevation(race);
+  const displayRace = applyPersonalPlan(race, personalPlan);
+  document.title = `${displayRace.name} · Alterra`;
+  content.replaceChildren(renderHero(displayRace));
+  content.append(renderPersonalPlanControls(race, personalPlan, storageError));
+  if (displayRace.profile?.gpx) content.append(renderElevationSection(displayRace));
+  if (displayRace.checkpoints?.length) content.append(renderCheckpoints(displayRace));
+  if (displayRace.nutrition) content.append(renderNutrition(displayRace.nutrition));
+  if (displayRace.reminders?.items?.length) content.append(renderReminders(displayRace.reminders));
+  if (displayRace.practicalInfo?.items?.length) content.append(renderPracticalInfo(displayRace.practicalInfo));
+  if (displayRace.gear?.groups?.length) content.append(renderGear(displayRace, displayRace.gear));
+  if (displayRace.sources?.length) content.append(renderSources(displayRace.sources, displayRace.verifiedAt));
+  if (displayRace.footer) addText(content, "p", "footer", displayRace.footer);
+  if (displayRace.checkpoints?.length) setupCheckpoints(displayRace);
+  if (displayRace.gear?.groups?.length) setupGear(displayRace.id, displayRace.gear);
+  if (displayRace.profile?.gpx) loadElevation(displayRace);
+}
+
+function hasLegacyPersonalPlan(race) {
+  return Boolean(
+    race.scenarios?.length ||
+    race.checkpoints?.some(checkpoint => checkpoint.elapsed?.length || checkpoint.clocks?.length || checkpoint.plan?.length) ||
+    race.nutrition ||
+    race.reminders?.items?.length
+  );
+}
+
+function personalPlanFromRace(race) {
+  return {
+    id: race.id,
+    raceId: race.id,
+    scenarios: race.scenarios || [],
+    defaultScenario: race.defaultScenario ?? 0,
+    checkpoints: (race.checkpoints || [])
+      .filter(checkpoint => checkpoint.elapsed?.length || checkpoint.clocks?.length || checkpoint.plan?.length)
+      .map(checkpoint => ({
+        id: checkpoint.id,
+        elapsed: checkpoint.elapsed || [],
+        clocks: checkpoint.clocks || [],
+        plan: checkpoint.plan || []
+      })),
+    nutrition: race.nutrition || null,
+    reminders: race.reminders || null,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function applyPersonalPlan(race, plan) {
+  if (!plan) return race;
+  const privateCheckpoints = new Map(
+    (Array.isArray(plan.checkpoints) ? plan.checkpoints : [])
+      .filter(checkpoint => checkpoint && typeof checkpoint.id === "string")
+      .map(checkpoint => [checkpoint.id, checkpoint])
+  );
+  return {
+    ...race,
+    scenarios: Array.isArray(plan.scenarios) ? plan.scenarios : [],
+    defaultScenario: plan.defaultScenario ?? 0,
+    checkpoints: (race.checkpoints || []).map(checkpoint => ({
+      ...checkpoint,
+      ...(privateCheckpoints.get(checkpoint.id) || {})
+    })),
+    nutrition: plan.nutrition && typeof plan.nutrition === "object" ? plan.nutrition : null,
+    reminders: plan.reminders && typeof plan.reminders === "object" ? plan.reminders : null
+  };
+}
+
+function renderPersonalPlanControls(race, plan = null, storageError = null) {
+  const section = makeElement("section", "section personal-plan-tools");
+  addText(section, "h2", "", "Plan personnel");
+  const status = makeElement("p", "sub personal-plan-status");
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+
+  if (plan) {
+    status.textContent = "Ton plan personnel est enregistré dans le stockage local de cet appareil.";
+    section.append(status);
+    return section;
+  }
+
+  if (storageError) {
+    status.textContent = "Le stockage local est indisponible. Le plan public reste affiché, mais sa copie privée n’a pas pu être vérifiée.";
+    section.append(status);
+    return section;
+  }
+
+  if (!hasLegacyPersonalPlan(race)) {
+    status.textContent = "Aucun plan personnel n’est enregistré ici. Tu peux en récupérer un en restaurant une sauvegarde depuis l’accueil.";
+    section.append(status);
+    return section;
+  }
+
+  status.textContent = "Enregistre une copie privée sur cet appareil. Les données encore présentes dans le fichier public ne seront retirées qu’après vérification de cette copie.";
+  const button = makeElement("button", "personal-plan-copy", "Enregistrer mon plan sur cet appareil");
+  button.type = "button";
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    status.textContent = "Enregistrement du plan sur cet appareil…";
+    try {
+      const planToSave = personalPlanFromRace(race);
+      await personalData.repository.create("racePlans", planToSave);
+      renderRace(race, planToSave);
+    } catch (error) {
+      console.error("Échec de l’enregistrement du plan personnel Mallorca.", error);
+      status.textContent = error.name === "ConstraintError"
+        ? "Un plan est déjà enregistré sur cet appareil. Actualise la fiche pour l’afficher sans le remplacer."
+        : "Enregistrement impossible. Vérifie l’espace disponible et réessaie.";
+      button.disabled = false;
+    }
+  });
+  section.append(status, button);
+  return section;
 }
 
 async function loadElevation(race) {
@@ -635,7 +736,16 @@ async function loadRace() {
     if (!entry) throw new Error(`Course inconnue : ${raceId}.`);
     const raceResponse = await fetch(new URL(entry.data, siteRoot));
     if (!raceResponse.ok) throw new Error(`Données de course indisponibles (${raceResponse.status}).`);
-    renderRace(await raceResponse.json());
+    const race = await raceResponse.json();
+    let personalPlan = null;
+    let storageError = null;
+    try {
+      personalPlan = await personalData.repository.get("racePlans", race.id);
+    } catch (error) {
+      storageError = error;
+      console.error("Impossible de lire le plan personnel sur cet appareil.", error);
+    }
+    renderRace(race, personalPlan, storageError);
   } catch (error) {
     showError("Vérifie ta connexion, puis réessaie depuis le calendrier.", error);
   }

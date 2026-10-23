@@ -14,6 +14,12 @@ Le modèle générique est `races/race.html` avec son script `races/race.js`. Le
 
 Les icônes du site sont rangées dans `icon/`.
 
+## Données personnelles sur l’appareil
+
+Depuis la fiche Mallorca, utilise **Enregistrer mon plan sur cet appareil** pour copier le plan dans le stockage local du navigateur. Vérifie ensuite qu’il reste affiché après fermeture/réouverture de l’application et télécharge une sauvegarde depuis l’accueil avant que les champs personnels soient retirés du JSON public.
+
+Les sauvegardes sont des fichiers JSON. La restauration depuis l’accueil remplace les données Alterra de l’appareil après confirmation. Les données locales ne sont pas synchronisées automatiquement entre appareils ; conserve le fichier de sauvegarde dans un endroit sûr.
+
 ## Documentation du projet
 
 - [Plan de développement](./plan.md)

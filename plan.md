@@ -1,7 +1,7 @@
 # Plan de développement d’Alterra
 
 **Mis à jour le :** 22 octobre 2026  
-**État général :** cadrage validé ; développement des fonctionnalités personnelles à commencer.
+**État général :** cadrage validé ; fondation locale des données personnelles en cours.
 
 ## Vision
 
@@ -83,16 +83,16 @@ Voir l’[architecture validée](./architecture.md).
 
 ### Étape 3 — Stockage personnel sur l’appareil
 
-**Statut :** à faire
+**Statut :** en cours
 
-**Prochaine étape :** implémenter IndexedDB derrière l’interface de repository, puis ajouter sauvegarde/restauration avant de brancher les formulaires.
+**Prochaine étape :** déployer cette version, copier le plan Mallorca depuis la fiche sur le téléphone, vérifier sa persistance et son export, puis retirer les champs personnels du JSON public.
 
-- Implémenter IndexedDB pour enregistrer les données personnelles dans le navigateur.
+- [x] Implémenter IndexedDB pour enregistrer les données personnelles dans le navigateur.
 - Permettre de consulter et modifier ces données hors ligne sur l’appareil.
-- Ajouter sur l’accueil des actions visibles pour sauvegarder toutes les données dans un fichier et importer/restaurer une sauvegarde depuis l’appareil (notamment via l’app Fichiers sur iPhone).
-- Inclure dans cette sauvegarde les informations personnelles Mallorca déplacées vers les données privées.
-- Afficher clairement qu’à ce stade les appareils ne se synchronisent pas automatiquement.
-- Déplacer le plan personnel Mallorca depuis les données publiques vers les données privées locales.
+- [x] Ajouter sur l’accueil des actions visibles pour sauvegarder toutes les données dans un fichier et importer/restaurer une sauvegarde depuis l’appareil (notamment via l’app Fichiers sur iPhone).
+- [x] Inclure dans cette sauvegarde les informations personnelles Mallorca déplacées vers les données privées.
+- [x] Afficher clairement qu’à ce stade les appareils ne se synchronisent pas automatiquement.
+- [x] Ajouter un transfert volontaire du plan Mallorca vers le stockage privé local ; effectuer et vérifier le transfert sur le téléphone avant de retirer les données du JSON public.
 
 **Validation :** les données survivent à la fermeture et au redémarrage de l’application ; un export peut être restauré ; les fonctions principales sont utilisables hors ligne.
 
