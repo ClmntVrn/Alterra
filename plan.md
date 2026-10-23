@@ -99,9 +99,12 @@ L’application démarre désormais sans données de course ; l’import d’une
 
 ### Étape 4 — Entraînements, courses et activités
 
-**Statut :** à faire
+**Statut :** en cours
 
-- Ajouter, consulter, modifier, supprimer et marquer comme réalisée une séance planifiée depuis le téléphone.
+- [x] Ajouter une séance depuis une journée du calendrier, avec type, heure au format 24 h facultative, case réalisé, objectifs et notes.
+- [x] Marquer une séance comme réalisée avec une case à cocher sans effacer les objectifs prévus ; permettre de la remettre à faire.
+- [x] Supprimer une séance depuis sa carte dans le détail du jour, avec confirmation.
+- Consulter et modifier une séance planifiée depuis le téléphone.
 - Gérer les courses de l’utilisateur sans confondre ces événements avec les courses de référence du catalogue.
 - Permettre la saisie manuelle d’une activité réalisée : date, durée, distance, dénivelé, notes et effort ressenti.
 - Prévoir des états clairement distincts (prévu, réalisé via Garmin, réalisé manuellement, à vérifier, annulé) et permettre de renseigner les valeurs réellement effectuées sans perdre les objectifs prévus.

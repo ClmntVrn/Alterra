@@ -15,7 +15,7 @@ const importInput = document.getElementById("personalDataFile");
 const status = document.getElementById("personalDataStatus");
 const personalData = createPersonalDataStore();
 let raceCatalogPromise = loadRaceCatalog(personalData);
-const refreshCalendar = initializeCalendar(raceCatalogPromise);
+const refreshCalendar = initializeCalendar(raceCatalogPromise, personalData.repository);
 
 function showPersonalDataStatus(message, isError = false) {
   status.textContent = message;
@@ -58,7 +58,7 @@ importInput.addEventListener("change", async () => {
     }
     await personalData.restore(data);
     raceCatalogPromise = loadRaceCatalog(personalData);
-    refreshCalendar(await raceCatalogPromise);
+    await refreshCalendar(await raceCatalogPromise);
     showPersonalDataStatus("Base complète restaurée sur cet appareil.");
   } catch (error) {
     console.error("Échec de la restauration des données personnelles.", error);

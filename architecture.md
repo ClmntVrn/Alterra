@@ -93,6 +93,9 @@ Les informations personnelles propres à Mallorca — objectif de temps, scénar
 - L’accueil conserve le calendrier mensuel actuel, son titre et son court descriptif.
 - Les repères d’une journée distinguent entraînement/course et prévu/réalisé ; ils ne reposent pas uniquement sur la couleur.
 - Toucher une journée ouvre ses séances prévues, activités réelles et courses.
+- En vue journalière, les flèches encadrent la date pour passer au jour précédent ou suivant ; une icône calendrier, séparée à droite, revient au mois correspondant à la date affichée.
+- Une séance planifiée peut être ajoutée depuis le jour choisi, avec une heure facultative au format 24 h, et marquée comme réalisée sans effacer ses objectifs prévus. Les éléments d’une même journée sont triés par heure ; ceux sans heure viennent ensuite. Le statut prévu/réalisé se change avec une case à cocher, et les séances réalisées ne sont pas supprimables.
+- Une séance peut être supprimée depuis sa carte dans le détail du jour après confirmation.
 - La séance prévue reste consultable après réalisation.
 - Le tableau de bord propose les indicateurs distance, durée, dénivelé positif et nombre de séances sur les 12 dernières semaines, avec sélection des valeurs prévues ou réalisées.
 - Les règles de calcul sont isolées dans des fonctions métier sans dépendance à l’interface ou à IndexedDB, afin de pouvoir les tester avec des données déterministes.
