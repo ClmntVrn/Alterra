@@ -104,14 +104,14 @@ L’application démarre désormais sans données de course ; l’import d’une
 - [x] Ajouter une séance depuis une journée du calendrier, avec type, heure au format 24 h facultative, case réalisé, objectifs et notes.
 - [x] Marquer une séance comme réalisée avec une case à cocher sans effacer les objectifs prévus ; permettre de la remettre à faire.
 - [x] Supprimer une séance depuis sa carte dans le détail du jour, avec confirmation.
-- Consulter et modifier une séance planifiée depuis le téléphone.
+- [x] Modifier une séance prévue ou réalisée directement dans sa fiche ; les valeurs réelles remplacent les objectifs, avec allure calculée et météo au choix.
 - Gérer les courses de l’utilisateur sans confondre ces événements avec les courses de référence du catalogue.
 - Permettre la saisie manuelle d’une activité réalisée : date, durée, distance, dénivelé, notes et effort ressenti.
-- Prévoir des états clairement distincts (prévu, réalisé via Garmin, réalisé manuellement, à vérifier, annulé) et permettre de renseigner les valeurs réellement effectuées sans perdre les objectifs prévus.
+- Prévoir des états clairement distincts (prévu, réalisé via Garmin, réalisé manuellement, à vérifier, annulé) ; pour une saisie manuelle simple, modifier directement la fiche réalisée avec les valeurs effectives.
 - Reprendre la décision sur le stockage des traces GPS, puis décider si un import local de fichiers d’activité est souhaité. Si oui, commencer par GPX et évaluer FIT/TCX séparément.
 - Conserver la séance prévue dans le calendrier comme référence, même après l’import d’une activité réalisée.
 
-**Validation :** un utilisateur peut gérer son calendrier sportif sans ordinateur, marquer une séance comme réalisée, comparer son objectif à ses résultats et corriger les données importées ou saisies.
+**Validation :** un utilisateur peut gérer son calendrier sportif sans ordinateur, marquer une séance comme réalisée, puis modifier simplement les valeurs pour refléter ce qui a été fait.
 
 ### Étape 5 — Nutrition et équipement
 

@@ -9,6 +9,7 @@ const trainingForm = document.getElementById("trainingForm");
 const trainingFormTitle = document.getElementById("trainingFormTitle");
 const trainingFormStatus = document.getElementById("trainingFormStatus");
 const cancelTrainingButton = document.getElementById("cancelTrainingButton");
+const trainingPace = document.getElementById("trainingPace");
 const previousMonthButton = document.getElementById("previousMonth");
 const nextMonthButton = document.getElementById("nextMonth");
 const previousDayButton = document.getElementById("previousDay");
@@ -18,6 +19,7 @@ const currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1
 let eventsByDate = {};
 let selectedDate = null;
 let repository = null;
+let editingSession = null;
 
 const monthFormatter = new Intl.DateTimeFormat("fr-FR", {
   month: "long",
@@ -34,6 +36,14 @@ const trainingTypes = Object.freeze({
   running: "Course à pied",
   strength: "Renforcement musculaire",
   cycling: "Vélo"
+});
+const weatherConditions = Object.freeze({
+  sunny: "Ensoleillé",
+  cloudy: "Nuageux",
+  rain: "Pluie",
+  snow: "Neige",
+  wind: "Vent",
+  storm: "Orage"
 });
 
 function dateKey(date) {
@@ -103,14 +113,26 @@ function formatTrainingTargets(session) {
     details.push(`${Number(session.distanceKm).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} km`);
   }
   if (Number.isFinite(session.durationMinutes)) {
-    const hours = Math.floor(session.durationMinutes / 60);
-    const minutes = session.durationMinutes % 60;
+    const totalMinutes = Math.round(session.durationMinutes);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
     details.push(hours ? `${hours} h${minutes ? ` ${minutes}` : ""}` : `${minutes} min`);
   }
   if (Number.isFinite(session.ascentMeters)) {
     details.push(`${Number(session.ascentMeters).toLocaleString("fr-FR")} m D+`);
   }
   return details.join(" · ");
+}
+
+function formatPace(distanceKm, durationMinutes) {
+  if (!Number.isFinite(distanceKm) || distanceKm <= 0 ||
+      !Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+    return "";
+  }
+  const secondsPerKm = Math.round(durationMinutes * 60 / distanceKm);
+  const paceMinutes = Math.floor(secondsPerKm / 60);
+  const paceSeconds = String(secondsPerKm % 60).padStart(2, "0");
+  return `${paceMinutes}:${paceSeconds} min/km`;
 }
 
 function renderRaceEvent(race, date) {
@@ -179,10 +201,12 @@ function renderTrainingEvent(session) {
   summary.textContent = formatTrainingSummary(session).join(" · ");
   card.append(summary);
   const targets = formatTrainingTargets(session);
-  if (targets) {
+  const pace = formatPace(session.distanceKm, session.durationMinutes);
+  const details = [targets, session.status === "completed" ? pace : ""].filter(Boolean).join(" · ");
+  if (details) {
     const targetDetails = document.createElement("p");
     targetDetails.className = "calendar-event-description calendar-training-targets";
-    targetDetails.textContent = targets;
+    targetDetails.textContent = details;
     card.append(targetDetails);
   }
   if (session.notes) {
@@ -191,6 +215,8 @@ function renderTrainingEvent(session) {
     notes.textContent = session.notes;
     card.append(notes);
   }
+  const actions = document.createElement("div");
+  actions.className = "calendar-session-actions";
   const statusLabel = document.createElement("label");
   statusLabel.className = "calendar-session-toggle";
   const statusCheckbox = document.createElement("input");
@@ -201,7 +227,7 @@ function renderTrainingEvent(session) {
     `${statusCheckbox.checked ? "Remettre à faire" : "Marquer comme réalisée"} : ${session.title}`
   );
   const statusText = document.createElement("span");
-  statusText.textContent = "Séance réalisée";
+  statusText.textContent = "Réalisée";
   statusLabel.append(statusCheckbox, statusText);
   statusCheckbox.addEventListener("change", async () => {
     statusCheckbox.disabled = true;
@@ -223,7 +249,37 @@ function renderTrainingEvent(session) {
       calendarHint.hidden = false;
     }
   });
-  card.append(statusLabel);
+  const detailsButton = document.createElement("button");
+  detailsButton.className = "calendar-session-details";
+  detailsButton.type = "button";
+  const detailsAreOpen = editingSession?.id === session.id;
+  detailsButton.title = detailsAreOpen ? "Fermer les détails" : "Détails et modification";
+  detailsButton.setAttribute("aria-expanded", String(detailsAreOpen));
+  detailsButton.setAttribute("aria-label", detailsAreOpen
+    ? `Fermer les détails de la séance : ${session.title}`
+    : `Détails de la séance : ${session.title}. Ouvrir pour modifier.`);
+  detailsButton.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>';
+  detailsButton.addEventListener("click", () => {
+    if (editingSession?.id === session.id) {
+      closeTrainingForm();
+      detailsButton.title = "Détails et modification";
+      detailsButton.setAttribute("aria-expanded", "false");
+      detailsButton.setAttribute(
+        "aria-label",
+        `Détails de la séance : ${session.title}. Ouvrir pour modifier.`
+      );
+      return;
+    }
+    openTrainingForm(session);
+    detailsButton.title = "Fermer les détails";
+    detailsButton.setAttribute("aria-expanded", "true");
+    detailsButton.setAttribute(
+      "aria-label",
+      `Fermer les détails de la séance : ${session.title}`
+    );
+  });
+  actions.append(statusLabel, detailsButton);
+  card.append(actions);
   return card;
 }
 
@@ -289,7 +345,33 @@ function closeTrainingForm() {
   trainingForm.hidden = true;
   trainingFormStatus.textContent = "";
   delete trainingFormStatus.dataset.state;
+  editingSession = null;
   addTrainingButton.hidden = false;
+  trainingPace.textContent = "—";
+}
+
+function updateTrainingPace() {
+  const distanceKm = Number(trainingForm.elements.namedItem("distanceKm").value);
+  const durationMinutes = Number(trainingForm.elements.namedItem("durationMinutes").value);
+  trainingPace.textContent = formatPace(distanceKm, durationMinutes) || "—";
+}
+
+function openTrainingForm(session = null) {
+  closeTrainingForm();
+  editingSession = session ? { ...session } : null;
+  trainingFormTitle.textContent = session
+    ? `Modifier · ${session.title}`
+    : `Entraînement du ${eventDateFormatter.format(selectedDate)}`;
+  if (session) {
+    for (const field of ["title", "type", "time", "distanceKm", "durationMinutes", "ascentMeters", "weather", "notes"]) {
+      trainingForm.elements.namedItem(field).value = session[field] ?? "";
+    }
+    trainingForm.elements.namedItem("completed").checked = session.status === "completed";
+  }
+  updateTrainingPace();
+  trainingForm.hidden = false;
+  addTrainingButton.hidden = true;
+  trainingForm.querySelector('[name="title"]').focus();
 }
 
 async function refreshEvents() {
@@ -397,33 +479,45 @@ export function initializeCalendar(racesPromise, personalRepository) {
   nextDayButton.addEventListener("click", () => moveSelectedDay(1));
   addTrainingButton.addEventListener("click", () => {
     if (!selectedDate) return;
-    trainingFormTitle.textContent = `Entraînement du ${eventDateFormatter.format(selectedDate)}`;
-    trainingForm.hidden = false;
-    addTrainingButton.hidden = true;
-    trainingForm.querySelector('[name="title"]').focus();
+    openTrainingForm();
   });
   cancelTrainingButton.addEventListener("click", closeTrainingForm);
+  trainingForm.elements.namedItem("distanceKm").addEventListener("input", updateTrainingPace);
+  trainingForm.elements.namedItem("durationMinutes").addEventListener("input", updateTrainingPace);
   trainingForm.addEventListener("submit", async event => {
     event.preventDefault();
     if (!selectedDate || !trainingForm.reportValidity()) return;
     const formData = new FormData(trainingForm);
     const session = {
-      id: crypto.randomUUID(),
+      ...(editingSession || {}),
+      id: editingSession?.id || crypto.randomUUID(),
       date: dateKey(selectedDate),
       type: String(formData.get("type")),
       title: String(formData.get("title")).trim(),
       status: formData.get("completed") === "on" ? "completed" : "planned",
-      createdAt: new Date().toISOString()
+      createdAt: editingSession?.createdAt || new Date().toISOString()
     };
-    if (session.status === "completed") session.completedAt = new Date().toISOString();
+    delete session.eventType;
+    if (session.status === "completed") {
+      session.completedAt = editingSession?.completedAt || new Date().toISOString();
+    } else {
+      delete session.completedAt;
+    }
     const time = String(formData.get("time")).trim();
     if (time) session.time = time;
+    else delete session.time;
     for (const field of ["distanceKm", "durationMinutes", "ascentMeters"]) {
       const value = String(formData.get(field)).trim();
       if (value) session[field] = Number(value);
+      else delete session[field];
     }
+    const weather = String(formData.get("weather"));
+    if (weather) session.weather = weather;
+    else delete session.weather;
     const notes = String(formData.get("notes")).trim();
     if (notes) session.notes = notes;
+    else delete session.notes;
+    const isEditing = Boolean(editingSession);
     const saveButton = trainingForm.querySelector('[type="submit"]');
     saveButton.disabled = true;
     trainingFormStatus.textContent = "Enregistrement…";
@@ -433,8 +527,10 @@ export function initializeCalendar(racesPromise, personalRepository) {
       closeTrainingForm();
       await refreshEvents();
     } catch (error) {
-      console.error("Impossible d’enregistrer l’entraînement.", error);
-      trainingFormStatus.textContent = "L’enregistrement a échoué. Vérifie le stockage de cet appareil.";
+      console.error(isEditing ? "Impossible de modifier l’entraînement." : "Impossible d’enregistrer l’entraînement.", error);
+      trainingFormStatus.textContent = isEditing
+        ? "La modification a échoué. Vérifie le stockage de cet appareil."
+        : "L’enregistrement a échoué. Vérifie le stockage de cet appareil.";
       trainingFormStatus.dataset.state = "error";
     } finally {
       saveButton.disabled = false;
