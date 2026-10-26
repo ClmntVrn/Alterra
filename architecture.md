@@ -60,7 +60,7 @@ Collections IndexedDB (clé `id`, identifiant stable généré par `crypto.rando
 | `nutritionProducts`, `equipment` | Prévues pour l’étape 5 | — |
 | `settings` | Réglages : catalogue initialisé, date de la dernière sauvegarde | Accueil |
 
-Une sortie réalisée est le même enregistrement que la sortie prévue, mis à jour avec les valeurs réelles : le prévu n’est pas conservé après réalisation. Champs d’une sortie : `date`, `endDate` facultative, `type`, `title`, `status`, `time`, `distanceKm`, `durationMinutes`, `ascentMeters`, `weather`, `notes`, `createdAt`, `completedAt`.
+Une sortie réalisée est le même enregistrement que la sortie prévue, mis à jour avec les valeurs réelles : le prévu n’est pas conservé après réalisation. Champs d’une sortie : `date`, `endDate` (calculée depuis `time` et `durationMinutes`, absente si la sortie tient sur un jour), `type`, `title`, `status`, `time`, `distanceKm`, `durationMinutes`, `ascentMeters`, `notes`, `createdAt`, `completedAt`, et pour une sortie réalisée `perceivedEffort` (1–10), `heartRateAvg`, `heartRateMax` (bpm) et `weather`. L’état « à vérifier » n’est pas stocké : il est déduit à l’affichage d’une sortie prévue dont la date est passée.
 
 Les états de progression des fiches (ravitos cochés, matériel) sont dans `localStorage` sous des clés `alterra-*` et sont inclus dans la sauvegarde.
 

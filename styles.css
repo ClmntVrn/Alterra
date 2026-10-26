@@ -1252,42 +1252,131 @@ button {
   resize: vertical;
 }
 
-.training-pace {
+.training-computed {
   margin: -4px 0 0;
   color: var(--color-slate);
   font-size: 13px;
   font-weight: 750;
 }
 
+.training-form-row,
 .training-form-measures {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.training-duration-field {
-  display: grid;
-  align-content: start;
-  gap: 5px;
+.training-form-measures {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+}
+
+.training-form-row input,
+.training-form-measures input {
+  min-width: 0;
+}
+
+.training-choice {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.training-choice legend {
+  margin-bottom: 6px;
+  padding: 0;
   color: var(--color-charcoal);
   font-size: 13px;
   font-weight: 700;
 }
 
-.training-duration-inputs {
+.training-choice-hint {
+  margin-left: 6px;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.training-choice-options {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
 
-.training-duration-inputs label {
-  gap: 4px;
-  font-size: 11px;
+.training-type-options {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.training-duration-inputs input {
-  padding-right: 6px;
-  padding-left: 6px;
+.training-effort-options {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.training-form .training-chip {
+  position: relative;
+  display: block;
+}
+
+.training-form .training-chip input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.training-chip span {
+  display: grid;
+  min-height: 44px;
+  padding: 6px 4px;
+  place-items: center;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: #f7f8f8;
+  color: var(--color-slate);
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.training-chip input:checked + span {
+  border-color: #e6b486;
+  background: #e6b486;
+  color: var(--color-charcoal);
+}
+
+.training-chip input:focus-visible + span {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.training-completed-fields {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #f0d2bd;
+  border-radius: 12px;
+  background: var(--color-accent-soft);
+}
+
+.training-completed-fields[hidden] {
+  display: none;
+}
+
+.calendar-training-item[data-state="toCheck"] .calendar-event-category {
+  color: #8a5a00;
+}
+
+.calendar-training-dot.is-planned {
+  background: var(--color-paper);
+  box-shadow: inset 0 0 0 2px var(--color-charcoal), 0 0 0 3px rgb(69 79 88 / 14%);
+}
+
+.calendar-training-dot.is-toCheck {
+  background: var(--color-warning);
+  box-shadow: inset 0 0 0 2px #b7791f, 0 0 0 3px rgb(183 121 31 / 18%);
 }
 
 .training-form-actions {
@@ -2098,8 +2187,8 @@ button {
     font-size: 14px;
   }
 
-  .training-form-measures {
-    grid-template-columns: minmax(0, 1fr);
+  .training-form-measures label {
+    font-size: 12px;
   }
 }
 

@@ -16,7 +16,8 @@ const trainingForm = document.getElementById("trainingForm");
 const trainingFormTitle = document.getElementById("trainingFormTitle");
 const trainingFormStatus = document.getElementById("trainingFormStatus");
 const cancelTrainingButton = document.getElementById("cancelTrainingButton");
-const trainingPace = document.getElementById("trainingPace");
+const trainingComputed = document.getElementById("trainingComputed");
+const trainingCompletedFields = document.getElementById("trainingCompletedFields");
 const previousMonthButton = document.getElementById("previousMonth");
 const nextMonthButton = document.getElementById("nextMonth");
 const monthPickerToggle = document.getElementById("calendarMonthPickerToggle");
@@ -37,6 +38,7 @@ let selectedDate = null;
 let repository = null;
 let editingSession = null;
 let editingPersonalRace = null;
+let selectedEffort = "";
 let monthYearPicker = null;
 let sessionsUpdated = () => {};
 
@@ -48,6 +50,17 @@ const eventDateFormatter = new Intl.DateTimeFormat("fr-FR", {
   day: "numeric",
   month: "long",
   year: "numeric"
+});
+const shortDateFormatter = new Intl.DateTimeFormat("fr-FR", {
+  weekday: "short",
+  day: "numeric",
+  month: "short"
+});
+const maxDurationMinutes = 9999 * 60 + 59;
+const sessionStateLabels = Object.freeze({
+  planned: "prévu",
+  completed: "réalisé",
+  toCheck: "à vérifier"
 });
 
 const trainingTypes = Object.freeze({
@@ -100,6 +113,90 @@ function parseCalendarDate(value) {
     date.getDate() === Number(match[3])
     ? date
     : null;
+}
+
+// Accepte 45 (minutes), 130 ou 1:30 ou 1h30 (1 h 30), 1020 (10 h 20) et 90min.
+function parseDurationInput(value) {
+  const text = String(value ?? "").trim().toLowerCase().replace(/\s+/g, "");
+  if (!text) return null;
+  let hours = 0;
+  let minutes;
+  let match;
+  if ((match = /^(\d{1,4})[:h](\d{1,2})?$/.exec(text))) {
+    hours = Number(match[1]);
+    minutes = Number(match[2] || 0);
+    if (minutes > 59) return NaN;
+  } else if ((match = /^(\d{1,4})(?:min|mn|m)$/.exec(text))) {
+    minutes = Number(match[1]);
+  } else if (/^\d{1,6}$/.test(text)) {
+    if (text.length <= 2) {
+      minutes = Number(text);
+    } else {
+      hours = Number(text.slice(0, -2));
+      minutes = Number(text.slice(-2));
+      if (minutes > 59) return NaN;
+    }
+  } else {
+    return NaN;
+  }
+  const total = hours * 60 + minutes;
+  return total > 0 && total <= maxDurationMinutes ? total : NaN;
+}
+
+function formatDurationInput(durationMinutes) {
+  const totalMinutes = Math.round(durationMinutes);
+  return `${Math.floor(totalMinutes / 60)}:${String(totalMinutes % 60).padStart(2, "0")}`;
+}
+
+function formatDurationText(durationMinutes) {
+  const totalMinutes = Math.round(durationMinutes);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return hours ? `${hours} h${minutes ? ` ${minutes}` : ""}` : `${minutes} min`;
+}
+
+// Retourne "" si vide, "HH:mm" si valide, null sinon. Accepte 9, 930, 9h30 et 09:30.
+function parseTimeInput(value) {
+  const text = String(value ?? "").trim().toLowerCase().replace(/\s+/g, "");
+  if (!text) return "";
+  const match = /^(\d{1,2})(?:[:h](\d{2})?)?$/.exec(text) || /^(\d{1,2})(\d{2})$/.exec(text);
+  if (!match) return null;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2] || 0);
+  if (hours > 23 || minutes > 59) return null;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
+function computeSessionEnd(date, time, durationMinutes) {
+  const start = parseCalendarDate(date);
+  if (!start || !Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+    return { endDate: date, endTime: null };
+  }
+  const [hours, minutes] = time ? time.split(":").map(Number) : [0, 0];
+  const startMinutes = hours * 60 + minutes;
+  const end = new Date(start);
+  end.setDate(end.getDate() + Math.floor((startMinutes + durationMinutes - 1) / 1440));
+  const endMinutes = Math.round(startMinutes + durationMinutes) % 1440;
+  return {
+    endDate: dateKey(end),
+    endTime: time
+      ? `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`
+      : null
+  };
+}
+
+function getSessionState(session) {
+  if (session.status === "completed") return "completed";
+  return (session.endDate || session.date) < dateKey(new Date()) ? "toCheck" : "planned";
+}
+
+function formatHeartRate(session) {
+  const average = Number.isFinite(session.heartRateAvg) ? session.heartRateAvg : null;
+  const maximum = Number.isFinite(session.heartRateMax) ? session.heartRateMax : null;
+  if (average && maximum) return `FC moy. ${average} · max ${maximum} bpm`;
+  if (average) return `FC moy. ${average} bpm`;
+  if (maximum) return `FC max ${maximum} bpm`;
+  return "";
 }
 
 function showLoadedEvents(races, personalRaces, sessions) {
@@ -203,10 +300,7 @@ function formatTrainingTargets(session) {
     details.push(`${Number(session.distanceKm).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} km`);
   }
   if (Number.isFinite(session.durationMinutes)) {
-    const totalMinutes = Math.round(session.durationMinutes);
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    details.push(hours ? `${hours} h${minutes ? ` ${minutes}` : ""}` : `${minutes} min`);
+    details.push(formatDurationText(session.durationMinutes));
   }
   if (Number.isFinite(session.ascentMeters)) {
     details.push(`${Number(session.ascentMeters).toLocaleString("fr-FR")} m D+`);
@@ -298,11 +392,13 @@ function renderPersonalRaceEvent(race) {
 function renderTrainingEvent(session) {
   const card = document.createElement("article");
   card.className = "calendar-item calendar-training-item";
+  const state = getSessionState(session);
+  card.dataset.state = state;
   const header = document.createElement("div");
   header.className = "calendar-training-header";
   const category = document.createElement("span");
   category.className = "calendar-event-category";
-  category.textContent = session.status === "completed" ? "ENTRAÎNEMENT · RÉALISÉ" : "ENTRAÎNEMENT · PRÉVU";
+  category.textContent = `ENTRAÎNEMENT · ${sessionStateLabels[state].toLocaleUpperCase("fr-FR")}`;
   header.append(category);
   if (session.status === "planned") {
     const deleteButton = document.createElement("button");
@@ -348,6 +444,18 @@ function renderTrainingEvent(session) {
     targetDetails.className = "calendar-event-description calendar-training-targets";
     targetDetails.textContent = details;
     card.append(targetDetails);
+  }
+  if (session.status === "completed") {
+    const feeling = [
+      Number.isFinite(session.perceivedEffort) ? `Ressenti ${session.perceivedEffort}/10` : "",
+      formatHeartRate(session)
+    ].filter(Boolean).join(" · ");
+    if (feeling) {
+      const feelingDetails = document.createElement("p");
+      feelingDetails.className = "calendar-event-description calendar-training-targets";
+      feelingDetails.textContent = feeling;
+      card.append(feelingDetails);
+    }
   }
   if (session.notes) {
     const notes = document.createElement("p");
@@ -492,8 +600,15 @@ function closeTrainingForm() {
   trainingFormStatus.textContent = "";
   delete trainingFormStatus.dataset.state;
   editingSession = null;
+  selectedEffort = "";
   addTrainingButton.hidden = false;
-  trainingPace.textContent = "—";
+  trainingComputed.textContent = "";
+  trainingComputed.hidden = true;
+  trainingCompletedFields.hidden = true;
+}
+
+function syncCompletedFields() {
+  trainingCompletedFields.hidden = !trainingForm.elements.namedItem("completed").checked;
 }
 
 function closeRaceEventForm() {
@@ -516,26 +631,26 @@ function updateDateRangeValidity(form) {
   endField.setCustomValidity(rangeIsValid ? "" : "La date de fin doit être égale ou postérieure à la date de début.");
 }
 
-function updateTrainingPace() {
-  updateDateRangeValidity(trainingForm);
-  const durationMinutesField = trainingForm.elements.namedItem("durationMinutes");
-  const durationHoursField = document.querySelector("#durationHours");
-  const durationRemainderField = document.querySelector("#durationRemainderMinutes");
-  const hoursValue = durationHoursField.value.trim();
-  const minutesValue = durationRemainderField.value.trim();
-  const hours = hoursValue ? Number(hoursValue) : 0;
-  const minutes = minutesValue ? Number(minutesValue) : 0;
-  const isDurationInRange = Number.isFinite(hours) && Number.isFinite(minutes) &&
-    hours <= 9999 && minutes <= 59.9;
-  durationHoursField.setCustomValidity(
-    isDurationInRange ? "" : "La durée ne peut pas dépasser 9 999 h."
+function updateTrainingComputed() {
+  const timeField = trainingForm.elements.namedItem("time");
+  const time = parseTimeInput(timeField.value);
+  timeField.setCustomValidity(
+    time === null ? "Saisis une heure entre 00:00 et 23:59, par exemple 930 pour 09:30." : ""
   );
-  durationRemainderField.setCustomValidity(
-    isDurationInRange ? "" : "Saisis entre 0 et 59,9 minutes (9 999 h maximum au total)."
+  const durationField = trainingForm.elements.namedItem("duration");
+  const durationMinutes = parseDurationInput(durationField.value);
+  durationField.setCustomValidity(Number.isNaN(durationMinutes)
+    ? "Saisis une durée comme 45 (minutes), 130 (1:30) ou 1020 (10:20)."
+    : "");
+
+  const heartRateAvgField = trainingForm.elements.namedItem("heartRateAvg");
+  const heartRateMaxField = trainingForm.elements.namedItem("heartRateMax");
+  heartRateMaxField.setCustomValidity(
+    heartRateAvgField.value && heartRateMaxField.value &&
+      Number(heartRateMaxField.value) < Number(heartRateAvgField.value)
+      ? "La FC max doit être supérieure ou égale à la FC moyenne."
+      : ""
   );
-  durationMinutesField.value = hoursValue || minutesValue
-    ? String(hours * 60 + minutes)
-    : "";
 
   const distanceField = trainingForm.elements.namedItem("distanceKm");
   const distanceValue = distanceField.value.trim();
@@ -546,8 +661,21 @@ function updateTrainingPace() {
   distanceField.setCustomValidity(
     isInRange ? "" : "Saisis une distance entre 0,1 et 1 000 km, avec au maximum deux décimales."
   );
-  const durationMinutes = Number(durationMinutesField.value);
-  trainingPace.textContent = formatPace(distanceKm, durationMinutes) || "—";
+  const computed = [];
+  if (durationMinutes) computed.push(formatDurationText(durationMinutes));
+  const pace = formatPace(distanceKm, durationMinutes);
+  if (pace) computed.push(`Allure ${pace}`);
+  const date = trainingForm.elements.namedItem("date").value;
+  if (durationMinutes && time !== null) {
+    const { endDate, endTime } = computeSessionEnd(date, time, durationMinutes);
+    const endDay = parseCalendarDate(endDate);
+    if (endDate === date && endTime) computed.push(`Fin ${endTime}`);
+    else if (endDate !== date && endDay) {
+      computed.push(`Fin le ${shortDateFormatter.format(endDay)}${endTime ? ` à ${endTime}` : ""}`);
+    }
+  }
+  trainingComputed.textContent = computed.join(" · ");
+  trainingComputed.hidden = !computed.length;
 }
 
 function parseLocalizedDecimal(value) {
@@ -563,22 +691,27 @@ function openTrainingForm(session = null) {
     ? `Modifier · ${session.title}`
     : `Entraînement du ${eventDateFormatter.format(selectedDate)}`;
   trainingForm.elements.namedItem("date").value = session?.date || dateKey(selectedDate);
-  trainingForm.elements.namedItem("endDate").value = session?.endDate || session?.date || dateKey(selectedDate);
   if (session) {
-    for (const field of ["title", "type", "time", "distanceKm", "ascentMeters", "weather", "notes"]) {
+    for (const field of ["title", "type", "time", "ascentMeters", "heartRateAvg", "heartRateMax", "weather", "notes"]) {
       trainingForm.elements.namedItem(field).value = session[field] ?? "";
     }
+    if (Number.isFinite(session.distanceKm)) {
+      trainingForm.elements.namedItem("distanceKm").value = String(session.distanceKm).replace(".", ",");
+    }
     if (Number.isFinite(session.durationMinutes) && session.durationMinutes > 0) {
-      document.querySelector("#durationHours").value = Math.floor(session.durationMinutes / 60);
-      document.querySelector("#durationRemainderMinutes").value =
-        String(Math.round((session.durationMinutes % 60) * 10) / 10);
+      trainingForm.elements.namedItem("duration").value = formatDurationInput(session.durationMinutes);
+    }
+    if (Number.isFinite(session.perceivedEffort)) {
+      trainingForm.elements.namedItem("perceivedEffort").value = String(session.perceivedEffort);
+      selectedEffort = String(session.perceivedEffort);
     }
     trainingForm.elements.namedItem("completed").checked = session.status === "completed";
   }
-  updateTrainingPace();
+  syncCompletedFields();
+  updateTrainingComputed();
   trainingForm.hidden = false;
   addTrainingButton.hidden = true;
-  trainingForm.querySelector('[name="title"]').focus();
+  trainingForm.querySelector('[name="type"]:checked').focus();
 }
 
 function openRaceEventForm(race = null) {
@@ -622,11 +755,15 @@ function renderCalendar() {
     getEventLabel: event => {
       if (event.eventType === "race") return `Course : ${event.name}`;
       if (event.eventType === "personalRace") return `Course : ${event.name}`;
-      const status = event.status === "completed" ? "réalisé" : "prévu";
+      const status = sessionStateLabels[getSessionState(event)];
       const time = event.time ? ` à ${event.time}` : "";
       return `Entraînement ${status}${time} : ${event.title}`;
     },
-    getEventMarkerClass: event => event.eventType !== "race" ? "calendar-session-dot" : ""
+    getEventMarkerClass: event => {
+      if (event.eventType === "race") return "";
+      if (event.eventType === "personalRace") return "calendar-session-dot";
+      return `calendar-session-dot calendar-training-dot is-${getSessionState(event)}`;
+    }
   });
 }
 
@@ -699,26 +836,49 @@ export function initializeCalendar(racesPromise, personalRepository, onSessionsU
     }
   });
   cancelTrainingButton.addEventListener("click", closeTrainingForm);
-  trainingForm.elements.namedItem("distanceKm").addEventListener("input", updateTrainingPace);
-  trainingForm.elements.namedItem("date").addEventListener("input", updateTrainingPace);
-  trainingForm.elements.namedItem("endDate").addEventListener("input", updateTrainingPace);
-  document.querySelector("#durationHours").addEventListener("input", updateTrainingPace);
-  document.querySelector("#durationRemainderMinutes").addEventListener("input", updateTrainingPace);
+  trainingForm.addEventListener("input", updateTrainingComputed);
+  trainingForm.elements.namedItem("completed").addEventListener("change", syncCompletedFields);
+  for (const fieldName of ["time", "duration"]) {
+    const field = trainingForm.elements.namedItem(fieldName);
+    field.addEventListener("blur", () => {
+      if (fieldName === "time") {
+        const time = parseTimeInput(field.value);
+        if (time) field.value = time;
+      } else {
+        const durationMinutes = parseDurationInput(field.value);
+        if (durationMinutes) field.value = formatDurationInput(durationMinutes);
+      }
+      updateTrainingComputed();
+    });
+  }
+  for (const radio of trainingForm.elements.namedItem("perceivedEffort")) {
+    radio.addEventListener("click", () => {
+      if (radio.value === selectedEffort) {
+        radio.checked = false;
+        selectedEffort = "";
+      } else {
+        selectedEffort = radio.value;
+      }
+    });
+  }
   trainingForm.addEventListener("submit", async event => {
     event.preventDefault();
-    updateTrainingPace();
+    updateTrainingComputed();
     if (!selectedDate || !trainingForm.reportValidity()) return;
     const formData = new FormData(trainingForm);
+    const type = String(formData.get("type"));
+    const time = parseTimeInput(formData.get("time"));
+    const durationMinutes = parseDurationInput(formData.get("duration"));
     const session = {
       ...(editingSession || {}),
       id: editingSession?.id || crypto.randomUUID(),
       date: String(formData.get("date")),
-      type: String(formData.get("type")),
-      title: String(formData.get("title")).trim(),
+      type,
+      title: String(formData.get("title")).trim() || trainingTypes[type] || "Entraînement",
       status: formData.get("completed") === "on" ? "completed" : "planned",
       createdAt: editingSession?.createdAt || new Date().toISOString()
     };
-    const endDate = String(formData.get("endDate"));
+    const { endDate } = computeSessionEnd(session.date, time, durationMinutes);
     if (endDate > session.date) session.endDate = endDate;
     else delete session.endDate;
     delete session.eventType;
@@ -727,17 +887,23 @@ export function initializeCalendar(racesPromise, personalRepository, onSessionsU
     } else {
       delete session.completedAt;
     }
-    const time = String(formData.get("time")).trim();
     if (time) session.time = time;
     else delete session.time;
-    for (const field of ["distanceKm", "durationMinutes", "ascentMeters"]) {
-      const value = String(formData.get(field)).trim();
-      if (value) {
-        session[field] = field === "distanceKm" ? parseLocalizedDecimal(value) : Number(value);
-      }
+    if (durationMinutes) session.durationMinutes = durationMinutes;
+    else delete session.durationMinutes;
+    const distanceValue = String(formData.get("distanceKm")).trim();
+    if (distanceValue) session.distanceKm = parseLocalizedDecimal(distanceValue);
+    else delete session.distanceKm;
+    const ascentValue = String(formData.get("ascentMeters")).trim();
+    if (ascentValue) session.ascentMeters = Number(ascentValue);
+    else delete session.ascentMeters;
+    // Le ressenti, la FC et la météo ne concernent qu’une séance réalisée.
+    for (const field of ["perceivedEffort", "heartRateAvg", "heartRateMax"]) {
+      const value = session.status === "completed" ? String(formData.get(field) ?? "").trim() : "";
+      if (value) session[field] = Number(value);
       else delete session[field];
     }
-    const weather = String(formData.get("weather"));
+    const weather = session.status === "completed" ? String(formData.get("weather")) : "";
     if (weather) session.weather = weather;
     else delete session.weather;
     const notes = String(formData.get("notes")).trim();

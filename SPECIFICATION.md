@@ -7,12 +7,15 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 - L’accueil réunit les statistiques d’activité, le calendrier et les commandes de sauvegarde.
 - Le calendrier utilise les dates locales de l’appareil. Les flèches changent de mois ou de jour ; le titre du mois ouvre un sélecteur de mois et d’année.
 - Toucher une date ouvre sa journée et ses événements.
-- Depuis une journée, on peut créer une sortie/entraînement ou une course personnelle. Chaque événement a une date de début et une date de fin inclusives ; il apparaît chaque jour couvert, y compris lors d’un changement de mois ou d’année.
-- Les plages sont contrôlées : la fin doit être égale ou postérieure au début.
-- Une sortie comprend un nom, un type (trail, course à pied, renforcement ou vélo), une heure facultative, une distance facultative, une durée facultative, un D+, une météo et des notes. Elle peut être marquée comme réalisée. Les sorties peuvent être modifiées ; les sorties prévues peuvent être supprimées.
-- Une sortie réalisée porte les valeurs réellement effectuées : ses champs sont modifiés directement et l’objectif prévu n’est pas conservé.
-- La distance accepte le point ou la virgule décimale, de 0,1 à 1 000 km, avec deux décimales au maximum. La durée est saisie en heures et minutes (jusqu’à 9 999 h et 59,9 min) et conservée comme un nombre de minutes. L’allure moyenne est calculée lorsque distance et durée sont valides.
-- Une course personnelle comprend un nom et des dates ; elle peut être modifiée ou supprimée.
+- Depuis une journée, on peut créer une sortie/entraînement ou une course personnelle. Un événement sur plusieurs jours apparaît chaque jour couvert, y compris lors d’un changement de mois ou d’année.
+- Une sortie comprend un type (trail, course, renfo ou vélo, choisi d’un toucher), un nom facultatif (à défaut, le nom du type), une date, une heure facultative, une distance, une durée, un D+ et des notes. Elle n’a pas de date de fin à saisir : la fin est déduite de l’heure de début (minuit si absente) et de la durée, et une sortie qui dépasse minuit couvre les jours suivants.
+- Sous la mesure, le formulaire affiche en direct la durée, l’allure moyenne et l’heure de fin (avec la date si elle change de jour).
+- Saisie rapide : l’heure accepte 9, 930, 9h30 ou 09:30 ; la durée accepte 45 (minutes), 90 ou 90min (1:30), 130, 1h30 ou 1:30 (1 h 30) et 1020 (10 h 20). Les champs sont remis au format h:mm à la sortie du champ. La durée est conservée en minutes entières, jusqu’à 9 999 h 59.
+- La distance accepte le point ou la virgule décimale, de 0,1 à 1 000 km, avec deux décimales au maximum.
+- Cocher « Séance réalisée » affiche le ressenti (1 à 10, un toucher sur la valeur choisie la désélectionne), la FC moyenne et la FC max (30 à 250 bpm, max ≥ moyenne) et la météo. Ces champs ne sont conservés que pour une sortie réalisée.
+- Une sortie réalisée porte les valeurs réellement effectuées : ses champs sont modifiés directement et l’objectif prévu n’est pas conservé. Les sorties peuvent être modifiées ; les sorties prévues peuvent être supprimées.
+- Une sortie prévue dont la dernière journée est passée est affichée « à vérifier ». Au calendrier, une sortie prévue a un repère creux, une sortie à vérifier un repère ambré et une sortie réalisée un repère plein.
+- Une course personnelle comprend un nom et des dates de début et de fin inclusives (la fin doit être égale ou postérieure au début) ; elle peut être modifiée ou supprimée.
 - Les courses de référence importées apparaissent aussi au calendrier et ouvrent leur fiche. Elles sont gérées dans la sauvegarde locale ; le bouton d’ajout depuis le calendrier crée une course personnelle, pas une fiche de référence détaillée.
 - Les périodes de sorties et courses sont des dates de présence, pas un découpage quotidien de la distance, du temps ou du D+. Pour les statistiques, une sortie réalisée est comptabilisée une seule fois dans la semaine de sa date de début.
 

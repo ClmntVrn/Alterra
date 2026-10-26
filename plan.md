@@ -1,7 +1,7 @@
 # Plan de développement d’Alterra
 
 **Mis à jour le :** 26 octobre 2026  
-**État général :** version locale utilisable (0.8.6) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
+**État général :** version locale utilisable (0.8.7) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
 
 ## Vision
 
@@ -43,6 +43,8 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - **Une sortie est un seul enregistrement** (`plannedSessions`) avec un statut `planned` ou `completed`. Une fois réalisée, ses valeurs sont les valeurs réelles : **l’objectif prévu n’est pas conservé** (décision du 26 octobre 2026, qui remplace la règle initiale « garder le prévu consultable après réalisation »).
 - La collection `activities` n’est pas utilisée. Elle reste dans le format de sauvegarde pour compatibilité ; un futur import (Garmin, GPX) marquera ou créera directement une sortie réalisée plutôt qu’une activité séparée.
 - Types de sortie : trail, course à pied, renforcement musculaire, vélo. Météo : une catégorie au choix (ensoleillé, nuageux, pluie, neige, vent, orage).
+- Une sortie n’a qu’une date de début saisie ; sa date de fin est calculée depuis l’heure et la durée (26 octobre 2026). Une sortie prévue dont la date est passée est « à vérifier », sans être déclarée manquée.
+- Ressenti, FC et météo ne sont enregistrés que sur une sortie réalisée.
 - Une sortie prévue peut être supprimée ; une sortie réalisée ne l’est pas depuis le calendrier (repasser d’abord en « prévu »).
 - Les statistiques ne comptent que les sorties réalisées, une seule fois, dans la semaine de leur date de début.
 - Le stockage des traces GPS des sorties est reporté.
@@ -68,8 +70,9 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - [x] Allure moyenne calculée depuis la distance et la durée.
 - [x] Courses personnelles (nom, dates) distinctes des courses de référence du catalogue.
 - [x] Sorties et courses sur plusieurs jours.
-- [ ] À décider : traitement d’une sortie prévue passée et non cochée (simple affichage « à vérifier » ou rien).
-- [ ] À décider : ajouter l’effort ressenti (1–10) et la fréquence cardiaque aux sorties réalisées.
+- [x] Une sortie prévue passée et non cochée est affichée « à vérifier » (décision du 26 octobre 2026).
+- [x] Ressenti (1–10), FC moyenne et FC max sur les sorties réalisées.
+- [x] Formulaire simplifié : type en un toucher, nom facultatif, une seule date (la fin se déduit de l’heure et de la durée), saisie rapide de l’heure et de la durée.
 
 **Validation :** un utilisateur peut gérer son calendrier sportif sans ordinateur et marquer une sortie comme réalisée avec ses valeurs effectives.
 

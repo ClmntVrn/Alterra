@@ -146,77 +146,90 @@
         </form>
         <form class="training-form" id="trainingForm" hidden>
           <h3 id="trainingFormTitle">Nouvel entraînement</h3>
-          <div class="calendar-date-range">
+          <fieldset class="training-choice">
+            <legend>Type</legend>
+            <div class="training-choice-options training-type-options">
+              <label class="training-chip"><input name="type" type="radio" value="trail" checked><span>Trail</span></label>
+              <label class="training-chip"><input name="type" type="radio" value="running"><span>Course</span></label>
+              <label class="training-chip"><input name="type" type="radio" value="strength"><span>Renfo</span></label>
+              <label class="training-chip"><input name="type" type="radio" value="cycling"><span>Vélo</span></label>
+            </div>
+          </fieldset>
+          <label>
+            Nom (facultatif)
+            <input name="title" type="text" maxlength="100" placeholder="Ex. Sortie longue">
+          </label>
+          <div class="training-form-row">
             <label>
-              Du
+              Date
               <input name="date" type="date" required>
             </label>
             <label>
-              Au
-              <input name="endDate" type="date" required>
+              Heure
+              <input name="time" type="text" inputmode="numeric" maxlength="5" value="09:00" placeholder="09:00" autocomplete="off">
             </label>
           </div>
-          <label>
-            Nom de la séance
-            <input name="title" type="text" maxlength="100" required>
-          </label>
-          <label>
-            Type
-            <select name="type" required>
-              <option value="trail">Trail</option>
-              <option value="running">Course à pied</option>
-              <option value="strength">Renforcement musculaire</option>
-              <option value="cycling">Vélo</option>
-            </select>
-          </label>
-          <label>
-            Heure de début
-            <input name="time" type="text" inputmode="text" maxlength="5" value="09:00" placeholder="HH:mm" pattern="(?:[01][0-9]|2[0-3]):[0-5][0-9]" title="Saisis l’heure au format 24 h, par exemple 07:30.">
-          </label>
           <div class="training-form-measures">
             <label>
               Distance (km)
-              <input name="distanceKm" type="text" inputmode="decimal" pattern="[0-9]+([,.][0-9]{1,2})?" maxlength="7" title="Saisis une distance entre 0,1 et 1 000 km, avec au maximum deux décimales.">
+              <input name="distanceKm" type="text" inputmode="decimal" maxlength="7" placeholder="12,5" autocomplete="off">
             </label>
-            <div class="training-duration-field">
-              <span>Durée</span>
-              <div class="training-duration-inputs" role="group" aria-label="Durée en heures et minutes">
-                <label>
-                  h
-                  <input id="durationHours" type="number" min="0" max="9999" step="1" inputmode="numeric" aria-label="Heures">
-                </label>
-                <label>
-                  min
-                  <input id="durationRemainderMinutes" type="number" min="0" max="59.9" step="0.1" inputmode="decimal" aria-label="Minutes">
-                </label>
-              </div>
-              <input name="durationMinutes" type="hidden">
-            </div>
+            <label>
+              Durée (h:mm)
+              <input name="duration" type="text" inputmode="numeric" maxlength="7" placeholder="1:30" autocomplete="off">
+            </label>
             <label>
               D+ (m)
-              <input name="ascentMeters" type="number" min="0" max="100000" step="1" inputmode="numeric">
+              <input name="ascentMeters" type="number" min="0" max="100000" step="1" inputmode="numeric" placeholder="600">
             </label>
           </div>
-          <p class="training-pace">Allure moyenne : <output id="trainingPace">—</output></p>
-          <label>
-            Météo (facultatif)
-            <select name="weather">
-              <option value="">Non renseignée</option>
-              <option value="sunny">Ensoleillé</option>
-              <option value="cloudy">Nuageux</option>
-              <option value="rain">Pluie</option>
-              <option value="snow">Neige</option>
-              <option value="wind">Vent</option>
-              <option value="storm">Orage</option>
-            </select>
+          <p class="training-computed" id="trainingComputed" aria-live="polite" hidden></p>
+          <label class="training-completed-toggle">
+            <input name="completed" type="checkbox">
+            <span>Séance réalisée</span>
           </label>
+          <div class="training-completed-fields" id="trainingCompletedFields" hidden>
+            <fieldset class="training-choice">
+              <legend>Ressenti <span class="training-choice-hint">1 très facile · 10 maximal</span></legend>
+              <div class="training-choice-options training-effort-options">
+                <label class="training-chip"><input name="perceivedEffort" type="radio" value="1"><span>1</span></label>
+                <label class="training-chip"><input name="perceivedEffort" type="radio" value="2"><span>2</span></label>
+                <label class="training-chip"><input name="perceivedEffort" type="radio" value="3"><span>3</span></label>
+                <label class="training-chip"><input name="perceivedEffort" type="radio" value="4"><span>4</span></label>
+                <label class="training-chip"><input name="perceivedEffort" type="radio" value="5"><span>5</span></label>
+                <label class="training-chip"><input name="perceivedEffort" type="radio" value="6"><span>6</span></label>
+                <label class="training-chip"><input name="perceivedEffort" type="radio" value="7"><span>7</span></label>
+                <label class="training-chip"><input name="perceivedEffort" type="radio" value="8"><span>8</span></label>
+                <label class="training-chip"><input name="perceivedEffort" type="radio" value="9"><span>9</span></label>
+                <label class="training-chip"><input name="perceivedEffort" type="radio" value="10"><span>10</span></label>
+              </div>
+            </fieldset>
+            <div class="training-form-row">
+              <label>
+                FC moyenne (bpm)
+                <input name="heartRateAvg" type="number" min="30" max="250" step="1" inputmode="numeric" placeholder="145">
+              </label>
+              <label>
+                FC max (bpm)
+                <input name="heartRateMax" type="number" min="30" max="250" step="1" inputmode="numeric" placeholder="172">
+              </label>
+            </div>
+            <label>
+              Météo
+              <select name="weather">
+                <option value="">Non renseignée</option>
+                <option value="sunny">Ensoleillé</option>
+                <option value="cloudy">Nuageux</option>
+                <option value="rain">Pluie</option>
+                <option value="snow">Neige</option>
+                <option value="wind">Vent</option>
+                <option value="storm">Orage</option>
+              </select>
+            </label>
+          </div>
           <label>
             Notes (facultatif)
             <textarea name="notes" rows="3" maxlength="1000"></textarea>
-          </label>
-          <label class="training-completed-toggle">
-            <input name="completed" type="checkbox">
-            <span>Séance déjà réalisée</span>
           </label>
           <div class="training-form-actions">
             <button class="calendar-create-button" id="cancelTrainingButton" type="button">Annuler</button>
@@ -243,7 +256,7 @@
     <footer class="app-footer">
       <span>ALTERRA · IMAGINÉ POUR LES SENTIERS</span>
       <span class="app-version">
-        <span>Version <strong>0.8.6</strong></span>
+        <span>Version <strong>0.8.7</strong></span>
         <a href="./versions.html" aria-label="Détails et historique des versions">Détails</a>
       </span>
     </footer>
