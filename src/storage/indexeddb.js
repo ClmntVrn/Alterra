@@ -1,4 +1,4 @@
-import { PERSONAL_DATA_COLLECTIONS, validatePersonalData } from "../domain/models.js";
+import { PERSONAL_DATA_COLLECTIONS, validatePersonalData } from "../domain/backup-format.js";
 
 const DATABASE_NAME = "alterra-personal-data";
 const DATABASE_VERSION = 2;

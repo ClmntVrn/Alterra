@@ -1,4 +1,4 @@
-import { PERSONAL_DATA_COLLECTIONS } from "../domain/models.js";
+import { PERSONAL_DATA_COLLECTIONS } from "../domain/backup-format.js";
 
 const collectionNames = new Set(PERSONAL_DATA_COLLECTIONS);
 

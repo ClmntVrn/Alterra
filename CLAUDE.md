@@ -17,14 +17,14 @@ Documentation de référence, à lire avant une évolution fonctionnelle :
 ## Structure technique
 
 - HTML, CSS et JavaScript natif en modules ES. Pas de framework, de bundler ni de dépendance sans besoin concret.
-- `index.html` : accueil (statistiques, calendrier, sauvegarde). `app/main.js` l'initialise.
-- `app/calendar.js` : calendrier mois/jour, formulaires de sorties et de courses personnelles.
-- `components/` : composants génériques (`calendar/`, `statistics/`), sans donnée propre à une course.
-- `app/domain/models.js` : format de sauvegarde versionné (`PERSONAL_DATA_FORMAT_VERSION`) et validation.
-- `app/storage/` : `repository.js` (interface stable) et `indexeddb.js` (adaptateur). Les écrans passent par le repository, jamais directement par IndexedDB.
-- `app/personal-data.js` : export/restauration, y compris les clés `localStorage` préfixées `alterra-`.
-- `races/race.html` + `races/race.js` : fiche de course générique. Les fiches et leurs GPX (`profile.gpxData`) vivent dans la collection `raceCatalog` de la base locale et dans les sauvegardes, jamais dans le dépôt.
-- `styles.css` : feuille de styles unique ; réutiliser ses variables et composants.
+- Pages à la racine (`index.html`, `race.html`, `versions.html`), avec `sw.js` et `manifest.json` qui doivent y rester.
+- `src/pages/` : points d'entrée des pages (`home.js` pour l'accueil, `race.js` pour la fiche).
+- `src/features/<fonctionnalité>/` : calendrier (vue mois/jour, formulaires de sorties et de courses personnelles), statistiques. Génériques, sans donnée propre à une course.
+- `src/domain/` : règles pures, sans DOM ni stockage, couvertes par les tests (`tests/`). `backup-format.js` porte le format de sauvegarde versionné (`PERSONAL_DATA_FORMAT_VERSION`) et sa validation.
+- `src/storage/` : `repository.js` (interface stable) et `indexeddb.js` (adaptateur). Les écrans passent par le repository, jamais directement par IndexedDB. `personal-data.js` gère l'export/restauration, y compris les clés `localStorage` préfixées `alterra-`.
+- `src/ui/format.js` : formats d'affichage français partagés.
+- `race.html` + `src/pages/race.js` : fiche de course générique. Les fiches et leurs GPX (`profile.gpxData`) vivent dans la collection `raceCatalog` de la base locale et dans les sauvegardes, jamais dans le dépôt.
+- `styles/main.css` : feuille de styles unique ; réutiliser ses variables et composants. Icônes dans `assets/icons/`.
 - Les blocs d'une fiche (scénarios, ravitos, nutrition, rappels, matériel, sources) sont facultatifs : ne pas coder de contenu propre à une course dans le moteur de rendu. Les identifiants des repères du profil correspondent à ceux des ravitos.
 
 ## Données et confidentialité

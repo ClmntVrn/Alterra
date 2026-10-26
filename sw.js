@@ -1,30 +1,30 @@
-const CACHE_NAME = "alterra-v46";
+const CACHE_NAME = "alterra-v47";
 
 const FILES = [
   "./",
   "./index.html",
+  "./race.html",
   "./versions.html",
-  "./app/main.js",
-  "./app/calendar.js",
-  "./components/calendar/calendar.js",
-  "./components/statistics/activity-statistics.js",
-  "./app/domain/models.js",
-  "./app/race-catalog.js",
-  "./app/storage/repository.js",
-  "./app/storage/indexeddb.js",
-  "./app/personal-data.js",
+  "./manifest.json",
+  "./styles/main.css",
+  "./assets/icons/icon.svg",
+  "./assets/icons/apple-touch-icon.png",
+  "./src/pages/home.js",
+  "./src/pages/race.js",
+  "./src/features/calendar/calendar.js",
+  "./src/features/calendar/month-grid.js",
+  "./src/features/statistics/activity-statistics.js",
+  "./src/domain/backup-format.js",
   "./src/domain/dates.js",
   "./src/domain/durations.js",
   "./src/domain/numbers.js",
   "./src/domain/statistics.js",
   "./src/domain/workouts.js",
-  "./src/ui/format.js",
-  "./races/race.html",
-  "./races/race.js",
-  "./styles.css",
-  "./manifest.json",
-  "./icon/icon.svg",
-  "./icon/apple-touch-icon.png"
+  "./src/storage/repository.js",
+  "./src/storage/indexeddb.js",
+  "./src/storage/personal-data.js",
+  "./src/storage/race-catalog.js",
+  "./src/ui/format.js"
 ];
 
 self.addEventListener("install", event => {

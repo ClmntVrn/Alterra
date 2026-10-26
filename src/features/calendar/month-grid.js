@@ -1,5 +1,5 @@
-import { toDateKey } from "../../src/domain/dates.js";
-import { formatLongDate, formatMonthName } from "../../src/ui/format.js";
+import { toDateKey } from "../../domain/dates.js";
+import { formatLongDate, formatMonthName } from "../../ui/format.js";
 
 const firstCalendarYear = 1900;
 const lastCalendarYear = 9999;

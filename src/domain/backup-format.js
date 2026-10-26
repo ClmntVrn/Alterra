@@ -1,4 +1,4 @@
-import { isDateKey } from "../../src/domain/dates.js";
+import { isDateKey } from "./dates.js";
 
 export const PERSONAL_DATA_FORMAT_VERSION = 2;
 

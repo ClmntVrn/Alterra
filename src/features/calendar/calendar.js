@@ -1,14 +1,14 @@
-import { createMonthYearPicker, renderCalendarGrid } from "../components/calendar/calendar.js";
+import { createMonthYearPicker, renderCalendarGrid } from "./month-grid.js";
 import {
   addDays,
   isDateKeyInRange,
   parseDateKey,
   parseTimeOfDay,
   toDateKey
-} from "../src/domain/dates.js";
-import { formatDuration, formatDurationClock, parseDuration } from "../src/domain/durations.js";
-import { parseDecimal } from "../src/domain/numbers.js";
-import { computeWorkoutEnd, formatPace, getWorkoutState } from "../src/domain/workouts.js";
+} from "../../domain/dates.js";
+import { formatDuration, formatDurationClock, parseDuration } from "../../domain/durations.js";
+import { parseDecimal } from "../../domain/numbers.js";
+import { computeWorkoutEnd, formatPace, getWorkoutState } from "../../domain/workouts.js";
 import {
   capitalize,
   formatDateRange,
@@ -16,7 +16,7 @@ import {
   formatMonthYear,
   formatNumber,
   formatWeekdayDate
-} from "../src/ui/format.js";
+} from "../../ui/format.js";
 
 const calendarDays = document.getElementById("calendarDays");
 const calendarGrid = document.querySelector(".calendar-grid");
@@ -208,7 +208,7 @@ function renderRaceEvent(race) {
   details.textContent = `${formatDateRange(race.date, race.endDate)} · ${race.calendarDetails}`;
   const openPlan = document.createElement("a");
   openPlan.className = "calendar-event-link";
-  openPlan.href = `./races/race.html?id=${encodeURIComponent(race.id)}`;
+  openPlan.href = `./race.html?id=${encodeURIComponent(race.id)}`;
   openPlan.textContent = "Ouvrir le plan de course";
   openPlan.setAttribute("aria-label", `Ouvrir la fiche de ${race.name}`);
   card.append(category, title, details, openPlan);

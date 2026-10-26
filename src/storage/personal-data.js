@@ -2,9 +2,9 @@ import {
   createEmptyPersonalData,
   PERSONAL_DATA_COLLECTIONS,
   validatePersonalData
-} from "./domain/models.js";
-import { createPersonalDataRepository } from "./storage/repository.js";
-import { createIndexedDbAdapter } from "./storage/indexeddb.js";
+} from "../domain/backup-format.js";
+import { createPersonalDataRepository } from "./repository.js";
+import { createIndexedDbAdapter } from "./indexeddb.js";
 
 const LOCAL_STATE_PREFIX = "alterra-";
 

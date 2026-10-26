@@ -1,9 +1,9 @@
-import { initializeCalendar } from "./calendar.js";
-import { initializeActivityStatistics } from "../components/statistics/activity-statistics.js";
-import { createPersonalDataStore } from "./personal-data.js";
-import { loadRaceCatalog } from "./race-catalog.js";
-import { daysBetween } from "../src/domain/dates.js";
-import { formatDaysAgo } from "../src/ui/format.js";
+import { initializeCalendar } from "../features/calendar/calendar.js";
+import { initializeActivityStatistics } from "../features/statistics/activity-statistics.js";
+import { createPersonalDataStore } from "../storage/personal-data.js";
+import { loadRaceCatalog } from "../storage/race-catalog.js";
+import { daysBetween } from "../domain/dates.js";
+import { formatDaysAgo } from "../ui/format.js";
 
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {

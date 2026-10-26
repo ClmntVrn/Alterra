@@ -1,10 +1,10 @@
-import { createPersonalDataStore } from "../app/personal-data.js";
-import { loadRaceCatalog } from "../app/race-catalog.js";
-import { formatDateRange, formatNumber } from "../src/ui/format.js";
+import { createPersonalDataStore } from "../storage/personal-data.js";
+import { loadRaceCatalog } from "../storage/race-catalog.js";
+import { formatDateRange, formatNumber } from "../ui/format.js";
 
 const content = document.getElementById("raceContent");
 const raceId = new URLSearchParams(location.search).get("id");
-const siteRoot = new URL("../", location.href);
+const siteRoot = new URL("./", location.href);
 const personalData = createPersonalDataStore();
 
 function makeElement(tag, className, text) {

@@ -1,4 +1,4 @@
-import { formatDuration } from "../../src/domain/durations.js";
+import { formatDuration } from "../../domain/durations.js";
 import {
   WEEK_COUNT,
   computeWeeklyTotals,
@@ -6,8 +6,8 @@ import {
   filterCompletedWorkouts,
   getWorkoutsInWeek,
   sumWorkouts
-} from "../../src/domain/statistics.js";
-import { formatLongDate, formatNumber, formatShortDayMonth } from "../../src/ui/format.js";
+} from "../../domain/statistics.js";
+import { formatLongDate, formatNumber, formatShortDayMonth } from "../../ui/format.js";
 
 const metrics = Object.freeze({
   distance: { label: "Distance", unit: "km" },

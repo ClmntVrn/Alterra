@@ -4,11 +4,11 @@ Site statique de préparation au trail, avec calendrier et fiches de course adap
 
 ## Fiches de course
 
-`races/` contient le modèle générique des fiches, pas de données de course. Une installation neuve démarre avec un calendrier vide ; importe une sauvegarde complète pour restaurer tes courses et leurs traces GPX.
+Le dépôt contient le modèle générique des fiches, pas de données de course. Une installation neuve démarre avec un calendrier vide ; importe une sauvegarde complète pour restaurer tes courses et leurs traces GPX.
 
-Le modèle générique est `races/race.html` avec son script `races/race.js`. Chaque fiche de course et son GPX sont conservés dans la base locale et inclus dans la sauvegarde autonome.
+Le modèle générique est `race.html` avec son script `src/pages/race.js`. Chaque fiche de course et son GPX sont conservés dans la base locale et inclus dans la sauvegarde autonome.
 
-Les icônes du site sont rangées dans `icon/`.
+Le code est dans `src/`, la feuille de styles dans `styles/` et les icônes dans `assets/icons/`.
 
 ## Données personnelles sur l’appareil
 

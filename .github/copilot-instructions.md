@@ -10,10 +10,10 @@
 ## Structure technique
 
 - Le projet est un site statique en HTML, CSS et JavaScript natif ; ne pas ajouter de framework ou de dépendance sans besoin concret.
-- `styles.css` est la feuille de styles partagée. Réutiliser ses variables et composants plutôt que dupliquer les styles dans les pages.
+- `styles/main.css` est la feuille de styles partagée. Réutiliser ses variables et composants plutôt que dupliquer les styles dans les pages.
 - `index.html` contient le calendrier et la navigation vers les plans de course.
-- `races/race.html` et `races/race.js` forment la fiche générique ; les fiches de course et GPX vivent dans la base locale et les sauvegardes, pas dans le dépôt.
-- L'icône du site se trouve dans `icon/icon.svg`.
+- `race.html` et `src/pages/race.js` forment la fiche générique ; les fiches de course et GPX vivent dans la base locale et les sauvegardes, pas dans le dépôt.
+- Le code est rangé dans `src/` : `pages/` (points d'entrée), `features/` (fonctionnalités), `domain/` (règles pures, testées), `storage/` (repository et IndexedDB), `ui/` (formats partagés). Les icônes sont dans `assets/icons/`.
 - Les détails, scénarios, ravitos, nutrition, rappels, matériel et références GPX sont des données optionnelles par course. Ne pas coder de contenu propre à une course dans le moteur de rendu.
 - Le profil d'altitude est construit depuis le GPX référencé dans le JSON de course ; les identifiants des repères correspondent à ceux des ravitos.
 - Le site est une PWA : `manifest.json` décrit l'application et `sw.js` met les ressources en cache. Lorsqu'une modification change les ressources livrées hors ligne, vérifier la liste du service worker et incrémenter `CACHE_NAME`.

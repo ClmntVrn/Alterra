@@ -10,36 +10,38 @@ Ce document décrit l’architecture actuelle et son évolution prévue, sans ba
 Alterra est une PWA statique en HTML, CSS et JavaScript natif (modules ES), sans framework ni étape de build.
 
 ```text
-Interface (index.html, races/race.html, versions.html, styles.css)
+Pages (index.html, race.html, versions.html, styles/main.css)
   statistiques · calendrier mois/jour · formulaires · fiches de course
                      │
                      ▼
-Logique applicative (app/, components/)
+Points d’entrée et fonctionnalités (src/pages/, src/features/)
   calendrier, statistiques, sauvegarde, fiche de course
                      │
                      ▼
-Repository (app/storage/repository.js)
+Repository (src/storage/repository.js)
   list · get · save · remove, indépendant du stockage
                      │
                      ▼
-Adaptateur IndexedDB (app/storage/indexeddb.js)
+Adaptateur IndexedDB (src/storage/indexeddb.js)
   base « alterra-personal-data » sur l’appareil
 ```
 
-| Fichier                                        | Rôle                                                                              |
-| ---------------------------------------------- | --------------------------------------------------------------------------------- |
-| `app/main.js`                                  | Initialise l’accueil, le service worker, le stockage persistant et la sauvegarde. |
-| `app/calendar.js`                              | Calendrier mois/jour, formulaires de sorties et de courses personnelles.          |
-| `components/calendar/calendar.js`              | Grille du calendrier et sélecteur mois/année, génériques.                         |
-| `components/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines.                                    |
-| `app/domain/models.js`                         | Format de sauvegarde versionné et validation.                                     |
-| `app/personal-data.js`                         | Export/restauration complète, y compris les clés `localStorage` `alterra-*`.      |
-| `app/race-catalog.js`                          | Chargement du catalogue de courses depuis la base locale.                         |
-| `races/race.js`                                | Fiche de course générique : profil GPX, ravitos, scénarios, nutrition, matériel.  |
-| `sw.js`                                        | Précache de l’interface pour l’usage hors ligne.                                  |
-| `src/domain/`                                  | Règles pures, sans DOM ni stockage : dates, durées, séances, statistiques.        |
-| `src/ui/format.js`                             | Formats d’affichage français partagés (dates, nombres, périodes).                 |
-| `tests/`                                       | Tests `node --test` du domaine, des formats et du précache du service worker.     |
+| Fichier                                          | Rôle                                                                               |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `src/pages/home.js`                              | Initialise l’accueil, le service worker, le stockage persistant et la sauvegarde.  |
+| `src/pages/race.js`                              | Fiche de course générique : profil GPX, ravitos, scénarios, nutrition, matériel.   |
+| `src/features/calendar/calendar.js`              | Calendrier mois/jour, formulaires de sorties et de courses personnelles.           |
+| `src/features/calendar/month-grid.js`            | Grille du calendrier et sélecteur mois/année, génériques.                          |
+| `src/features/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines.                                     |
+| `src/domain/`                                    | Règles pures, sans DOM ni stockage : dates, durées, séances, statistiques.         |
+| `src/domain/backup-format.js`                    | Format de sauvegarde versionné et validation.                                      |
+| `src/storage/personal-data.js`                   | Export/restauration complète, y compris les clés `localStorage` `alterra-*`.       |
+| `src/storage/race-catalog.js`                    | Chargement du catalogue de courses depuis la base locale.                          |
+| `src/ui/format.js`                               | Formats d’affichage français partagés (dates, nombres, périodes).                  |
+| `styles/main.css`                                | Feuille de styles de toutes les pages.                                             |
+| `assets/icons/`                                  | Icônes du site et de l’écran d’accueil.                                            |
+| `sw.js`, `manifest.json`                         | Précache hors ligne et manifeste de la PWA, à la racine pour couvrir tout le site. |
+| `tests/`                                         | Tests `node --test` du domaine, des formats et du précache du service worker.      |
 
 Le code des écrans délègue les calculs à `src/domain/` ; c’est la partie couverte par les tests. Un test vérifie aussi que chaque ressource livrée figure dans le précache de `sw.js`.
 
@@ -89,8 +91,7 @@ Le service worker ne met en cache que l’interface ; les données personnelles 
 
 ## 4. Évolutions prévues
 
-- **Structure :** réorganiser le code dans `src/` par fonctionnalité (voir la proposition de restructuration en cours).
-- **Découpage :** séparer dans `app/calendar.js` la vue, les formulaires et l’accès aux données lorsque le fichier devra évoluer.
+- **Découpage :** séparer `src/features/calendar/calendar.js` et `src/pages/race.js` en modules par responsabilité, sans état global, puis découper la feuille de styles.
 - **Backend :** quand la synchronisation sera nécessaire, ajouter une implémentation distante du repository avec authentification et isolation des données par utilisateur vérifiées côté serveur ; migrer par export puis import vérifié, sans supprimer la sauvegarde source.
 - **Intégrations :** Garmin/Strava et IA passeront par un serveur ; aucun secret d’API dans le navigateur. Les séances générées par IA restent des propositions à valider.
 
