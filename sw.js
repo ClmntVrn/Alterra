@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "alterra-v42";
+const CACHE_NAME = "alterra-v43";
 
 const FILES = [
   "./",
@@ -18,7 +18,8 @@ const FILES = [
   "./races/race.js",
   "./styles.css",
   "./manifest.json",
-  "./icon/icon.svg"
+  "./icon/icon.svg",
+  "./icon/apple-touch-icon.png"
 ];
 
 self.addEventListener("install", event => {
