@@ -15,11 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
       - run: npm ci
       - run: npm run check
-      - run: npm run test:browser
+      # Même commande que npm run test:browser, avec une annotation GitHub par test en échec.
+      - name: Tests navigateur
+        run: >-
+          node --test --test-concurrency=1
+          --test-reporter=spec --test-reporter-destination=stdout
+          --test-reporter=./tools/github-reporter.js --test-reporter-destination=stdout
+          "tests/browser/*.browser.js"
