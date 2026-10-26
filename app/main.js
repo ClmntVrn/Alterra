@@ -5,13 +5,15 @@ import { loadRaceCatalog } from "./race-catalog.js";
 
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js")
+    navigator.serviceWorker
+      .register("./sw.js")
       .catch(error => console.error("Service worker:", error));
   });
 }
 
 if (navigator.storage?.persist) {
-  navigator.storage.persisted()
+  navigator.storage
+    .persisted()
     .then(persisted => persisted || navigator.storage.persist())
     .catch(error => console.warn("Stockage persistant :", error));
 }
@@ -48,11 +50,14 @@ async function showLastBackup() {
     lastBackup.dataset.state = "stale";
   } else {
     const today = new Date();
-    const days = Math.max(0, Math.round(
-      (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
-        Date.UTC(backupDate.getFullYear(), backupDate.getMonth(), backupDate.getDate())) /
-        86400000
-    ));
+    const days = Math.max(
+      0,
+      Math.round(
+        (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
+          Date.UTC(backupDate.getFullYear(), backupDate.getMonth(), backupDate.getDate())) /
+          86400000
+      )
+    );
     lastBackup.textContent = `Dernière sauvegarde : ${relativeDayFormatter.format(-days, "day")}.`;
     lastBackup.dataset.state = days >= BACKUP_REMINDER_DAYS ? "stale" : "recent";
   }
@@ -101,7 +106,11 @@ importInput.addEventListener("change", async () => {
   importButton.disabled = true;
   try {
     const data = JSON.parse(await file.text());
-    if (!window.confirm("Cette importation remplacera toutes les données Alterra de cet appareil, y compris les courses et états de checklist. Continuer ?")) {
+    if (
+      !window.confirm(
+        "Cette importation remplacera toutes les données Alterra de cet appareil, y compris les courses et états de checklist. Continuer ?"
+      )
+    ) {
       return;
     }
     await personalData.restore(data);

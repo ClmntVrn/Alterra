@@ -57,7 +57,10 @@ export function initializeActivityStatistics(container, repository) {
   const updateCategoriesViewport = () => {
     const maxScroll = categoriesViewport.scrollWidth - categoriesViewport.clientWidth;
     categoriesViewport.classList.toggle("is-scrolled", categoriesViewport.scrollLeft > 4);
-    categoriesViewport.classList.toggle("is-at-end", categoriesViewport.scrollLeft >= maxScroll - 4);
+    categoriesViewport.classList.toggle(
+      "is-at-end",
+      categoriesViewport.scrollLeft >= maxScroll - 4
+    );
   };
   categoriesViewport.addEventListener("scroll", updateCategoriesViewport, { passive: true });
   window.addEventListener("resize", updateCategoriesViewport);
@@ -66,9 +69,7 @@ export function initializeActivityStatistics(container, repository) {
     suppressClickTarget = null;
     dragStartX = event.clientX;
     dragStartScroll = categoriesViewport.scrollLeft;
-    dragTarget = event.target instanceof Element
-      ? event.target.closest(".activity-filter")
-      : null;
+    dragTarget = event.target instanceof Element ? event.target.closest(".activity-filter") : null;
     isDragging = true;
     hasCapturedPointer = false;
   });
@@ -99,14 +100,21 @@ export function initializeActivityStatistics(container, repository) {
   };
   categoriesViewport.addEventListener("pointerup", finishCategoryDrag);
   categoriesViewport.addEventListener("pointercancel", finishCategoryDrag);
-  categoriesViewport.addEventListener("click", event => {
-    if (suppressClickTarget && event.target instanceof Element &&
-        event.target.closest(".activity-filter") === suppressClickTarget) {
-      suppressClickTarget = null;
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  }, true);
+  categoriesViewport.addEventListener(
+    "click",
+    event => {
+      if (
+        suppressClickTarget &&
+        event.target instanceof Element &&
+        event.target.closest(".activity-filter") === suppressClickTarget
+      ) {
+        suppressClickTarget = null;
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    },
+    true
+  );
   requestAnimationFrame(updateCategoriesViewport);
   for (const [key, metric] of Object.entries(metrics)) {
     const button = metricsElement.querySelector(`[data-metric="${key}"]`);
@@ -117,19 +125,24 @@ export function initializeActivityStatistics(container, repository) {
     });
     button.textContent = metric.label;
     if (key === "effort") {
-      button.setAttribute("aria-label", "Km-effort : distance + 1 km par 100 m de dénivelé positif");
+      button.setAttribute(
+        "aria-label",
+        "Km-effort : distance + 1 km par 100 m de dénivelé positif"
+      );
       button.title = "1 km-effort = 1 km + 100 m de dénivelé positif";
     }
   }
 
   render();
-  repository.list("plannedSessions")
+  repository
+    .list("plannedSessions")
     .then(updateSessions)
     .catch(error => {
       console.error("Impossible de charger les statistiques d’entraînement.", error);
       chart.replaceChildren();
       chart.setAttribute("role", "status");
-      chart.textContent = "Impossible de charger les statistiques. Vérifie le stockage de cet appareil.";
+      chart.textContent =
+        "Impossible de charger les statistiques. Vérifie le stockage de cet appareil.";
     });
 
   return updateSessions;
@@ -159,18 +172,20 @@ export function initializeActivityStatistics(container, repository) {
 
   function filterSessions(records) {
     const types = categories[selectedCategory].types;
-    return records.filter(session =>
-      session.status === "completed" &&
-      types.includes(session.type) &&
-      parseLocalDate(session.date) !== null
+    return records.filter(
+      session =>
+        session.status === "completed" &&
+        types.includes(session.type) &&
+        parseLocalDate(session.date) !== null
     );
   }
 
   function renderSelectedWeek(weeks, records) {
     const selectedWeek = weeks[selectedWeekIndex];
-    const dateLabel = selectedWeek.start.getFullYear() === selectedWeek.end.getFullYear()
-      ? `${weekRangeFormatter.format(selectedWeek.start)} – ${weekRangeFormatter.format(selectedWeek.end)} ${selectedWeek.end.getFullYear()}`
-      : `${fullDateFormatter.format(selectedWeek.start)} – ${fullDateFormatter.format(selectedWeek.end)}`;
+    const dateLabel =
+      selectedWeek.start.getFullYear() === selectedWeek.end.getFullYear()
+        ? `${weekRangeFormatter.format(selectedWeek.start)} – ${weekRangeFormatter.format(selectedWeek.end)} ${selectedWeek.end.getFullYear()}`
+        : `${fullDateFormatter.format(selectedWeek.start)} – ${fullDateFormatter.format(selectedWeek.end)}`;
     weekLabel.textContent = dateLabel;
 
     const sessionsInWeek = records.filter(session => {
@@ -189,7 +204,11 @@ export function initializeActivityStatistics(container, repository) {
       const sessionWeek = startOfWeek(date);
       const index = Math.round(
         (Date.UTC(sessionWeek.getFullYear(), sessionWeek.getMonth(), sessionWeek.getDate()) -
-          Date.UTC(weeks[0].start.getFullYear(), weeks[0].start.getMonth(), weeks[0].start.getDate())) /
+          Date.UTC(
+            weeks[0].start.getFullYear(),
+            weeks[0].start.getMonth(),
+            weeks[0].start.getDate()
+          )) /
           604800000
       );
       if (index < 0 || index >= weekCount) continue;
@@ -266,7 +285,7 @@ export function initializeActivityStatistics(container, repository) {
       group.setAttribute(
         "aria-label",
         `${fullDateFormatter.format(weeks[index].start)}, ` +
-        `${numberFormatter.format(weeks[index].totals[selectedMetric])} ${metrics[selectedMetric].unit}`
+          `${numberFormatter.format(weeks[index].totals[selectedMetric])} ${metrics[selectedMetric].unit}`
       );
       const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       hitArea.setAttribute("x", point.x - 13);
@@ -360,12 +379,14 @@ function formatDuration(minutes) {
 }
 
 function createCurvePath(points) {
-  return points.map((point, index) => {
-    if (index === 0) return `M ${point.x} ${point.y}`;
-    const previous = points[index - 1];
-    const controlX = (previous.x + point.x) / 2;
-    return `C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
-  }).join(" ");
+  return points
+    .map((point, index) => {
+      if (index === 0) return `M ${point.x} ${point.y}`;
+      const previous = points[index - 1];
+      const controlX = (previous.x + point.x) / 2;
+      return `C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
+    })
+    .join(" ");
 }
 
 function updateSelectedButtons(container, attribute, selectedValue) {

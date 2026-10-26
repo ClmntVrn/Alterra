@@ -26,17 +26,17 @@ Adaptateur IndexedDB (app/storage/indexeddb.js)
   base « alterra-personal-data » sur l’appareil
 ```
 
-| Fichier | Rôle |
-| --- | --- |
-| `app/main.js` | Initialise l’accueil, le service worker, le stockage persistant et la sauvegarde. |
-| `app/calendar.js` | Calendrier mois/jour, formulaires de sorties et de courses personnelles. |
-| `components/calendar/calendar.js` | Grille du calendrier et sélecteur mois/année, génériques. |
-| `components/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines. |
-| `app/domain/models.js` | Format de sauvegarde versionné et validation. |
-| `app/personal-data.js` | Export/restauration complète, y compris les clés `localStorage` `alterra-*`. |
-| `app/race-catalog.js` | Chargement du catalogue de courses depuis la base locale. |
-| `races/race.js` | Fiche de course générique : profil GPX, ravitos, scénarios, nutrition, matériel. |
-| `sw.js` | Précache de l’interface pour l’usage hors ligne. |
+| Fichier                                        | Rôle                                                                              |
+| ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| `app/main.js`                                  | Initialise l’accueil, le service worker, le stockage persistant et la sauvegarde. |
+| `app/calendar.js`                              | Calendrier mois/jour, formulaires de sorties et de courses personnelles.          |
+| `components/calendar/calendar.js`              | Grille du calendrier et sélecteur mois/année, génériques.                         |
+| `components/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines.                                    |
+| `app/domain/models.js`                         | Format de sauvegarde versionné et validation.                                     |
+| `app/personal-data.js`                         | Export/restauration complète, y compris les clés `localStorage` `alterra-*`.      |
+| `app/race-catalog.js`                          | Chargement du catalogue de courses depuis la base locale.                         |
+| `races/race.js`                                | Fiche de course générique : profil GPX, ravitos, scénarios, nutrition, matériel.  |
+| `sw.js`                                        | Précache de l’interface pour l’usage hors ligne.                                  |
 
 Les écrans passent par le repository, jamais directement par les transactions IndexedDB. Le jour où une synchronisation sera nécessaire, une implémentation distante du même repository pourra remplacer ou compléter IndexedDB.
 
@@ -50,15 +50,15 @@ Le dépôt ne contient que le code de l’application : aucune fiche de course, 
 
 Collections IndexedDB (clé `id`, identifiant stable généré par `crypto.randomUUID()` pour les créations) :
 
-| Collection | Contenu | Utilisation |
-| --- | --- | --- |
-| `plannedSessions` | Sorties prévues ou réalisées (statut `planned` ou `completed`) | Calendrier, statistiques |
-| `raceEvents` | Courses personnelles (nom, dates) | Calendrier |
-| `raceCatalog` | Fiches de course de référence, GPX embarqué dans `profile.gpxData` | Calendrier, fiches |
-| `racePlans` | Plan personnel d’une course (objectif, scénarios, nutrition, rappels) | Fiches |
-| `activities` | Non utilisée, conservée pour compatibilité du format | — |
-| `nutritionProducts`, `equipment` | Prévues pour l’étape 5 | — |
-| `settings` | Réglages : catalogue initialisé, date de la dernière sauvegarde | Accueil |
+| Collection                       | Contenu                                                               | Utilisation              |
+| -------------------------------- | --------------------------------------------------------------------- | ------------------------ |
+| `plannedSessions`                | Sorties prévues ou réalisées (statut `planned` ou `completed`)        | Calendrier, statistiques |
+| `raceEvents`                     | Courses personnelles (nom, dates)                                     | Calendrier               |
+| `raceCatalog`                    | Fiches de course de référence, GPX embarqué dans `profile.gpxData`    | Calendrier, fiches       |
+| `racePlans`                      | Plan personnel d’une course (objectif, scénarios, nutrition, rappels) | Fiches                   |
+| `activities`                     | Non utilisée, conservée pour compatibilité du format                  | —                        |
+| `nutritionProducts`, `equipment` | Prévues pour l’étape 5                                                | —                        |
+| `settings`                       | Réglages : catalogue initialisé, date de la dernière sauvegarde       | Accueil                  |
 
 Une sortie réalisée est le même enregistrement que la sortie prévue, mis à jour avec les valeurs réelles : le prévu n’est pas conservé après réalisation. Champs d’une sortie : `date`, `endDate` (calculée depuis `time` et `durationMinutes`, absente si la sortie tient sur un jour), `type`, `title`, `status`, `time`, `distanceKm`, `durationMinutes`, `ascentMeters`, `notes`, `createdAt`, `completedAt`, et pour une sortie réalisée `perceivedEffort` (1–10), `heartRateAvg`, `heartRateMax` (bpm) et `weather`. L’état « à vérifier » n’est pas stocké : il est déduit à l’affichage d’une sortie prévue dont la date est passée.
 

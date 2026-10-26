@@ -27,27 +27,35 @@ function openDatabase() {
       database.onversionchange = () => database.close();
       resolve(database);
     };
-    request.onerror = () => reject(request.error || new Error("Impossible d’ouvrir la base locale."));
-    request.onblocked = () => reject(new Error("La base locale est bloquée par un autre onglet Alterra."));
+    request.onerror = () =>
+      reject(request.error || new Error("Impossible d’ouvrir la base locale."));
+    request.onblocked = () =>
+      reject(new Error("La base locale est bloquée par un autre onglet Alterra."));
   });
 }
 
 function requestResult(request, transaction) {
   return new Promise((resolve, reject) => {
     let result;
-    request.onsuccess = () => { result = request.result; };
+    request.onsuccess = () => {
+      result = request.result;
+    };
     request.onerror = () => reject(request.error || new Error("La requête IndexedDB a échoué."));
     transaction.oncomplete = () => resolve(result);
-    transaction.onerror = () => reject(transaction.error || new Error("La transaction IndexedDB a échoué."));
-    transaction.onabort = () => reject(transaction.error || new Error("La transaction IndexedDB a été annulée."));
+    transaction.onerror = () =>
+      reject(transaction.error || new Error("La transaction IndexedDB a échoué."));
+    transaction.onabort = () =>
+      reject(transaction.error || new Error("La transaction IndexedDB a été annulée."));
   });
 }
 
 function transactionComplete(transaction) {
   return new Promise((resolve, reject) => {
     transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error || new Error("La transaction IndexedDB a échoué."));
-    transaction.onabort = () => reject(transaction.error || new Error("La transaction IndexedDB a été annulée."));
+    transaction.onerror = () =>
+      reject(transaction.error || new Error("La transaction IndexedDB a échoué."));
+    transaction.onabort = () =>
+      reject(transaction.error || new Error("La transaction IndexedDB a été annulée."));
   });
 }
 
@@ -76,8 +84,9 @@ export function createIndexedDbAdapter() {
       assertCollection(collection);
       const db = await getDatabase();
       const transaction = db.transaction(collection, "readonly");
-      return requestResult(transaction.objectStore(collection).get(id), transaction)
-        .then(record => record ?? null);
+      return requestResult(transaction.objectStore(collection).get(id), transaction).then(
+        record => record ?? null
+      );
     },
 
     async save(collection, record) {
@@ -102,10 +111,13 @@ export function createIndexedDbAdapter() {
             store.delete(id);
           }
         };
-        request.onerror = () => reject(request.error || new Error("La suppression IndexedDB a échoué."));
+        request.onerror = () =>
+          reject(request.error || new Error("La suppression IndexedDB a échoué."));
         transaction.oncomplete = () => resolve(removed);
-        transaction.onerror = () => reject(transaction.error || new Error("La transaction IndexedDB a échoué."));
-        transaction.onabort = () => reject(transaction.error || new Error("La transaction IndexedDB a été annulée."));
+        transaction.onerror = () =>
+          reject(transaction.error || new Error("La transaction IndexedDB a échoué."));
+        transaction.onabort = () =>
+          reject(transaction.error || new Error("La transaction IndexedDB a été annulée."));
       });
     },
 

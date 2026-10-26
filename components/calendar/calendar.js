@@ -60,7 +60,7 @@ export function renderCalendarGrid({
       dateButton.setAttribute(
         "aria-label",
         `${eventLabels.join(", ")}` +
-        `${events.length ? ", " : ""}${eventDateFormatter.format(date)}, afficher la journée`
+          `${events.length ? ", " : ""}${eventDateFormatter.format(date)}, afficher la journée`
       );
       const dateNumber = document.createElement("span");
       dateNumber.className = "calendar-date";
@@ -99,11 +99,9 @@ export function createMonthYearPicker({
   let yearScrollTimeout = null;
 
   for (let month = 0; month < 12; month += 1) {
-    monthWheel.append(createWheelOption(
-      monthWheel,
-      month,
-      monthNameFormatter.format(new Date(2026, month, 1))
-    ));
+    monthWheel.append(
+      createWheelOption(monthWheel, month, monthNameFormatter.format(new Date(2026, month, 1)))
+    );
   }
   appendYearOptions(
     yearWheel,
@@ -198,7 +196,11 @@ export function createMonthYearPicker({
       appendYearOptions(yearWheel, newFirstYear, firstYear - 1, true);
       yearWheel.scrollTop += addedYears * 42;
     } else if (lastYear - selectedYear < 10 && lastYear < lastCalendarYear) {
-      appendYearOptions(yearWheel, lastYear + 1, Math.min(lastCalendarYear, lastYear + wheelYearBatchSize));
+      appendYearOptions(
+        yearWheel,
+        lastYear + 1,
+        Math.min(lastCalendarYear, lastYear + wheelYearBatchSize)
+      );
     }
   }
 
@@ -245,13 +247,11 @@ function setSelectedOption(wheel, value) {
 }
 
 function scrollWheelToValue(wheel, value) {
-  const option = Array.from(wheel.children).find(
-    item => Number(item.dataset.value) === value
-  );
+  const option = Array.from(wheel.children).find(item => Number(item.dataset.value) === value);
   if (!option) return;
   const wheelTop = wheel.getBoundingClientRect().top;
-  wheel.scrollTop += option.getBoundingClientRect().top - wheelTop -
-    (wheel.clientHeight - option.offsetHeight) / 2;
+  wheel.scrollTop +=
+    option.getBoundingClientRect().top - wheelTop - (wheel.clientHeight - option.offsetHeight) / 2;
 }
 
 function findCenteredWheelOption(wheel) {

@@ -55,7 +55,9 @@ function renderHero(race) {
     formatRaceDates(race),
     race.startTime ? `Départ ${race.startTime}` : "",
     race.route || ""
-  ].filter(Boolean).join(" · ");
+  ]
+    .filter(Boolean)
+    .join(" · ");
   addText(hero, "p", "sub", subtitle);
 
   const stats = makeElement("div", "stats");
@@ -75,7 +77,8 @@ function renderHero(race) {
   if (race.distanceNote) addText(hero, "p", "sub", race.distanceNote);
 
   const pills = makeElement("div", "pills");
-  if (race.targetFinish) pills.append(makeElement("span", "pill", `Arrivée cible ${race.targetFinish}`));
+  if (race.targetFinish)
+    pills.append(makeElement("span", "pill", `Arrivée cible ${race.targetFinish}`));
   if (race.cutoff) pills.append(makeElement("span", "pill", `Barrière max. ${race.cutoff}`));
   if (race.stones) pills.append(makeElement("span", "pill", `${race.stones} Running Stones`));
   if (pills.childElementCount) hero.append(pills);
@@ -88,7 +91,14 @@ function renderElevationSection(race) {
   const headingText = document.createElement("div");
   addText(headingText, "h2", "", "Profil de la course");
   addText(headingText, "p", "elevation-caption", race.profile.caption);
-  heading.append(headingText, makeElement("span", "elevation-ascent", `${Number(race.ascentMeters).toLocaleString("fr-FR")} m D+`));
+  heading.append(
+    headingText,
+    makeElement(
+      "span",
+      "elevation-ascent",
+      `${Number(race.ascentMeters).toLocaleString("fr-FR")} m D+`
+    )
+  );
   section.append(heading);
 
   const chart = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -101,7 +111,8 @@ function renderElevationSection(race) {
   title.textContent = `Profil d’altitude ${race.name}`;
   const description = document.createElementNS(chart.namespaceURI, "desc");
   description.id = "elevationDescription";
-  description.textContent = "Profil de la trace GPX avec le départ, les ravitaillements et l’arrivée. Les points atteints sont colorés en orange.";
+  description.textContent =
+    "Profil de la trace GPX avec le départ, les ravitaillements et l’arrivée. Les points atteints sont colorés en orange.";
   chart.append(title, description);
   section.append(chart);
 
@@ -109,9 +120,15 @@ function renderElevationSection(race) {
   progress.id = "elevationProgress";
   progress.setAttribute("aria-live", "polite");
   section.append(progress);
-  section.append(makeElement("p", "elevation-hint", race.checkpoints?.length
-    ? "Coche les ravitos dans « En course » pour actualiser ta progression sur le profil. Tu peux aussi toucher un repère."
-    : "Profil d’altitude du parcours."));
+  section.append(
+    makeElement(
+      "p",
+      "elevation-hint",
+      race.checkpoints?.length
+        ? "Coche les ravitos dans « En course » pour actualiser ta progression sur le profil. Tu peux aussi toucher un repère."
+        : "Profil d’altitude du parcours."
+    )
+  );
 
   return section;
 }
@@ -140,7 +157,7 @@ function parseGpxProfile(gpxText, race) {
     throw new Error("Le GPX ne contient pas assez de points de trace.");
   }
 
-  const radians = degrees => degrees * Math.PI / 180;
+  const radians = degrees => (degrees * Math.PI) / 180;
   const earthRadiusKm = 6371;
   let distanceKm = 0;
   for (let index = 1; index < trackpoints.length; index += 1) {
@@ -148,9 +165,11 @@ function parseGpxProfile(gpxText, race) {
     const current = trackpoints[index];
     const latitudeDelta = radians(current.latitude - previous.latitude);
     const longitudeDelta = radians(current.longitude - previous.longitude);
-    const a = Math.sin(latitudeDelta / 2) ** 2 +
-      Math.cos(radians(previous.latitude)) * Math.cos(radians(current.latitude)) *
-      Math.sin(longitudeDelta / 2) ** 2;
+    const a =
+      Math.sin(latitudeDelta / 2) ** 2 +
+      Math.cos(radians(previous.latitude)) *
+        Math.cos(radians(current.latitude)) *
+        Math.sin(longitudeDelta / 2) ** 2;
     distanceKm += earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     current.distanceKm = distanceKm;
   }
@@ -158,7 +177,8 @@ function parseGpxProfile(gpxText, race) {
     throw new Error("La distance de la trace GPX est invalide.");
   }
 
-  const minElevation = Math.floor(Math.min(...trackpoints.map(point => point.elevation)) / 200) * 200;
+  const minElevation =
+    Math.floor(Math.min(...trackpoints.map(point => point.elevation)) / 200) * 200;
   let maxElevation = Math.ceil(Math.max(...trackpoints.map(point => point.elevation)) / 200) * 200;
   if (maxElevation <= minElevation) maxElevation = minElevation + 200;
   const left = 52;
@@ -177,8 +197,8 @@ function parseGpxProfile(gpxText, race) {
     return {
       km: target,
       elevation,
-      x: left + target / distanceKm * (right - left),
-      y: bottom - (elevation - minElevation) / (maxElevation - minElevation) * (bottom - top)
+      x: left + (target / distanceKm) * (right - left),
+      y: bottom - ((elevation - minElevation) / (maxElevation - minElevation)) * (bottom - top)
     };
   };
 
@@ -190,9 +210,7 @@ function parseGpxProfile(gpxText, race) {
   const markers = [{ id: "start", ...pointAt(0) }];
   (race.checkpoints || []).forEach(checkpoint => {
     if (!Number.isFinite(checkpoint.km)) return;
-    const routeKm = checkpoint.id === "finish"
-      ? distanceKm
-      : Math.min(checkpoint.km, distanceKm);
+    const routeKm = checkpoint.id === "finish" ? distanceKm : Math.min(checkpoint.km, distanceKm);
     markers.push({ id: checkpoint.id, ...pointAt(routeKm) });
   });
   if (!markers.some(marker => marker.id === "finish")) {
@@ -210,7 +228,11 @@ function renderCheckpoints(race) {
   selector.setAttribute("aria-label", "Scénario de temps");
   (race.scenarios || []).forEach((scenario, index) => {
     const isDefault = index === (race.defaultScenario ?? 0);
-    const button = makeElement("button", isDefault ? "active" : "", `${scenario.name}\n${scenario.duration}`);
+    const button = makeElement(
+      "button",
+      isDefault ? "active" : "",
+      `${scenario.name}\n${scenario.duration}`
+    );
     button.type = "button";
     button.dataset.scenario = scenario.id;
     button.setAttribute("aria-pressed", String(isDefault));
@@ -218,7 +240,12 @@ function renderCheckpoints(race) {
   });
   if (selector.childElementCount) {
     section.append(selector);
-    addText(section, "p", "sub scenario-help", "Temps écoulé · heure de passage estimée. Coche chaque ravito atteint.");
+    addText(
+      section,
+      "p",
+      "sub scenario-help",
+      "Temps écoulé · heure de passage estimée. Coche chaque ravito atteint."
+    );
   }
   if (race.checkpointNote) addText(section, "p", "sub scenario-help", race.checkpointNote);
 
@@ -232,7 +259,9 @@ function renderCheckpoints(race) {
     const checkpointDetails = [
       Number.isFinite(checkpoint.km) ? `KM ${formatKilometers(checkpoint.km)}` : "",
       checkpoint.description || ""
-    ].filter(Boolean).join(" · ");
+    ]
+      .filter(Boolean)
+      .join(" · ");
     if (checkpointDetails) addText(details, "div", "km", checkpointDetails);
     const label = makeElement("label", "mark");
     const checkbox = document.createElement("input");
@@ -332,7 +361,9 @@ function setupCheckpoints(race) {
   const storageKey = `alterra-${race.id}-checkpoints`;
   const checks = [...document.querySelectorAll(".checkpoint input[type=checkbox]")];
   function update() {
-    const done = checks.filter(input => input.checked).map(input => input.closest(".checkpoint").dataset.id);
+    const done = checks
+      .filter(input => input.checked)
+      .map(input => input.closest(".checkpoint").dataset.id);
     try {
       localStorage.setItem(storageKey, JSON.stringify(done));
     } catch (error) {
@@ -344,7 +375,8 @@ function setupCheckpoints(race) {
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
     checks.forEach(input => {
-      input.checked = Array.isArray(saved) && saved.includes(input.closest(".checkpoint").dataset.id);
+      input.checked =
+        Array.isArray(saved) && saved.includes(input.closest(".checkpoint").dataset.id);
       input.closest(".checkpoint").classList.toggle("done", input.checked);
     });
   } catch (error) {
@@ -352,7 +384,9 @@ function setupCheckpoints(race) {
   }
   checks.forEach(input => input.addEventListener("change", update));
   document.getElementById("resetCheckpoints").addEventListener("click", () => {
-    checks.forEach(input => { input.checked = false; });
+    checks.forEach(input => {
+      input.checked = false;
+    });
     update();
   });
 }
@@ -367,7 +401,10 @@ function renderNutrition(nutrition) {
     if (typeof detail === "string") {
       paragraph.textContent = detail;
     } else {
-      paragraph.append(makeElement("strong", "", `${detail.lead} :`), document.createTextNode(` ${detail.text}`));
+      paragraph.append(
+        makeElement("strong", "", `${detail.lead} :`),
+        document.createTextNode(` ${detail.text}`)
+      );
     }
     overview.append(paragraph);
   });
@@ -414,7 +451,11 @@ function renderGear(race, gear) {
   addText(body, "p", "gear-hint", gear.hint || "Coche les éléments prévus.");
 
   gear.groups.forEach((group, groupIndex) => {
-    const title = makeElement("div", `gear-group-title${groupIndex > 0 ? " recommended-title" : ""}`, group.title);
+    const title = makeElement(
+      "div",
+      `gear-group-title${groupIndex > 0 ? " recommended-title" : ""}`,
+      group.title
+    );
     body.append(title);
     group.items.forEach(item => {
       const label = makeElement("label", "gear-item");
@@ -444,7 +485,9 @@ function setupGear(raceId, gear) {
 
   function saveState() {
     const state = {};
-    boxes.forEach(box => { state[box.dataset.gear] = box.checked; });
+    boxes.forEach(box => {
+      state[box.dataset.gear] = box.checked;
+    });
     try {
       localStorage.setItem(storageKey, JSON.stringify(state));
     } catch (error) {
@@ -453,7 +496,7 @@ function setupGear(raceId, gear) {
     const required = boxes.filter(box => box.dataset.required === "true");
     const checked = required.filter(box => box.checked).length;
     count.textContent = `${checked}/${required.length}`;
-    bar.style.width = `${required.length ? checked / required.length * 100 : 0}%`;
+    bar.style.width = `${required.length ? (checked / required.length) * 100 : 0}%`;
   }
 
   try {
@@ -466,14 +509,20 @@ function setupGear(raceId, gear) {
   }
   boxes.forEach(box => box.addEventListener("change", saveState));
   document.getElementById("resetGear").addEventListener("click", () => {
-    boxes.forEach(box => { box.checked = false; });
+    boxes.forEach(box => {
+      box.checked = false;
+    });
     saveState();
   });
   saveState();
 }
 
 function drawElevation(race, profile, chart, progress) {
-  if (!Array.isArray(profile.samples) || !Array.isArray(profile.markers) || !profile.markers.length) {
+  if (
+    !Array.isArray(profile.samples) ||
+    !Array.isArray(profile.markers) ||
+    !profile.markers.length
+  ) {
     showProfileError(progress, "Les données du profil sont invalides.");
     return;
   }
@@ -489,55 +538,119 @@ function drawElevation(race, profile, chart, progress) {
   const last = profile.samples[profile.samples.length - 1];
   const area = svg("polygon", {
     class: "elevation-area",
-    points: [`${first[0]},${plotBottom}`, ...profile.samples.map(point => point.join(",")), `${last[0]},${plotBottom}`].join(" ")
+    points: [
+      `${first[0]},${plotBottom}`,
+      ...profile.samples.map(point => point.join(",")),
+      `${last[0]},${plotBottom}`
+    ].join(" ")
   });
   const grid = svg("g", { class: "elevation-grid" });
-  const line = svg("polyline", { class: "elevation-line", points: profile.samples.map(point => point.join(",")).join(" ") });
-  const completed = svg("polyline", { class: "elevation-completed", id: "profileCompleted", points: "" });
+  const line = svg("polyline", {
+    class: "elevation-line",
+    points: profile.samples.map(point => point.join(",")).join(" ")
+  });
+  const completed = svg("polyline", {
+    class: "elevation-completed",
+    id: "profileCompleted",
+    points: ""
+  });
   const axis = svg("path", { class: "elevation-axis", d: "M 52 26 V 213 H 884" });
   const markersLayer = svg("g", { class: "elevation-markers" });
-  const current = svg("circle", { class: "elevation-current", id: "profileCurrent", cx: "0", cy: "0", r: "7", visibility: "hidden" });
+  const current = svg("circle", {
+    class: "elevation-current",
+    id: "profileCurrent",
+    cx: "0",
+    cy: "0",
+    r: "7",
+    visibility: "hidden"
+  });
 
   const elevationRange = profile.maxElevation - profile.minElevation;
   const rawStep = elevationRange / 4;
   const magnitude = 10 ** Math.floor(Math.log10(rawStep));
   const normalizedStep = rawStep / magnitude;
-  const elevationStep = (normalizedStep <= 1 ? 1 : normalizedStep <= 2 ? 2 : normalizedStep <= 2.5 ? 2.5 : normalizedStep <= 5 ? 5 : 10) * magnitude;
-  for (let elevation = profile.minElevation; elevation <= profile.maxElevation; elevation += elevationStep) {
-    const y = 26 + (profile.maxElevation - elevation) / elevationRange * 187;
-    grid.append(svg("line", { x1: 52, y1: y, x2: 884, y2: y }), svg("text", { x: 44, y: y + 4, "text-anchor": "end" }, `${elevation} m`));
+  const elevationStep =
+    (normalizedStep <= 1
+      ? 1
+      : normalizedStep <= 2
+        ? 2
+        : normalizedStep <= 2.5
+          ? 2.5
+          : normalizedStep <= 5
+            ? 5
+            : 10) * magnitude;
+  for (
+    let elevation = profile.minElevation;
+    elevation <= profile.maxElevation;
+    elevation += elevationStep
+  ) {
+    const y = 26 + ((profile.maxElevation - elevation) / elevationRange) * 187;
+    grid.append(
+      svg("line", { x1: 52, y1: y, x2: 884, y2: y }),
+      svg("text", { x: 44, y: y + 4, "text-anchor": "end" }, `${elevation} m`)
+    );
   }
   for (let km = 0; km <= Math.floor(profile.distanceKm / 10) * 10; km += 10) {
-    const x = 52 + km / profile.distanceKm * 832;
-    grid.append(svg("line", { x1: x, y1: 213, x2: x, y2: 218 }), svg("text", { x, y: 231, "text-anchor": "middle" }, `${km}`));
+    const x = 52 + (km / profile.distanceKm) * 832;
+    grid.append(
+      svg("line", { x1: x, y1: 213, x2: x, y2: 218 }),
+      svg("text", { x, y: 231, "text-anchor": "middle" }, `${km}`)
+    );
   }
-  grid.append(svg("text", { x: 884, y: 231, "text-anchor": "end" }, `${profile.distanceKm.toFixed(1).replace(".", ",")} km`));
+  grid.append(
+    svg(
+      "text",
+      { x: 884, y: 231, "text-anchor": "end" },
+      `${profile.distanceKm.toFixed(1).replace(".", ",")} km`
+    )
+  );
 
-  const checkpointById = new Map((race.checkpoints || []).map(checkpoint => [checkpoint.id, checkpoint]));
+  const checkpointById = new Map(
+    (race.checkpoints || []).map(checkpoint => [checkpoint.id, checkpoint])
+  );
   profile.markers.forEach(marker => {
     const checkpoint = checkpointById.get(marker.id);
-    const name = marker.id === "start" ? "Départ" : marker.id === "finish" ? "Arrivée" : checkpoint?.name || marker.id;
+    const name =
+      marker.id === "start"
+        ? "Départ"
+        : marker.id === "finish"
+          ? "Arrivée"
+          : checkpoint?.name || marker.id;
     const interactive = marker.id !== "start" && checkpointById.has(marker.id);
-    const stop = svg("g", { class: "elevation-stop", transform: `translate(${marker.x} ${marker.y})` });
+    const stop = svg("g", {
+      class: "elevation-stop",
+      transform: `translate(${marker.x} ${marker.y})`
+    });
     const circle = svg("circle", {
       class: "elevation-stop-dot",
       r: 5,
       "data-profile-stop": marker.id,
       tabindex: interactive ? 0 : -1,
       role: interactive ? "button" : "img",
-      "aria-label": marker.id === "start" ? "Départ, kilomètre zéro" : interactive ? `Marquer ${name} comme atteint` : name
+      "aria-label":
+        marker.id === "start"
+          ? "Départ, kilomètre zéro"
+          : interactive
+            ? `Marquer ${name} comme atteint`
+            : name
     });
     if (interactive) circle.setAttribute("aria-pressed", "false");
-    const label = svg("text", {
-      class: "elevation-stop-label",
-      x: 0,
-      y: marker.y < 53 ? 15 : -11,
-      "text-anchor": marker.id === "start" ? "start" : marker.id === "finish" ? "end" : "middle"
-    }, name);
+    const label = svg(
+      "text",
+      {
+        class: "elevation-stop-label",
+        x: 0,
+        y: marker.y < 53 ? 15 : -11,
+        "text-anchor": marker.id === "start" ? "start" : marker.id === "finish" ? "end" : "middle"
+      },
+      name
+    );
     stop.append(circle, label);
     if (interactive) {
       const toggle = () => {
-        const checkbox = document.querySelector(`.checkpoint[data-id="${CSS.escape(marker.id)}"] input[type="checkbox"]`);
+        const checkbox = document.querySelector(
+          `.checkpoint[data-id="${CSS.escape(marker.id)}"] input[type="checkbox"]`
+        );
         if (!checkbox) return;
         checkbox.checked = !checkbox.checked;
         checkbox.dispatchEvent(new Event("change", { bubbles: true }));
@@ -555,13 +668,15 @@ function drawElevation(race, profile, chart, progress) {
   chart.append(area, grid, line, completed, axis, markersLayer, current);
 
   window.updateElevationProgress = () => {
-    const progressMarkers = profile.markers.filter(marker =>
-      marker.id === "start" || checkpointById.has(marker.id)
+    const progressMarkers = profile.markers.filter(
+      marker => marker.id === "start" || checkpointById.has(marker.id)
     );
     const checkpointMarkers = progressMarkers.filter(marker => marker.id !== "start");
     let completedCount = 0;
     for (const marker of checkpointMarkers) {
-      const checkbox = document.querySelector(`.checkpoint[data-id="${CSS.escape(marker.id)}"] input[type="checkbox"]`);
+      const checkbox = document.querySelector(
+        `.checkpoint[data-id="${CSS.escape(marker.id)}"] input[type="checkbox"]`
+      );
       if (!checkbox?.checked) break;
       completedCount += 1;
     }
@@ -578,13 +693,21 @@ function drawElevation(race, profile, chart, progress) {
     current.setAttribute("cx", activeMarker.x);
     current.setAttribute("cy", activeMarker.y);
     current.setAttribute("visibility", activeMarker.km > 0 ? "visible" : "hidden");
-    const name = activeMarker.id === "start" ? "Départ" : checkpointById.get(activeMarker.id)?.name || "Arrivée";
+    const name =
+      activeMarker.id === "start"
+        ? "Départ"
+        : checkpointById.get(activeMarker.id)?.name || "Arrivée";
     const remaining = Math.max(0, profile.distanceKm - activeMarker.km);
-    const currentKm = activeMarker.km.toFixed(2).replace(/\.?0+$/, "").replace(".", ",");
+    const currentKm = activeMarker.km
+      .toFixed(2)
+      .replace(/\.?0+$/, "")
+      .replace(".", ",");
     progress.textContent = `${name} · KM ${currentKm} · ${remaining.toFixed(1).replace(".", ",")} km restants`;
     profile.markers.forEach(marker => {
       if (marker.id === "start") return;
-      const checkbox = document.querySelector(`.checkpoint[data-id="${CSS.escape(marker.id)}"] input[type="checkbox"]`);
+      const checkbox = document.querySelector(
+        `.checkpoint[data-id="${CSS.escape(marker.id)}"] input[type="checkbox"]`
+      );
       const dot = chart.querySelector(`[data-profile-stop="${CSS.escape(marker.id)}"]`);
       if (!dot) return;
       dot.classList.toggle("is-done", Boolean(checkbox?.checked));
@@ -595,7 +718,13 @@ function drawElevation(race, profile, chart, progress) {
 }
 
 function renderRace(race, personalPlan = null, storageError = null) {
-  if (!race.id || !race.name || !race.date || !Number.isFinite(race.distanceKm) || !Number.isFinite(race.ascentMeters)) {
+  if (
+    !race.id ||
+    !race.name ||
+    !race.date ||
+    !Number.isFinite(race.distanceKm) ||
+    !Number.isFinite(race.ascentMeters)
+  ) {
     throw new Error("Les données principales de la course sont incomplètes.");
   }
   const displayRace = applyPersonalPlan(race, personalPlan);
@@ -605,9 +734,11 @@ function renderRace(race, personalPlan = null, storageError = null) {
   if (displayRace.checkpoints?.length) content.append(renderCheckpoints(displayRace));
   if (displayRace.nutrition) content.append(renderNutrition(displayRace.nutrition));
   if (displayRace.reminders?.items?.length) content.append(renderReminders(displayRace.reminders));
-  if (displayRace.practicalInfo?.items?.length) content.append(renderPracticalInfo(displayRace.practicalInfo));
+  if (displayRace.practicalInfo?.items?.length)
+    content.append(renderPracticalInfo(displayRace.practicalInfo));
   if (displayRace.gear?.groups?.length) content.append(renderGear(displayRace, displayRace.gear));
-  if (displayRace.sources?.length) content.append(renderSources(displayRace.sources, displayRace.verifiedAt));
+  if (displayRace.sources?.length)
+    content.append(renderSources(displayRace.sources, displayRace.verifiedAt));
   if (displayRace.footer) addText(content, "p", "footer", displayRace.footer);
   const personalPlanStatus = renderPersonalPlanControls(personalPlan, storageError);
   if (personalPlanStatus) content.append(personalPlanStatus);
@@ -619,11 +750,12 @@ function renderRace(race, personalPlan = null, storageError = null) {
 function applyPersonalPlan(race, plan) {
   if (!plan) return race;
   const scenarios = Array.isArray(plan.scenarios) ? plan.scenarios : [];
-  const defaultScenario = Number.isInteger(plan.defaultScenario) &&
+  const defaultScenario =
+    Number.isInteger(plan.defaultScenario) &&
     plan.defaultScenario >= 0 &&
     plan.defaultScenario < scenarios.length
-    ? plan.defaultScenario
-    : 0;
+      ? plan.defaultScenario
+      : 0;
   const privateCheckpoints = new Map(
     (Array.isArray(plan.checkpoints) ? plan.checkpoints : [])
       .filter(checkpoint => checkpoint && typeof checkpoint.id === "string")
@@ -632,12 +764,12 @@ function applyPersonalPlan(race, plan) {
   const finishCheckpoint = privateCheckpoints.get("finish");
   return {
     ...race,
-    targetTime: typeof plan.targetTime === "string"
-      ? plan.targetTime
-      : scenarios[defaultScenario]?.duration,
-    targetFinish: typeof plan.targetFinish === "string"
-      ? plan.targetFinish
-      : finishCheckpoint?.clocks?.[defaultScenario],
+    targetTime:
+      typeof plan.targetTime === "string" ? plan.targetTime : scenarios[defaultScenario]?.duration,
+    targetFinish:
+      typeof plan.targetFinish === "string"
+        ? plan.targetFinish
+        : finishCheckpoint?.clocks?.[defaultScenario],
     scenarios,
     defaultScenario,
     checkpoints: (race.checkpoints || []).map(checkpoint => ({
@@ -664,7 +796,8 @@ function renderPersonalPlanControls(plan, storageError = null) {
   }
 
   if (storageError) {
-    status.textContent = "Le plan personnel ne peut pas être chargé depuis le stockage local de cet appareil.";
+    status.textContent =
+      "Le plan personnel ne peut pas être chargé depuis le stockage local de cet appareil.";
     section.append(status);
     return section;
   }

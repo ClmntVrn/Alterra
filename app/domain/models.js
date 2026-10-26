@@ -42,9 +42,11 @@ function isValidDateKey(value) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return false;
   const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-  return date.getFullYear() === Number(match[1]) &&
+  return (
+    date.getFullYear() === Number(match[1]) &&
     date.getMonth() === Number(match[2]) - 1 &&
-    date.getDate() === Number(match[3]);
+    date.getDate() === Number(match[3])
+  );
 }
 
 export function validatePersonalData(data) {
@@ -56,7 +58,11 @@ export function validatePersonalData(data) {
   }
 
   for (const collection of PERSONAL_DATA_COLLECTIONS) {
-    if (data.formatVersion === 1 && collection === "raceCatalog" && data[collection] === undefined) {
+    if (
+      data.formatVersion === 1 &&
+      collection === "raceCatalog" &&
+      data[collection] === undefined
+    ) {
       data[collection] = [];
     }
     if (!Array.isArray(data[collection])) {
@@ -64,8 +70,13 @@ export function validatePersonalData(data) {
     }
     const ids = new Set();
     for (const item of data[collection]) {
-      if (!item || typeof item !== "object" || Array.isArray(item) ||
-          typeof item.id !== "string" || item.id.trim() === "") {
+      if (
+        !item ||
+        typeof item !== "object" ||
+        Array.isArray(item) ||
+        typeof item.id !== "string" ||
+        item.id.trim() === ""
+      ) {
         throw new TypeError(`Chaque élément de « ${collection} » doit avoir un identifiant.`);
       }
       if (ids.has(item.id)) {
@@ -73,13 +84,21 @@ export function validatePersonalData(data) {
       }
       ids.add(item.id);
       if (collection === "raceCatalog") {
-        if (typeof item.name !== "string" || typeof item.date !== "string" ||
-            typeof item.calendarDetails !== "string" ||
-            !Number.isFinite(item.distanceKm) || !Number.isFinite(item.ascentMeters)) {
-          throw new TypeError(`La course « ${item.id} » ne contient pas ses informations de référence.`);
+        if (
+          typeof item.name !== "string" ||
+          typeof item.date !== "string" ||
+          typeof item.calendarDetails !== "string" ||
+          !Number.isFinite(item.distanceKm) ||
+          !Number.isFinite(item.ascentMeters)
+        ) {
+          throw new TypeError(
+            `La course « ${item.id} » ne contient pas ses informations de référence.`
+          );
         }
-        if (item.endDate !== undefined &&
-            (!isValidDateKey(item.date) || !isValidDateKey(item.endDate) || item.endDate < item.date)) {
+        if (
+          item.endDate !== undefined &&
+          (!isValidDateKey(item.date) || !isValidDateKey(item.endDate) || item.endDate < item.date)
+        ) {
           throw new TypeError(`La date de fin de la course « ${item.id} » est invalide.`);
         }
         if (item.profile?.gpx && typeof item.profile.gpxData !== "string") {

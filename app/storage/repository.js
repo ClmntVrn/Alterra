@@ -9,8 +9,13 @@ function assertCollection(collection) {
 }
 
 function assertRecord(record) {
-  if (!record || typeof record !== "object" || Array.isArray(record) ||
-      typeof record.id !== "string" || record.id.trim() === "") {
+  if (
+    !record ||
+    typeof record !== "object" ||
+    Array.isArray(record) ||
+    typeof record.id !== "string" ||
+    record.id.trim() === ""
+  ) {
     throw new TypeError("Un enregistrement doit être un objet avec un identifiant.");
   }
 }
@@ -65,7 +70,9 @@ export function createPersonalDataRepository(adapter) {
     async remove(collection, id) {
       assertCollection(collection);
       if (typeof id !== "string" || id.trim() === "") {
-        throw new TypeError("Un identifiant valide est nécessaire pour supprimer un enregistrement.");
+        throw new TypeError(
+          "Un identifiant valide est nécessaire pour supprimer un enregistrement."
+        );
       }
       return adapter.remove(collection, id);
     }
