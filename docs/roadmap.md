@@ -1,7 +1,7 @@
 # Plan de développement d’Alterra
 
 **Mis à jour le :** 26 octobre 2026  
-**État général :** version locale utilisable (0.8.8) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
+**État général :** version locale utilisable (0.8.14) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
 
 ## Vision
 
@@ -141,8 +141,72 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 
 **Validation :** chaque service externe a un coût et une politique de données documentés ; les clés restent côté serveur.
 
+## Refonte technique
+
+Chantier de qualité du code décidé le 26 octobre 2026, mené en parallèle de la feuille de route : chaque étape est un commit séparé, sans changement de comportement sauf mention, vérifié par `npm run check` et un scénario dans le navigateur.
+
+### R1 — Hygiène du dépôt
+
+**Statut :** terminée — 26 octobre 2026
+
+- [x] `.editorconfig`, `.gitattributes`, fins de ligne LF, `package.json` (outils de développement uniquement).
+- [x] Prettier et ESLint, `npm run check` ; documents de projet déplacés dans `docs/`.
+
+### R2 — Domaine pur et tests
+
+**Statut :** terminée — 26 octobre 2026 (0.8.8)
+
+- [x] Dates, durées, séances et statistiques extraites dans `src/domain/`, formats français dans `src/ui/format.js`, doublons supprimés.
+- [x] Tests `node --test`, dont un test vérifiant que le service worker précache toutes les ressources livrées.
+- [x] Corrigé au passage : le graphique d’activité recomptait les séances à chaque sélection de semaine.
+
+### R3 — Nouvelle arborescence
+
+**Statut :** terminée — 26 octobre 2026 (0.8.9)
+
+- [x] `src/pages/`, `src/features/`, `src/storage/`, `styles/`, `assets/icons/` ; déplacements par `git mv` pour garder l’historique.
+- [x] Fiche course à la racine : `race.html?id=…`.
+
+### R4 — Découpage du calendrier
+
+**Statut :** terminée — 26 octobre 2026 (0.8.10, 0.8.11)
+
+- [x] `calendar.js` réduit aux vues mois/jour ; cartes et formulaires dans `features/workouts/` et `features/races/` ; règles du calendrier dans `src/domain/calendar.js` avec tests ; plus d’état global.
+- [x] Corrigé au passage : la modification d’une course personnelle enregistrait un champ interne (`eventType`).
+- [x] Sélecteur de mois natif (`<input type="month">`) à la place des roues maison. À vérifier sur iPhone.
+
+### R5 — Découpage de la fiche course
+
+**Statut :** terminée — 26 octobre 2026 (0.8.12)
+
+- [x] `race.js` réduit au chargement et à l’assemblage ; blocs dans `features/race-sheet/` ; plan personnel et profil d’altitude dans `src/domain/` avec tests ; plus de variable globale `window.updateElevationProgress`.
+
+### R6 — Feuilles de styles
+
+**Statut :** terminée — 26 octobre 2026 (0.8.13, 0.8.14)
+
+- [x] `main.css` découpée en `tokens.css`, `base.css`, `layout.css`, `components/` et `features/` ; chaque page charge ses feuilles.
+- [x] Styles calculés de tous les éléments vérifiés identiques (9 écrans, 3 largeurs) ; règles inutilisées supprimées.
+- [x] Aucune couleur écrite en dur hors de `tokens.css`.
+
+### R7 — Renommage des données
+
+**Statut :** en cours
+
+- [ ] Collections `plannedSessions` → `workouts` et `raceEvents` → `personalRaces`, avec migration de la base IndexedDB.
+- [ ] Sauvegarde au format 3 ; les formats 1 et 2 restent acceptés à l’import.
+- [ ] Migration testée sur une copie d’une vraie sauvegarde (gardée hors du dépôt).
+
+### R8 — Automatisation
+
+**Statut :** à faire
+
+- [ ] `npm run release` : numéro de version, `versions.html` et cache du service worker en une commande.
+- [ ] Scénarios de test navigateur dans `tools/`, lançables par une commande npm.
+- [ ] Intégration continue GitHub : `npm run check` à chaque push.
+
 ## Suivi
 
-- Mettre à jour les cases et le statut de l’étape concernée après chaque évolution notable.
+- Mettre à jour les cases et le statut de l’étape concernée (feuille de route ou refonte technique) après chaque évolution notable.
 - Ajouter les décisions importantes dans « Décisions de référence » en datant celles qui en remplacent une autre.
 - Ne pas marquer une étape terminée avant d’avoir vérifié ses critères de validation.
