@@ -119,11 +119,43 @@
       <div class="calendar-event-details" id="calendarEventDetails" hidden aria-live="polite"></div>
       <section class="calendar-create-section" id="calendarCreateSection" aria-label="Ajouter un événement" hidden>
         <div class="calendar-create-actions">
-          <button class="calendar-create-button" type="button" disabled>＋ Ajouter course</button>
+          <button class="calendar-create-button" id="addRaceButton" type="button">＋ Ajouter une course</button>
           <button class="calendar-create-button" id="addTrainingButton" type="button">＋ Ajouter un entraînement</button>
         </div>
+        <form class="training-form calendar-race-form" id="raceEventForm" hidden>
+          <h3 id="raceEventFormTitle">Nouvelle course</h3>
+          <label>
+            Nom de la course
+            <input name="name" type="text" maxlength="100" required>
+          </label>
+          <div class="calendar-date-range">
+            <label>
+              Du
+              <input name="date" type="date" required>
+            </label>
+            <label>
+              Au
+              <input name="endDate" type="date" required>
+            </label>
+          </div>
+          <div class="training-form-actions">
+            <button class="calendar-create-button" id="cancelRaceEventButton" type="button">Annuler</button>
+            <button class="training-save-button" type="submit">Enregistrer</button>
+          </div>
+          <p class="training-form-status" id="raceEventFormStatus" role="status" aria-live="polite"></p>
+        </form>
         <form class="training-form" id="trainingForm" hidden>
           <h3 id="trainingFormTitle">Nouvel entraînement</h3>
+          <div class="calendar-date-range">
+            <label>
+              Du
+              <input name="date" type="date" required>
+            </label>
+            <label>
+              Au
+              <input name="endDate" type="date" required>
+            </label>
+          </div>
           <label>
             Nom de la séance
             <input name="title" type="text" maxlength="100" required>
@@ -144,12 +176,22 @@
           <div class="training-form-measures">
             <label>
               Distance (km)
-              <input name="distanceKm" type="number" min="0.1" max="1000" step="0.1" inputmode="decimal">
+              <input name="distanceKm" type="text" inputmode="decimal" pattern="[0-9]+([,.][0-9])?" maxlength="6" title="Saisis une distance entre 0,1 et 1 000 km, avec au maximum une décimale.">
             </label>
-            <label>
-              Durée (min)
-              <input name="durationMinutes" type="number" min="0.1" max="1440" step="0.1" inputmode="decimal">
-            </label>
+            <div class="training-duration-field">
+              <span>Durée</span>
+              <div class="training-duration-inputs" role="group" aria-label="Durée en heures et minutes">
+                <label>
+                  h
+                  <input id="durationHours" type="number" min="0" max="9999" step="1" inputmode="numeric" aria-label="Heures">
+                </label>
+                <label>
+                  min
+                  <input id="durationRemainderMinutes" type="number" min="0" max="59.9" step="0.1" inputmode="decimal" aria-label="Minutes">
+                </label>
+              </div>
+              <input name="durationMinutes" type="hidden">
+            </div>
             <label>
               D+ (m)
               <input name="ascentMeters" type="number" min="0" max="100000" step="1" inputmode="numeric">
@@ -200,7 +242,7 @@
     <footer class="app-footer">
       <span>ALTERRA · IMAGINÉ POUR LES SENTIERS</span>
       <span class="app-version">
-        <span>Version <strong>0.8.0</strong></span>
+        <span>Version <strong>0.8.3</strong></span>
         <a href="./versions.html" aria-label="Détails et historique des versions">Détails</a>
       </span>
     </footer>

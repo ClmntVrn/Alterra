@@ -37,6 +37,16 @@ export function createEmptyPersonalData() {
   };
 }
 
+function isValidDateKey(value) {
+  if (typeof value !== "string") return false;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  return date.getFullYear() === Number(match[1]) &&
+    date.getMonth() === Number(match[2]) - 1 &&
+    date.getDate() === Number(match[3]);
+}
+
 export function validatePersonalData(data) {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     throw new TypeError("Les données personnelles doivent être un objet.");
@@ -67,6 +77,10 @@ export function validatePersonalData(data) {
             typeof item.calendarDetails !== "string" ||
             !Number.isFinite(item.distanceKm) || !Number.isFinite(item.ascentMeters)) {
           throw new TypeError(`La course « ${item.id} » ne contient pas ses informations de référence.`);
+        }
+        if (item.endDate !== undefined &&
+            (!isValidDateKey(item.date) || !isValidDateKey(item.endDate) || item.endDate < item.date)) {
+          throw new TypeError(`La date de fin de la course « ${item.id} » est invalide.`);
         }
         if (item.profile?.gpx && typeof item.profile.gpxData !== "string") {
           throw new TypeError(`La trace GPX de « ${item.id} » est absente de la sauvegarde.`);

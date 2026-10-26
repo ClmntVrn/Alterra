@@ -204,7 +204,7 @@ export function initializeActivityStatistics(container, repository) {
     const maxValue = Math.max(...values, 0);
     const chartMax = maxValue || 1;
     const points = values.map((value, index) => ({
-      x: 28 + index * 27.6,
+      x: 43 + index * 27,
       y: 146 - (value / chartMax) * 112
     }));
 
@@ -220,15 +220,24 @@ export function initializeActivityStatistics(container, repository) {
     title.textContent = `${metrics[selectedMetric].label} par semaine`;
     svg.append(title);
 
-    for (const y of [34, 90, 146]) {
+    const axisPositions = [34, 90, 146];
+    const axisValues = [maxValue, maxValue / 2, 0];
+    const axisLabels = [];
+    axisPositions.forEach((y, index) => {
       const gridLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      gridLine.setAttribute("x1", "20");
-      gridLine.setAttribute("x2", "340");
+      gridLine.setAttribute("x1", "40");
+      gridLine.setAttribute("x2", "344");
       gridLine.setAttribute("y1", y);
       gridLine.setAttribute("y2", y);
       gridLine.setAttribute("class", "activity-chart-gridline");
       svg.append(gridLine);
-    }
+      const axisLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      axisLabel.setAttribute("x", "2");
+      axisLabel.setAttribute("y", y + 3);
+      axisLabel.setAttribute("class", "activity-chart-axis-label");
+      axisLabel.textContent = numberFormatter.format(axisValues[index]);
+      axisLabels.push(axisLabel);
+    });
 
     const linePath = createCurvePath(points);
     const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -243,6 +252,7 @@ export function initializeActivityStatistics(container, repository) {
     line.setAttribute("d", linePath);
     line.setAttribute("class", "activity-chart-line");
     svg.append(line);
+    svg.append(...axisLabels);
 
     points.forEach((point, index) => {
       const group = document.createElementNS("http://www.w3.org/2000/svg", "g");

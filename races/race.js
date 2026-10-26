@@ -23,6 +23,17 @@ function localDate(dateString) {
   return new Date(year, month - 1, day);
 }
 
+function formatRaceDates(race) {
+  const start = localDate(race.date);
+  if (!race.endDate || race.endDate === race.date) return dateFormatter.format(start);
+  const end = localDate(race.endDate);
+  const sameYear = start.getFullYear() === end.getFullYear();
+  const startText = sameYear
+    ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" }).format(start)
+    : dateFormatter.format(start);
+  return `${startText} – ${dateFormatter.format(end)}`;
+}
+
 function formatDuration(duration) {
   return duration.replace(":", "h");
 }
@@ -41,7 +52,7 @@ function renderHero(race) {
   const hero = makeElement("section", "hero");
   addText(hero, "h1", "", race.name);
   const subtitle = [
-    dateFormatter.format(localDate(race.date)),
+    formatRaceDates(race),
     race.startTime ? `Départ ${race.startTime}` : "",
     race.route || ""
   ].filter(Boolean).join(" · ");
