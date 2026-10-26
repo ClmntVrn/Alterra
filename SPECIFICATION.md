@@ -10,7 +10,7 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 - Depuis une journée, on peut créer une sortie/entraînement ou une course personnelle. Chaque événement a une date de début et une date de fin inclusives ; il apparaît chaque jour couvert, y compris lors d’un changement de mois ou d’année.
 - Les plages sont contrôlées : la fin doit être égale ou postérieure au début.
 - Une sortie comprend un nom, un type (trail, course à pied, renforcement ou vélo), une heure facultative, une distance facultative, une durée facultative, un D+, une météo et des notes. Elle peut être marquée comme réalisée. Les sorties peuvent être modifiées ; les sorties prévues peuvent être supprimées.
-- La distance accepte le point ou la virgule décimale, de 0,1 à 1 000 km, avec une décimale au maximum. La durée est saisie en heures et minutes (jusqu’à 9 999 h et 59,9 min) et conservée comme un nombre de minutes. L’allure moyenne est calculée lorsque distance et durée sont valides.
+- La distance accepte le point ou la virgule décimale, de 0,1 à 1 000 km, avec deux décimales au maximum. La durée est saisie en heures et minutes (jusqu’à 9 999 h et 59,9 min) et conservée comme un nombre de minutes. L’allure moyenne est calculée lorsque distance et durée sont valides.
 - Une course personnelle comprend un nom et des dates ; elle peut être modifiée ou supprimée.
 - Les courses de référence importées apparaissent aussi au calendrier et ouvrent leur fiche. Elles sont gérées dans la sauvegarde locale ; le bouton d’ajout depuis le calendrier crée une course personnelle, pas une fiche de référence détaillée.
 - Les périodes de sorties et courses sont des dates de présence, pas un découpage quotidien de la distance, du temps ou du D+. Pour les statistiques, une sortie réalisée est comptabilisée une seule fois dans la semaine de sa date de début.
@@ -20,7 +20,7 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 - Le graphique couvre les 12 semaines commençant le lundi, semaine actuelle incluse.
 - Seules les sorties marquées « réalisées » sont comptées. Les filtres sont Trail + course à pied (par défaut), Trail, Course à pied et Vélo.
 - L’indicateur sélectionnable est la distance, la durée, le D+ ou le km-effort. Le km-effort vaut distance en km + D+ en mètres / 100.
-- Sélectionner une semaine affiche ses totaux de distance, temps et D+. Le graphique indique les valeurs de son échelle verticale.
+- Sélectionner une semaine affiche ses totaux de distance, temps et D+. Le graphique indique à droite les valeurs de son échelle verticale.
 - Les statistiques sont calculées depuis les sorties enregistrées dans Alterra ; aucune connexion à Strava ou autre service n’est intégrée.
 
 ## Fiche de course

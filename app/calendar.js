@@ -541,9 +541,10 @@ function updateTrainingPace() {
   const distanceValue = distanceField.value.trim();
   const distanceKm = parseLocalizedDecimal(distanceValue);
   const isInRange = !distanceValue ||
-    (Number.isFinite(distanceKm) && distanceKm >= 0.1 && distanceKm <= 1000);
+    (Number.isFinite(distanceKm) && distanceKm >= 0.1 && distanceKm <= 1000 &&
+      /^\d+(?:[,.]\d{1,2})?$/.test(distanceValue));
   distanceField.setCustomValidity(
-    isInRange ? "" : "Saisis une distance comprise entre 0,1 et 1 000 km."
+    isInRange ? "" : "Saisis une distance entre 0,1 et 1 000 km, avec au maximum deux décimales."
   );
   const durationMinutes = Number(durationMinutesField.value);
   trainingPace.textContent = formatPace(distanceKm, durationMinutes) || "—";

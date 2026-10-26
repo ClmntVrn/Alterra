@@ -334,7 +334,7 @@ button {
   fill: rgb(255 253 247 / 70%);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 8px;
-  text-anchor: start;
+  text-anchor: end;
 }
 
 .activity-chart-area {
@@ -2087,11 +2087,7 @@ button {
   }
 
   .training-form-measures {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .training-form-measures label:last-child {
-    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

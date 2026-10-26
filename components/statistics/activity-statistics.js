@@ -204,7 +204,7 @@ export function initializeActivityStatistics(container, repository) {
     const maxValue = Math.max(...values, 0);
     const chartMax = maxValue || 1;
     const points = values.map((value, index) => ({
-      x: 43 + index * 27,
+      x: 20 + index * 26.8,
       y: 146 - (value / chartMax) * 112
     }));
 
@@ -225,14 +225,14 @@ export function initializeActivityStatistics(container, repository) {
     const axisLabels = [];
     axisPositions.forEach((y, index) => {
       const gridLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      gridLine.setAttribute("x1", "40");
-      gridLine.setAttribute("x2", "344");
+      gridLine.setAttribute("x1", "16");
+      gridLine.setAttribute("x2", "320");
       gridLine.setAttribute("y1", y);
       gridLine.setAttribute("y2", y);
       gridLine.setAttribute("class", "activity-chart-gridline");
       svg.append(gridLine);
       const axisLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      axisLabel.setAttribute("x", "2");
+      axisLabel.setAttribute("x", "358");
       axisLabel.setAttribute("y", y + 3);
       axisLabel.setAttribute("class", "activity-chart-axis-label");
       axisLabel.textContent = numberFormatter.format(axisValues[index]);
