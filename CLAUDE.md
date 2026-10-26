@@ -51,6 +51,7 @@ Quand une modification change les ressources livrées :
 - Après une modification : relire le diff et lancer `npm run check` (Prettier, ESLint, tests). `npm run format` reformate le code. Pour un changement d'interface, de stockage ou de PWA, lancer aussi `npm run test:browser` (tests dans Chrome ou Edge sans interface, `tests/browser/`, données fictives uniquement). Il n'y a pas d'étape de build : Node.js ne sert qu'aux outils de développement.
 - Pour un changement d'interface ou de PWA, tester le parcours sur largeur mobile ; signaler ce qui reste à vérifier sur iPhone/Safari.
 - Un commit de formatage pur est ajouté à `.git-blame-ignore-revs`.
+- La CI GitHub (`.github/workflows/ci.yml`) relance `npm run check` et `npm run test:browser` à chaque push ; elle signale sans bloquer la publication.
 - Ne pas réécrire l'historique Git (purge des anciennes données Mallorca comprise) sans décision explicite.
 
 ## Mise à jour de ces consignes

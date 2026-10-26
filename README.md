@@ -16,6 +16,16 @@ La base locale comprend les fiches de course et leurs traces GPX, les plans pers
 
 L’export et l’import se font depuis l’accueil. L’import remplace toutes les données Alterra de l’appareil après confirmation. Les fichiers JSON ne sont pas synchronisés automatiquement entre appareils ; conserve l’export complet dans un endroit sûr.
 
+## Développement
+
+Node.js ne sert qu’aux outils de développement : le site n’a pas d’étape de build.
+
+- `npm run check` : formatage, lint et tests unitaires.
+- `npm run test:browser` : parcours dans Chrome ou Edge sans interface, sur données fictives.
+- `npm run release -- 0.8.17 "Ligne d’historique."` : nouvelle version (numéro, historique, cache hors ligne).
+
+À chaque push, GitHub relance ces vérifications (onglet Actions) ; elles ne bloquent pas la publication du site.
+
 ## Documentation du projet
 
 - [Spécification fonctionnelle et règles de gestion](./docs/specification.md)

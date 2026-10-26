@@ -1,0 +1,25 @@
+# Vérifications à chaque push : formatage, lint, tests unitaires puis tests navigateur.
+# Elles signalent seulement : la publication du site ne dépend pas de leur résultat.
+name: Vérifications
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verifications:
+    name: npm run check et tests navigateur
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run test:browser

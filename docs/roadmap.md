@@ -206,7 +206,8 @@ Chantier de qualité du code décidé le 26 octobre 2026, mené en parallèle de
 
 - [x] `npm run release -- <version> "<ligne>"` : numéro de version partout, entrée datée dans `versions.html`, cache du service worker dérivé de la version, puis `npm run check` ; tout est préparé avant la première écriture. Un test vérifie que la version est identique partout.
 - [x] Tests navigateur dans `tests/browser/` (calendrier, fiche course, mise à niveau de la base, mise en page mobile), lancés par `npm run test:browser` ; pilotage de Chrome ou Edge sans dépendance dans `tools/browser.js`. Vérifié qu’une migration sabotée fait échouer les tests.
-- [ ] Intégration continue GitHub : `npm run check` à chaque push.
+- [x] Intégration continue GitHub (`.github/workflows/ci.yml`) : `npm ci`, `npm run check` puis `npm run test:browser` à chaque push ; elle signale sans bloquer la publication. Étapes reproduites localement.
+- [ ] Premier passage de la CI sur GitHub à confirmer après le push.
 
 ## Suivi
 
