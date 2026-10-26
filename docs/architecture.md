@@ -98,7 +98,6 @@ Le service worker ne met en cache que l’interface ; les données personnelles 
 
 ## 4. Évolutions prévues
 
-- **Couleurs :** remplacer les couleurs écrites en dur dans les feuilles de styles par des variables.
 - **Backend :** quand la synchronisation sera nécessaire, ajouter une implémentation distante du repository avec authentification et isolation des données par utilisateur vérifiées côté serveur ; migrer par export puis import vérifié, sans supprimer la sauvegarde source.
 - **Intégrations :** Garmin/Strava et IA passeront par un serveur ; aucun secret d’API dans le navigateur. Les séances générées par IA restent des propositions à valider.
 

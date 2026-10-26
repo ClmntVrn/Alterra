@@ -14,7 +14,7 @@ body {
   margin: 0;
   padding: max(16px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
   background:
-    radial-gradient(ellipse at 12% 0%, rgb(105 116 125 / 12%), transparent 34rem),
+    radial-gradient(ellipse at 12% 0%, rgb(var(--rgb-muted) / 12%), transparent 34rem),
     var(--color-stone);
   color: var(--color-text);
   font:

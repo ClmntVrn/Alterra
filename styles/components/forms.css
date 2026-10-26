@@ -7,7 +7,7 @@
   border: 0;
   border-radius: 11px;
   background: var(--color-charcoal);
-  color: #fffdf7;
+  color: var(--color-cream);
   font-size: 13px;
   font-weight: 750;
 }
@@ -60,7 +60,7 @@
   padding: 9px 11px;
   border: 1px solid var(--color-line);
   border-radius: 10px;
-  background: #fff;
+  background: var(--color-paper);
   color: var(--color-text);
   font-size: 16px;
 }
@@ -153,15 +153,15 @@
   place-items: center;
   border: 1px solid var(--color-line);
   border-radius: 10px;
-  background: #f7f8f8;
+  background: var(--color-surface-soft);
   color: var(--color-slate);
   font-size: 14px;
   font-weight: 750;
 }
 
 .training-chip input:checked + span {
-  border-color: #e6b486;
-  background: #e6b486;
+  border-color: var(--color-sand);
+  background: var(--color-sand);
   color: var(--color-charcoal);
 }
 
@@ -174,7 +174,7 @@
   display: grid;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #f0d2bd;
+  border: 1px solid var(--color-accent-line-soft);
   border-radius: 12px;
   background: var(--color-accent-soft);
 }
@@ -207,7 +207,7 @@
 }
 
 .training-form-status[data-state="error"] {
-  color: #9c2f19;
+  color: var(--color-error);
 }
 
 @media (max-width: 480px) {

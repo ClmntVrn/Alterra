@@ -54,12 +54,12 @@
 
 .elevation-axis {
   fill: none;
-  stroke: #aab2b8;
+  stroke: var(--color-axis);
   stroke-width: 1;
 }
 
 .elevation-area {
-  fill: #e2e6e9;
+  fill: var(--color-track);
 }
 
 .elevation-line {
@@ -109,7 +109,7 @@
 
 .elevation-current {
   fill: var(--color-accent-bright);
-  stroke: white;
+  stroke: var(--color-paper);
   stroke-width: 2;
 }
 

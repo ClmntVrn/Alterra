@@ -1,18 +1,58 @@
-/* Variables partagées : couleurs, ombres. */
+/* Variables partagées : couleurs, ombres. Les autres feuilles n’écrivent aucune couleur en dur. */
 
 :root {
   color-scheme: light;
+
+  /* Palette charbon, ardoise, pierre et orange. */
   --color-charcoal: #20262b;
   --color-slate: #454f58;
   --color-stone: #eceff1;
   --color-paper: #ffffff;
+  --color-cream: #fffdf7;
+  --color-sand: #e6b486;
   --color-text: #252c32;
   --color-muted: #69747d;
-  --color-line: #d9dfe3;
   --color-accent: #b94f1f;
   --color-accent-bright: #ed6b2e;
   --color-accent-soft: #fff0e7;
+  --color-chart: #f29a62;
+
+  /* Surfaces claires et traits. */
+  --color-surface: #f1f3f4;
+  --color-surface-soft: #f7f8f8;
+  --color-surface-faint: #fbfcfc;
+  --color-today: #e9edf0;
+  --color-track: #e2e6e9;
+  --color-line: #d9dfe3;
+  --color-line-soft: #e8ebed;
+  --color-control-line: #a8b0b6;
+  --color-axis: #aab2b8;
+  --color-done-text: #828c94;
+  --color-hero-line: #3d484f;
+  --color-accent-line-soft: #f0d2bd;
+  --color-accent-line: #f2c7ae;
+  --color-accent-line-strong: #d99a77;
+
+  /* États. */
   --color-warning: #fff3d9;
   --color-warning-line: #e6c78e;
+  --color-warning-strong: #b7791f;
+  --color-warning-text: #8a5a00;
+  --color-error: #9c2f19;
+  --color-danger: #8f3023;
+  --color-danger-line: #d9a99b;
+
+  /* Composantes RVB, pour les transparences : rgb(var(--rgb-cream) / 30%). */
+  --rgb-paper: 255 255 255;
+  --rgb-cream: 255 253 247;
+  --rgb-slate: 69 79 88;
+  --rgb-muted: 105 116 125;
+  --rgb-ink: 20 25 29;
+  --rgb-accent-bright: 237 107 46;
+  --rgb-chart: 242 154 98;
+  --rgb-warning-strong: 183 121 31;
+  --rgb-mountain-light: 160 171 179;
+  --rgb-mountain-dark: 59 69 77;
+
   --shadow-card: 0 12px 32px rgb(31 41 48 / 8%);
 }

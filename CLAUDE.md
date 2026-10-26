@@ -12,6 +12,7 @@ Documentation de référence, à lire avant une évolution fonctionnelle :
 
 - Interface lisible en un coup d'œil, libellés simples, pas de texte redondant ni de section superflue.
 - Style outdoor : palette charbon, ardoise, pierre et orange. Pas de vert sans demande explicite.
+- Aucune couleur écrite en dur hors de `styles/tokens.css` : utiliser ses variables (`var(--color-…)`, et `rgb(var(--rgb-…) / 30%)` pour une transparence).
 - Conserver l'accessibilité clavier, les attributs ARIA et des repères qui ne reposent pas uniquement sur la couleur.
 
 ## Structure technique

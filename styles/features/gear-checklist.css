@@ -76,7 +76,7 @@
   overflow: hidden;
   margin-bottom: 12px;
   border-radius: 10px;
-  background: #e2e6e9;
+  background: var(--color-track);
 }
 
 #gearProgressBar {
@@ -108,7 +108,7 @@
   align-items: flex-start;
   gap: 11px;
   padding: 12px 0;
-  border-bottom: 1px solid #e8ebed;
+  border-bottom: 1px solid var(--color-line-soft);
   color: var(--color-text);
   font-size: 13px;
   line-height: 1.5;
@@ -121,7 +121,7 @@
 }
 
 .gear-item:has(input:checked) span {
-  color: #828c94;
+  color: var(--color-done-text);
   text-decoration: line-through;
 }
 
