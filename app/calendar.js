@@ -1,3 +1,5 @@
+import { createMonthYearPicker, renderCalendarGrid } from "../components/calendar/calendar.js";
+
 const calendarDays = document.getElementById("calendarDays");
 const calendarTitle = document.getElementById("calendarTitle");
 const calendarGrid = document.querySelector(".calendar-grid");
@@ -12,6 +14,12 @@ const cancelTrainingButton = document.getElementById("cancelTrainingButton");
 const trainingPace = document.getElementById("trainingPace");
 const previousMonthButton = document.getElementById("previousMonth");
 const nextMonthButton = document.getElementById("nextMonth");
+const monthPickerToggle = document.getElementById("calendarMonthPickerToggle");
+const monthPickerForm = document.getElementById("calendarMonthPicker");
+const monthWheel = document.getElementById("calendarMonthWheel");
+const yearWheel = document.getElementById("calendarYearWheel");
+const calendarTitleText = document.getElementById("calendarTitleText");
+const calendarDayTitle = document.getElementById("calendarDayTitle");
 const previousDayButton = document.getElementById("previousDay");
 const nextDayButton = document.getElementById("nextDay");
 const backToMonthButton = document.getElementById("backToMonth");
@@ -20,6 +28,8 @@ let eventsByDate = {};
 let selectedDate = null;
 let repository = null;
 let editingSession = null;
+let monthYearPicker = null;
+let sessionsUpdated = () => {};
 
 const monthFormatter = new Intl.DateTimeFormat("fr-FR", {
   month: "long",
@@ -55,6 +65,7 @@ function dateKey(date) {
 }
 
 function showLoadedEvents(races, sessions) {
+  sessionsUpdated(sessions);
   eventsByDate = {};
   for (const race of races) {
     const events = eventsByDate[race.date] || [];
@@ -85,7 +96,10 @@ function showLoadedEvents(races, sessions) {
 }
 
 function showMonthView() {
+  monthYearPicker.close();
   document.querySelector(".calendar-heading").classList.remove("is-day-view");
+  monthPickerToggle.hidden = false;
+  calendarDayTitle.hidden = true;
   calendarGrid.hidden = false;
   calendarEventDetails.hidden = true;
   calendarCreateSection.hidden = true;
@@ -288,7 +302,10 @@ function showDayDetails(date) {
   currentMonth.setFullYear(date.getFullYear(), date.getMonth(), 1);
   document.querySelector(".calendar-heading").classList.add("is-day-view");
   const events = eventsByDate[dateKey(date)] || [];
-  calendarTitle.textContent = eventDateFormatter.format(date);
+  calendarDayTitle.textContent = eventDateFormatter.format(date);
+  calendarDayTitle.hidden = false;
+  monthPickerToggle.hidden = true;
+  monthYearPicker.close();
   calendarGrid.hidden = true;
   calendarEventDetails.replaceChildren();
   calendarEventDetails.hidden = false;
@@ -385,92 +402,44 @@ async function refreshEvents() {
 function renderCalendar() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  calendarTitle.textContent = monthFormatter.format(currentMonth);
-  calendarTitle.textContent =
-    calendarTitle.textContent.charAt(0).toLocaleUpperCase("fr-FR") +
-    calendarTitle.textContent.slice(1);
-  calendarDays.replaceChildren();
-
-  const firstWeekday = (currentMonth.getDay() + 6) % 7;
-  const daysInMonth = new Date(
-    currentMonth.getFullYear(),
-    currentMonth.getMonth() + 1,
-    0
-  ).getDate();
-
-  const weekCount = Math.ceil((firstWeekday + daysInMonth) / 7);
-  for (let week = 0; week < weekCount; week += 1) {
-    const weekRow = document.createElement("div");
-    weekRow.className = "calendar-week";
-    weekRow.setAttribute("role", "row");
-
-    for (let weekday = 0; weekday < 7; weekday += 1) {
-      const day = week * 7 + weekday - firstWeekday + 1;
-      const dayCell = document.createElement("div");
-      dayCell.className = "calendar-day";
-      dayCell.setAttribute("role", "gridcell");
-
-      if (day < 1 || day > daysInMonth) {
-        dayCell.classList.add("is-empty");
-        dayCell.setAttribute("aria-hidden", "true");
-        weekRow.append(dayCell);
-        continue;
-      }
-
-      const date = new Date(
-        currentMonth.getFullYear(),
-        currentMonth.getMonth(),
-        day
-      );
-      const key = dateKey(date);
-      const isToday = date.getTime() === today.getTime();
-      if (isToday) {
-        dayCell.classList.add("is-today");
-        dayCell.setAttribute("aria-current", "date");
-      }
-      const events = eventsByDate[key] || [];
-      const dateButton = document.createElement("button");
-      dateButton.className = "calendar-date-button";
-      dateButton.type = "button";
-      dateButton.setAttribute(
-        "aria-label",
-        `${events.map(event => {
-          if (event.eventType === "race") return `Course : ${event.name}`;
-          const status = event.status === "completed" ? "réalisé" : "prévu";
-          const time = event.time ? ` à ${event.time}` : "";
-          return `Entraînement ${status}${time} : ${event.title}`;
-        }).join(", ")}` +
-        `${events.length ? ", " : ""}${eventDateFormatter.format(date)}, afficher la journée`
-      );
-      const dateNumber = document.createElement("span");
-      dateNumber.className = "calendar-date";
-      dateNumber.textContent = day;
-      dateButton.append(dateNumber);
-      if (events.length) {
-        dayCell.classList.add("has-event");
-        for (const event of events.slice(0, 3)) {
-          const eventDot = document.createElement("span");
-          eventDot.className = `calendar-event-dot${event.eventType === "training" ? " calendar-session-dot" : ""}`;
-          eventDot.setAttribute("aria-hidden", "true");
-          dateButton.append(eventDot);
-        }
-      }
-      dateButton.addEventListener("click", () => showDayDetails(date));
-      dayCell.append(dateButton);
-      weekRow.append(dayCell);
-    }
-
-    calendarDays.append(weekRow);
-  }
+  const formattedMonth = monthFormatter.format(currentMonth);
+  calendarTitleText.textContent =
+    formattedMonth.charAt(0).toLocaleUpperCase("fr-FR") +
+    formattedMonth.slice(1);
+  renderCalendarGrid({
+    container: calendarDays,
+    currentMonth,
+    eventsByDate,
+    today,
+    onSelectDate: showDayDetails,
+    getEventLabel: event => {
+      if (event.eventType === "race") return `Course : ${event.name}`;
+      const status = event.status === "completed" ? "réalisé" : "prévu";
+      const time = event.time ? ` à ${event.time}` : "";
+      return `Entraînement ${status}${time} : ${event.title}`;
+    },
+    getEventMarkerClass: event => event.eventType === "training" ? "calendar-session-dot" : ""
+  });
 }
 
-export function initializeCalendar(racesPromise, personalRepository) {
+export function initializeCalendar(racesPromise, personalRepository, onSessionsUpdated = () => {}) {
   repository = personalRepository;
+  sessionsUpdated = onSessionsUpdated;
+  monthYearPicker = createMonthYearPicker({
+    toggle: monthPickerToggle,
+    form: monthPickerForm,
+    monthWheel,
+    yearWheel,
+    currentMonth,
+    onApply: renderCalendar
+  });
   previousMonthButton.addEventListener("click", () => {
+    monthYearPicker.close();
     currentMonth.setMonth(currentMonth.getMonth() - 1);
     renderCalendar();
   });
   nextMonthButton.addEventListener("click", () => {
+    monthYearPicker.close();
     currentMonth.setMonth(currentMonth.getMonth() + 1);
     renderCalendar();
   });
@@ -540,7 +509,9 @@ export function initializeCalendar(racesPromise, personalRepository) {
     if (!document.hidden && !calendarGrid.hidden) renderCalendar();
   });
 
+  monthPickerToggle.hidden = false;
   renderCalendar();
+  monthYearPicker.sync(currentMonth, true);
   Promise.resolve(racesPromise)
     .then(() => refreshEvents())
     .catch(error => {

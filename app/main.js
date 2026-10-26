@@ -1,4 +1,5 @@
 import { initializeCalendar } from "./calendar.js";
+import { initializeActivityStatistics } from "../components/statistics/activity-statistics.js";
 import { createPersonalDataStore } from "./personal-data.js";
 import { loadRaceCatalog } from "./race-catalog.js";
 
@@ -15,7 +16,15 @@ const importInput = document.getElementById("personalDataFile");
 const status = document.getElementById("personalDataStatus");
 const personalData = createPersonalDataStore();
 let raceCatalogPromise = loadRaceCatalog(personalData);
-const refreshCalendar = initializeCalendar(raceCatalogPromise, personalData.repository);
+const updateActivityStatistics = initializeActivityStatistics(
+  document.getElementById("activityStatistics"),
+  personalData.repository
+);
+const refreshCalendar = initializeCalendar(
+  raceCatalogPromise,
+  personalData.repository,
+  updateActivityStatistics
+);
 
 function showPersonalDataStatus(message, isError = false) {
   status.textContent = message;
