@@ -6,9 +6,11 @@ import {
   isDateKey,
   isDateKeyInRange,
   parseDateKey,
+  parseMonthKey,
   parseTimeOfDay,
   startOfWeek,
-  toDateKey
+  toDateKey,
+  toMonthKey
 } from "../../src/domain/dates.js";
 
 test("toDateKey complète mois et jour sur deux chiffres", () => {
@@ -66,5 +68,17 @@ test("parseTimeOfDay accepte les saisies rapides", () => {
 test("parseTimeOfDay refuse les heures impossibles", () => {
   for (const value of ["2560", "24", "9:75", "abc", "12345"]) {
     assert.equal(parseTimeOfDay(value), null, value);
+  }
+});
+
+test("toMonthKey et parseMonthKey font l’aller-retour d’un mois", () => {
+  assert.equal(toMonthKey(new Date(2026, 0, 31)), "2026-01");
+  assert.equal(toDateKey(parseMonthKey("2026-10")), "2026-10-01");
+  assert.equal(parseMonthKey("0050-03").getFullYear(), 50);
+});
+
+test("parseMonthKey refuse un mois invalide ou un champ vidé", () => {
+  for (const value of ["", "2026-13", "2026-00", "2026-1", "2026-10-01", null]) {
+    assert.equal(parseMonthKey(value), null, String(value));
   }
 });

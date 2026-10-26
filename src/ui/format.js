@@ -17,7 +17,6 @@ const weekdayDateFormatter = new Intl.DateTimeFormat(LOCALE, {
   month: "short"
 });
 const monthYearFormatter = new Intl.DateTimeFormat(LOCALE, { month: "long", year: "numeric" });
-const monthNameFormatter = new Intl.DateTimeFormat(LOCALE, { month: "long" });
 const numberFormatter = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 1 });
 const relativeDayFormatter = new Intl.RelativeTimeFormat(LOCALE, { numeric: "auto" });
 
@@ -29,8 +28,6 @@ export const formatShortDayMonth = date => shortDayMonthFormatter.format(date);
 export const formatWeekdayDate = date => weekdayDateFormatter.format(date);
 /** octobre 2026 */
 export const formatMonthYear = date => monthYearFormatter.format(date);
-/** octobre */
-export const formatMonthName = date => monthNameFormatter.format(date);
 /** 1 234,5 (une décimale au plus) */
 export const formatNumber = value => numberFormatter.format(value);
 /** aujourd’hui, hier, il y a 3 jours */

@@ -1,6 +1,7 @@
 // Calendrier de l’accueil : vue mois, vue jour et formulaires de la journée.
 
-import { createMonthYearPicker, renderCalendarGrid } from "./month-grid.js";
+import { renderCalendarGrid } from "./month-grid.js";
+import { createMonthPicker } from "./month-picker.js";
 import { groupMonthEventsByDate, listEventsOnDate } from "../../domain/calendar.js";
 import { addDays, toDateKey } from "../../domain/dates.js";
 import { getWorkoutState } from "../../domain/workouts.js";
@@ -55,13 +56,12 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   let sources = { races: [], personalRaces: [], workouts: [] };
   let selectedDate = null;
 
-  const monthYearPicker = createMonthYearPicker({
-    toggle: monthPickerToggle,
-    form: document.getElementById("calendarMonthPicker"),
-    monthWheel: document.getElementById("calendarMonthWheel"),
-    yearWheel: document.getElementById("calendarYearWheel"),
-    currentMonth,
-    onApply: renderMonth
+  const monthPicker = createMonthPicker({
+    input: document.getElementById("calendarMonthInput"),
+    onSelect: month => {
+      currentMonth.setFullYear(month.getFullYear(), month.getMonth(), 1);
+      renderMonth();
+    }
   });
   const raceForm = createPersonalRaceForm({
     form: document.getElementById("raceEventForm"),
@@ -103,6 +103,7 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
     today.setHours(0, 0, 0, 0);
     const todayKey = toDateKey(today);
     titleText.textContent = capitalize(formatMonthYear(currentMonth));
+    monthPicker.setMonth(currentMonth);
     renderCalendarGrid({
       container: calendarDays,
       currentMonth,
@@ -170,7 +171,6 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   }
 
   function showMonth() {
-    monthYearPicker.close();
     raceForm.close();
     setView("month");
     selectedDate = null;
@@ -181,7 +181,6 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   function showDay(date) {
     selectedDate = date;
     currentMonth.setFullYear(date.getFullYear(), date.getMonth(), 1);
-    monthYearPicker.close();
     setView("day");
     dayTitle.textContent = formatLongDate(date);
     previousDayButton.setAttribute(
@@ -209,7 +208,6 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   }
 
   function moveMonth(offset) {
-    monthYearPicker.close();
     currentMonth.setMonth(currentMonth.getMonth() + offset);
     renderMonth();
   }
@@ -235,7 +233,6 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
 
   monthPickerToggle.hidden = false;
   renderMonth();
-  monthYearPicker.sync(currentMonth, true);
   Promise.resolve(racesPromise)
     .then(() => refreshEvents())
     .catch(error => showError("Impossible de charger le calendrier. Réessaie.", error));

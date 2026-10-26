@@ -544,20 +544,14 @@ button {
 }
 
 .calendar-month-picker-toggle {
+  position: relative;
   display: inline-flex;
   min-height: 44px;
   align-items: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
 }
 
-.calendar-month-picker-toggle:hover,
-.calendar-month-picker-toggle:focus-visible {
+.calendar-month-picker-toggle:has(.calendar-month-input:not([hidden])):hover,
+.calendar-month-picker-toggle:has(.calendar-month-input:focus-visible) {
   color: var(--color-accent);
 }
 
@@ -565,138 +559,20 @@ button {
   display: none;
 }
 
-.calendar-month-picker {
-  position: absolute;
-  z-index: 5;
-  top: 72px;
-  left: clamp(8px, 4vw, 18px);
-  right: clamp(8px, 4vw, 18px);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  padding: 14px;
-  border: 1px solid rgb(69 79 88 / 18%);
-  border-radius: 20px;
-  background: rgb(255 255 255 / 96%);
-  box-shadow: 0 18px 42px rgb(32 38 43 / 22%);
-  -webkit-backdrop-filter: blur(18px);
-  backdrop-filter: blur(18px);
-}
-
-.calendar-month-picker[hidden] {
-  display: none;
-}
-
-.calendar-wheel-column {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  min-width: 0;
-  gap: 5px;
-}
-
-.calendar-wheel-frame {
-  position: relative;
-  min-width: 0;
-  overflow: hidden;
-  border-radius: 12px;
-}
-
-.calendar-wheel-frame::before {
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  right: 4px;
-  left: 4px;
-  height: 42px;
-  border-top: 1px solid rgb(69 79 88 / 14%);
-  border-bottom: 1px solid rgb(69 79 88 / 14%);
-  background: rgb(237 107 46 / 7%);
-  content: "";
-  pointer-events: none;
-  transform: translateY(-50%);
-}
-
-.calendar-wheel-frame::after {
+/* Champ natif invisible posé sur le titre : le toucher ouvre le sélecteur du système. */
+.calendar-month-input {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    var(--color-paper) 0%,
-    transparent 30%,
-    transparent 70%,
-    var(--color-paper) 100%
-  );
-  content: "";
-  opacity: 0.78;
-  pointer-events: none;
-}
-
-.calendar-wheel-label {
-  color: var(--color-muted);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.calendar-wheel {
-  height: 200px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 79px 4px;
-  border-radius: 12px;
-  background: transparent;
-  scrollbar-width: none;
-  scroll-snap-type: y mandatory;
-  scroll-padding-block: 79px;
-  -webkit-overflow-scrolling: touch;
-}
-
-.calendar-wheel::-webkit-scrollbar {
-  display: none;
-}
-
-.calendar-wheel-option {
-  display: block;
   width: 100%;
-  height: 42px;
-  padding: 0 4px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
   border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--color-muted);
-  font: inherit;
-  font-size: 15px;
-  scroll-snap-align: center;
-}
-
-.calendar-wheel-option:hover,
-.calendar-wheel-option:focus-visible,
-.calendar-wheel-option[aria-selected="true"] {
-  background: var(--color-accent-soft);
-  color: var(--color-charcoal);
-}
-
-.calendar-wheel-option[aria-selected="true"] {
-  font-weight: 800;
-}
-
-.calendar-month-picker-submit {
-  grid-column: 1 / -1;
-  min-height: 44px;
-  padding: 9px 14px;
-  border: 0;
-  border-radius: 12px;
-  background: var(--color-charcoal);
-  color: #fff;
-  font: inherit;
-  font-weight: 750;
-}
-
-.calendar-month-picker-submit:hover,
-.calendar-month-picker-submit:focus-visible {
-  background: var(--color-accent);
+  opacity: 0;
+  font-size: 16px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .calendar-navigation {
@@ -2180,27 +2056,6 @@ button {
 }
 
 @media (max-width: 480px) {
-  .calendar-month-picker {
-    top: 70px;
-    gap: 6px;
-    padding: 10px;
-  }
-
-  .calendar-wheel {
-    height: 190px;
-    padding-top: 74px;
-    padding-bottom: 74px;
-    scroll-padding-block: 74px;
-  }
-
-  .calendar-wheel-frame::before {
-    height: 42px;
-  }
-
-  .calendar-wheel-option {
-    font-size: 14px;
-  }
-
   .training-form-measures label {
     font-size: 12px;
   }

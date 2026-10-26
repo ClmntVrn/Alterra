@@ -31,7 +31,8 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 | `src/pages/home.js`                              | Initialise l’accueil, le service worker, le stockage persistant et la sauvegarde.      |
 | `src/pages/race.js`                              | Fiche de course générique : profil GPX, ravitos, scénarios, nutrition, matériel.       |
 | `src/features/calendar/calendar.js`              | Calendrier : vue mois/jour, navigation et rafraîchissement, sans état global.          |
-| `src/features/calendar/month-grid.js`            | Grille du calendrier et sélecteur mois/année, génériques.                              |
+| `src/features/calendar/month-grid.js`            | Grille du calendrier, générique.                                                       |
+| `src/features/calendar/month-picker.js`          | Choix du mois avec le sélecteur natif (`<input type="month">`).                        |
 | `src/features/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines.                                         |
 | `src/features/workouts/`                         | Carte et formulaire d’une séance, libellés des types et états.                         |
 | `src/features/races/`                            | Cartes des courses et formulaire d’une course personnelle.                             |

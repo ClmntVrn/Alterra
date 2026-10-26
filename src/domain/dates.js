@@ -35,6 +35,29 @@ export function isDateKey(value) {
   return parseDateKey(value) !== null;
 }
 
+/**
+ * @param {Date} date
+ * @returns {string} Clé de mois AAAA-MM, format d’un champ `<input type="month">`.
+ */
+export function toMonthKey(date) {
+  return toDateKey(date).slice(0, 7);
+}
+
+/**
+ * @param {unknown} value
+ * @returns {Date|null} Premier jour du mois à minuit local, ou null si la clé est invalide.
+ */
+export function parseMonthKey(value) {
+  if (typeof value !== "string") return null;
+  const match = /^(\d{4})-(\d{2})$/.exec(value);
+  if (!match) return null;
+  const [year, month] = match.slice(1).map(Number);
+  if (month < 1 || month > 12) return null;
+  const date = new Date(2000, month - 1, 1);
+  date.setFullYear(year);
+  return date;
+}
+
 /** Bornes incluses ; les clés AAAA-MM-JJ se comparent dans l’ordre lexicographique. */
 export function isDateKeyInRange(key, startKey, endKey = startKey) {
   return key >= startKey && key <= endKey;

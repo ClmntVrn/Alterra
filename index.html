@@ -127,17 +127,16 @@
         <div class="calendar-heading">
           <div>
             <h2 id="calendarTitle" aria-live="polite">
-              <button
-                class="calendar-month-picker-toggle"
-                id="calendarMonthPickerToggle"
-                type="button"
-                aria-label="Choisir le mois et l’année"
-                title="Choisir le mois et l’année"
-                aria-expanded="false"
-                aria-controls="calendarMonthPicker"
-              >
+              <label class="calendar-month-picker-toggle" id="calendarMonthPickerToggle">
                 <span id="calendarTitleText">Octobre 2026</span>
-              </button>
+                <input
+                  class="calendar-month-input"
+                  id="calendarMonthInput"
+                  type="month"
+                  aria-label="Choisir le mois et l’année"
+                  title="Choisir le mois et l’année"
+                />
+              </label>
               <span id="calendarDayTitle" hidden></span>
             </h2>
           </div>
@@ -196,38 +195,6 @@
             </button>
           </div>
         </div>
-        <form
-          class="calendar-month-picker"
-          id="calendarMonthPicker"
-          aria-label="Choisir un mois et une année"
-          hidden
-        >
-          <div class="calendar-wheel-column">
-            <span class="calendar-wheel-label">Mois</span>
-            <div class="calendar-wheel-frame">
-              <div
-                class="calendar-wheel"
-                id="calendarMonthWheel"
-                role="listbox"
-                aria-label="Mois"
-                tabindex="0"
-              ></div>
-            </div>
-          </div>
-          <div class="calendar-wheel-column">
-            <span class="calendar-wheel-label">Année</span>
-            <div class="calendar-wheel-frame">
-              <div
-                class="calendar-wheel"
-                id="calendarYearWheel"
-                role="listbox"
-                aria-label="Année"
-                tabindex="0"
-              ></div>
-            </div>
-          </div>
-          <button class="calendar-month-picker-submit" type="submit">Appliquer</button>
-        </form>
         <div class="calendar-grid" role="grid" aria-labelledby="calendarTitle">
           <div class="calendar-weekdays" role="row">
             <div class="calendar-weekday" role="columnheader" aria-label="Lundi">Lun</div>
@@ -492,7 +459,7 @@
       <footer class="app-footer">
         <span>ALTERRA · IMAGINÉ POUR LES SENTIERS</span>
         <span class="app-version">
-          <span>Version <strong>0.8.10</strong></span>
+          <span>Version <strong>0.8.11</strong></span>
           <a href="./versions.html" aria-label="Détails et historique des versions">Détails</a>
         </span>
       </footer>
