@@ -23,6 +23,8 @@ const titleColor = () =>
 /** Élément actif, joint aux messages d’échec pour le diagnostic. */
 const activeElement = () =>
   page.evaluate(() => document.activeElement?.id || document.activeElement?.tagName);
+/** Le focus quitte le champ de mois, comme quand le sélecteur natif se referme. */
+const leaveMonthInput = () => page.evaluate(() => document.getElementById("nextMonth").focus());
 
 // Le sélecteur natif lui-même (roues de l’iPhone, fenêtre de Chrome) ne se pilote pas d’un test :
 // on vérifie que le toucher atteint le champ, puis la couleur selon que le champ est actif ou non.
@@ -48,8 +50,9 @@ test("sur écran tactile, le titre du mois n’est orange que pendant le choix",
     const input = document.getElementById("calendarMonthInput");
     input.value = "2027-01";
     input.dispatchEvent(new Event("change"));
-    input.blur();
   });
+  // input.blur() ne libère pas toujours ce champ dans Chrome sous Linux : on déplace le focus.
+  await leaveMonthInput();
   assert.equal(
     await page.evaluate(() => document.getElementById("calendarTitleText").textContent),
     "Janvier 2027"
@@ -59,6 +62,8 @@ test("sur écran tactile, le titre du mois n’est orange que pendant le choix",
 
 test("le survol ne colore le titre du mois qu’avec une souris", async () => {
   // Sur iPhone, le survol reste actif après un toucher : il ne doit pas laisser le titre orange.
+  await leaveMonthInput();
+  assert.notEqual(await activeElement(), "calendarMonthInput");
   await page.forceHover("#calendarMonthPickerToggle");
   assert.equal(await titleColor(), CHARCOAL, "écran tactile");
   await page.setViewport(375, 812, { touch: false });
