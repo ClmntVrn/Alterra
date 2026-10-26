@@ -1,0 +1,4 @@
+node_modules/
+
+# Sauvegardes personnelles : ne jamais les versionner.
+alterra-sauvegarde-*.json

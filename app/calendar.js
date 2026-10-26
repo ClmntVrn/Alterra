@@ -1,7 +1,6 @@
 import { createMonthYearPicker, renderCalendarGrid } from "../components/calendar/calendar.js";
 
 const calendarDays = document.getElementById("calendarDays");
-const calendarTitle = document.getElementById("calendarTitle");
 const calendarGrid = document.querySelector(".calendar-grid");
 const calendarEventDetails = document.getElementById("calendarEventDetails");
 const calendarCreateSection = document.getElementById("calendarCreateSection");
@@ -68,14 +67,6 @@ const trainingTypes = Object.freeze({
   running: "Course à pied",
   strength: "Renforcement musculaire",
   cycling: "Vélo"
-});
-const weatherConditions = Object.freeze({
-  sunny: "Ensoleillé",
-  cloudy: "Nuageux",
-  rain: "Pluie",
-  snow: "Neige",
-  wind: "Vent",
-  storm: "Orage"
 });
 
 function dateKey(date) {
