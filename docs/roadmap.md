@@ -202,12 +202,12 @@ Chantier de qualité du code décidé le 26 octobre 2026, mené en parallèle de
 
 ### R8 — Automatisation
 
-**Statut :** en cours
+**Statut :** terminée — 26 octobre 2026
 
 - [x] `npm run release -- <version> "<ligne>"` : numéro de version partout, entrée datée dans `versions.html`, cache du service worker dérivé de la version, puis `npm run check` ; tout est préparé avant la première écriture. Un test vérifie que la version est identique partout.
 - [x] Tests navigateur dans `tests/browser/` (calendrier, fiche course, mise à niveau de la base, mise en page mobile), lancés par `npm run test:browser` ; pilotage de Chrome ou Edge sans dépendance dans `tools/browser.js`. Vérifié qu’une migration sabotée fait échouer les tests.
 - [x] Intégration continue GitHub (`.github/workflows/ci.yml`) : `npm ci`, `npm run check` puis `npm run test:browser` à chaque push ; elle signale sans bloquer la publication. Étapes reproduites localement.
-- [ ] Premier passage de la CI sur GitHub à confirmer après le push.
+- [x] CI au vert sur GitHub le 26 octobre 2026 (commit `7ff65fb`). Les premiers passages ont révélé des écarts propres à Chrome sous Linux (focus du champ de mois, absence de souris), corrigés dans les tests ; chaque test en échec devient une annotation GitHub (`tools/github-reporter.js`).
 
 ## Suivi
 

@@ -52,6 +52,7 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 | `tests/browser/`                                 | Parcours dans Chrome ou Edge sans interface, sur données fictives (`npm run test:browser`).                                |
 | `tools/browser.js`                               | Pilotage du navigateur pour ces tests, sans dépendance.                                                                    |
 | `tools/release.js`                               | Nouvelle version en une commande (`npm run release`), sans commit ni push.                                                 |
+| `tools/github-reporter.js`                       | Rapporteur de tests pour la CI : chaque échec devient une annotation GitHub.                                               |
 | `.github/workflows/ci.yml`                       | Vérifications GitHub à chaque push : `npm run check` puis tests navigateur ; sans effet sur la publication.                |
 
 Le code des écrans délègue les calculs à `src/domain/` ; c’est la partie couverte par les tests. Un test vérifie aussi que chaque ressource livrée figure dans le précache de `sw.js`.
