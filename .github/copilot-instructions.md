@@ -16,8 +16,8 @@
 - Le code est rangé dans `src/` : `pages/` (points d'entrée), `features/` (fonctionnalités), `domain/` (règles pures, testées), `storage/` (repository et IndexedDB), `ui/` (formats partagés). Les icônes sont dans `assets/icons/`.
 - Les détails, scénarios, ravitos, nutrition, rappels, matériel et références GPX sont des données optionnelles par course. Ne pas coder de contenu propre à une course dans le moteur de rendu.
 - Le profil d'altitude est construit depuis le GPX référencé dans le JSON de course ; les identifiants des repères correspondent à ceux des ravitos.
-- Le site est une PWA : `manifest.json` décrit l'application et `sw.js` met les ressources en cache. Lorsqu'une modification change les ressources livrées hors ligne, vérifier la liste du service worker et incrémenter `CACHE_NAME`.
-- Lors d'une nouvelle version de l'application, mettre à jour le numéro affiché en bas de `index.html`, documenter les évolutions dans `versions.html` et précacher toute nouvelle ressource dans `sw.js`.
+- Le site est une PWA : `manifest.json` décrit l'application et `sw.js` met les ressources en cache. Lorsqu'une modification change les ressources livrées hors ligne, vérifier la liste `FILES` du service worker ; `CACHE_NAME` est dérivé du numéro de version.
+- Pour une nouvelle version, lancer `npm run release -- <version> "<ligne d'historique>"` : il met à jour le numéro partout, l'historique de `versions.html` et le cache du service worker. Précacher toute nouvelle ressource dans `sw.js`.
 
 ## Conventions de modification
 

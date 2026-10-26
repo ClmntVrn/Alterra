@@ -40,10 +40,9 @@ Documentation de référence, à lire avant une évolution fonctionnelle :
 
 Quand une modification change les ressources livrées :
 
-1. Ajouter toute nouvelle ressource à la liste `FILES` de `sw.js` et incrémenter `CACHE_NAME`.
-2. Mettre à jour le numéro de version en bas de `index.html`.
-3. Documenter l'évolution dans `versions.html`.
-4. Mettre à jour les cases et statuts de `docs/roadmap.md`, et `docs/specification.md` si le comportement change.
+1. Ajouter toute nouvelle ressource à la liste `FILES` de `sw.js` (un test le vérifie).
+2. Lancer `npm run release -- 0.8.17 "Ligne d'historique." "Autre ligne."` : numéro dans `package.json`, `package-lock.json` et en bas de `index.html`, entrée datée dans `versions.html`, `CACHE_NAME` de `sw.js` dérivé de la version, puis `npm run check`. Ni commit ni push. Un test vérifie que la version est la même partout.
+3. Mettre à jour les cases et statuts de `docs/roadmap.md`, et `docs/specification.md` si le comportement change.
 
 ## Façon de travailler
 

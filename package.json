@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "test": "node --test",
     "test:browser": "node --test --test-concurrency=1 \"tests/browser/*.browser.js\"",
-    "check": "npm run format:check && npm run lint && npm test"
+    "check": "npm run format:check && npm run lint && npm test",
+    "release": "node tools/release.js"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

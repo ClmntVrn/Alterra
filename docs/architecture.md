@@ -51,6 +51,7 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 | `tests/`                                         | Tests `node --test` du domaine, des formats, des sauvegardes et du précache du service worker (`npm test`).                |
 | `tests/browser/`                                 | Parcours dans Chrome ou Edge sans interface, sur données fictives (`npm run test:browser`).                                |
 | `tools/browser.js`                               | Pilotage du navigateur pour ces tests, sans dépendance.                                                                    |
+| `tools/release.js`                               | Nouvelle version en une commande (`npm run release`), sans commit ni push.                                                 |
 
 Le code des écrans délègue les calculs à `src/domain/` ; c’est la partie couverte par les tests. Un test vérifie aussi que chaque ressource livrée figure dans le précache de `sw.js`.
 
@@ -96,7 +97,7 @@ Limites :
 - les exports contiennent des données personnelles et doivent être conservés en lieu sûr ;
 - IndexedDB n’est pas chiffré : la protection de l’appareil reste importante.
 
-Le service worker ne met en cache que l’interface ; les données personnelles ne transitent pas par son cache. Chaque changement des ressources livrées impose d’incrémenter `CACHE_NAME`.
+Le service worker ne met en cache que l’interface ; les données personnelles ne transitent pas par son cache. Son cache porte le numéro de version (`alterra-0.8.16`) : chaque version publiée avec `npm run release` le renouvelle.
 
 ## 4. Évolutions prévues
 
