@@ -30,7 +30,7 @@
 
 - Après une modification, vérifier au minimum le diff et `git diff --check`.
 - Pour les changements d'interface ou de PWA, tester le parcours concerné sur mobile et, si possible, dans Safari/iOS ou le navigateur intégré à l'écran d'accueil.
-- Il n'y a actuellement pas de commande de build ou de test configurée dans le dépôt ; ne pas en inventer une pour une petite modification.
+- Lancer `npm run check` (Prettier, ESLint, tests) après une modification ; il n'y a pas d'étape de build.
 
 ## Mise à jour de ces consignes
 

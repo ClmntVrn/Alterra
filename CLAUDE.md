@@ -47,9 +47,9 @@ Quand une modification change les ressources livrées :
 
 - Avancer point par point : une évolution ciblée à la fois, vérifiée, puis commitée séparément.
 - Proposer un plan court avant un changement important ou une décision de conception ; ne pas trancher seul une question ouverte du plan.
-- Après une modification : relire le diff et lancer `git diff --check`.
+- Après une modification : relire le diff et lancer `npm run check` (Prettier, ESLint, tests). `npm run format` reformate le code. Il n'y a pas d'étape de build : Node.js ne sert qu'aux outils de développement.
 - Pour un changement d'interface ou de PWA, tester le parcours sur largeur mobile ; signaler ce qui reste à vérifier sur iPhone/Safari.
-- Pas encore de commande de build ni de test dans le dépôt ; ne pas en inventer pour une petite modification.
+- Un commit de formatage pur est ajouté à `.git-blame-ignore-revs`.
 - Ne pas réécrire l'historique Git (purge des anciennes données Mallorca comprise) sans décision explicite.
 
 ## Mise à jour de ces consignes
