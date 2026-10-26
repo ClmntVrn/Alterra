@@ -1,854 +1,244 @@
+// Calendrier de l’accueil : vue mois, vue jour et formulaires de la journée.
+
 import { createMonthYearPicker, renderCalendarGrid } from "./month-grid.js";
-import {
-  addDays,
-  isDateKeyInRange,
-  parseDateKey,
-  parseTimeOfDay,
-  toDateKey
-} from "../../domain/dates.js";
-import { formatDuration, formatDurationClock, parseDuration } from "../../domain/durations.js";
-import { parseDecimal } from "../../domain/numbers.js";
-import { computeWorkoutEnd, formatPace, getWorkoutState } from "../../domain/workouts.js";
-import {
-  capitalize,
-  formatDateRange,
-  formatLongDate,
-  formatMonthYear,
-  formatNumber,
-  formatWeekdayDate
-} from "../../ui/format.js";
+import { groupMonthEventsByDate, listEventsOnDate } from "../../domain/calendar.js";
+import { addDays, toDateKey } from "../../domain/dates.js";
+import { getWorkoutState } from "../../domain/workouts.js";
+import { el } from "../../ui/dom.js";
+import { capitalize, formatLongDate, formatMonthYear } from "../../ui/format.js";
+import { createPersonalRaceForm } from "../races/personal-race-form.js";
+import { renderPersonalRaceCard, renderRaceCard } from "../races/race-card.js";
+import { renderWorkoutCard } from "../workouts/workout-card.js";
+import { createWorkoutForm } from "../workouts/workout-form.js";
+import { WORKOUT_STATE_LABELS } from "../workouts/workout-labels.js";
 
-const calendarDays = document.getElementById("calendarDays");
-const calendarGrid = document.querySelector(".calendar-grid");
-const calendarEventDetails = document.getElementById("calendarEventDetails");
-const calendarCreateSection = document.getElementById("calendarCreateSection");
-const calendarHint = document.getElementById("calendarHint");
-const addRaceButton = document.getElementById("addRaceButton");
-const raceEventForm = document.getElementById("raceEventForm");
-const raceEventFormTitle = document.getElementById("raceEventFormTitle");
-const raceEventFormStatus = document.getElementById("raceEventFormStatus");
-const cancelRaceEventButton = document.getElementById("cancelRaceEventButton");
-const addTrainingButton = document.getElementById("addTrainingButton");
-const trainingForm = document.getElementById("trainingForm");
-const trainingFormTitle = document.getElementById("trainingFormTitle");
-const trainingFormStatus = document.getElementById("trainingFormStatus");
-const cancelTrainingButton = document.getElementById("cancelTrainingButton");
-const trainingComputed = document.getElementById("trainingComputed");
-const trainingCompletedFields = document.getElementById("trainingCompletedFields");
-const previousMonthButton = document.getElementById("previousMonth");
-const nextMonthButton = document.getElementById("nextMonth");
-const monthPickerToggle = document.getElementById("calendarMonthPickerToggle");
-const monthPickerForm = document.getElementById("calendarMonthPicker");
-const monthWheel = document.getElementById("calendarMonthWheel");
-const yearWheel = document.getElementById("calendarYearWheel");
-const calendarTitleText = document.getElementById("calendarTitleText");
-const calendarDayTitle = document.getElementById("calendarDayTitle");
-const previousDayButton = document.getElementById("previousDay");
-const nextDayButton = document.getElementById("nextDay");
-const backToMonthButton = document.getElementById("backToMonth");
-const currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-let eventsByDate = {};
-let calendarRaces = [];
-let calendarPersonalRaces = [];
-let calendarSessions = [];
-let selectedDate = null;
-let repository = null;
-let editingSession = null;
-let editingPersonalRace = null;
-let selectedEffort = "";
-let monthYearPicker = null;
-let sessionsUpdated = () => {};
-
-const sessionStateLabels = Object.freeze({
-  planned: "prévu",
-  completed: "réalisé",
-  toCheck: "à vérifier"
-});
-
-const trainingTypes = Object.freeze({
-  trail: "Trail",
-  running: "Course à pied",
-  strength: "Renforcement musculaire",
-  cycling: "Vélo"
-});
-
-function formatHeartRate(session) {
-  const average = Number.isFinite(session.heartRateAvg) ? session.heartRateAvg : null;
-  const maximum = Number.isFinite(session.heartRateMax) ? session.heartRateMax : null;
-  if (average && maximum) return `FC moy. ${average} · max ${maximum} bpm`;
-  if (average) return `FC moy. ${average} bpm`;
-  if (maximum) return `FC max ${maximum} bpm`;
-  return "";
-}
-
-function showLoadedEvents(races, personalRaces, sessions) {
-  sessionsUpdated(sessions);
-  calendarRaces = races;
-  calendarPersonalRaces = personalRaces;
-  calendarSessions = sessions;
-  calendarHint.textContent = "";
-  delete calendarHint.dataset.state;
-  calendarHint.hidden = true;
-  renderCalendar();
-  if (selectedDate) showDayDetails(selectedDate);
-}
-
-function getDayEvents(date) {
-  const key = toDateKey(date);
-  return [
-    ...calendarRaces
-      .filter(race => isDateKeyInRange(key, race.date, race.endDate))
-      .map(race => ({ ...race, eventType: "race" })),
-    ...calendarPersonalRaces
-      .filter(
-        race =>
-          typeof race.name === "string" &&
-          parseDateKey(race.date) &&
-          isDateKeyInRange(key, race.date, race.endDate)
-      )
-      .map(race => ({ ...race, eventType: "personalRace" })),
-    ...calendarSessions
-      .filter(session => isDateKeyInRange(key, session.date, session.endDate))
-      .map(session => ({ ...session, eventType: "training" }))
-  ].sort(compareEventTimes);
-}
-
-function buildMonthEvents(currentMonth) {
-  const daysInMonth = new Date(
-    currentMonth.getFullYear(),
-    currentMonth.getMonth() + 1,
-    0
-  ).getDate();
-  const monthStart = toDateKey(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1));
-  const monthEnd = toDateKey(
-    new Date(currentMonth.getFullYear(), currentMonth.getMonth(), daysInMonth)
-  );
-  const events = {};
-  const allEvents = [
-    ...calendarRaces.map(race => ({ ...race, eventType: "race" })),
-    ...calendarPersonalRaces.map(race => ({ ...race, eventType: "personalRace" })),
-    ...calendarSessions.map(session => ({ ...session, eventType: "training" }))
-  ];
-  for (const event of allEvents) {
-    const startDate = event.date;
-    const endDate = event.endDate || startDate;
-    if (endDate < monthStart || startDate > monthEnd) continue;
-    const start = parseDateKey(startDate < monthStart ? monthStart : startDate);
-    const end = parseDateKey(endDate > monthEnd ? monthEnd : endDate);
-    if (!start || !end) continue;
-    for (const day = new Date(start); day <= end; day.setDate(day.getDate() + 1)) {
-      const key = toDateKey(day);
-      (events[key] ||= []).push(event);
-    }
+function getEventLabel(event, todayKey) {
+  if (event.eventType === "race" || event.eventType === "personalRace") {
+    return `Course : ${event.name}`;
   }
-  for (const dayEvents of Object.values(events)) dayEvents.sort(compareEventTimes);
-  return events;
+  const status = WORKOUT_STATE_LABELS[getWorkoutState(event, todayKey)];
+  const time = event.time ? ` à ${event.time}` : "";
+  return `Entraînement ${status}${time} : ${event.title}`;
 }
 
-function compareEventTimes(left, right) {
-  const leftTime = left.eventType === "race" ? left.startTime : left.time;
-  const rightTime = right.eventType === "race" ? right.startTime : right.time;
-  const validLeftTime = typeof leftTime === "string" && leftTime ? leftTime : null;
-  const validRightTime = typeof rightTime === "string" && rightTime ? rightTime : null;
-  if (!validLeftTime) return validRightTime ? 1 : 0;
-  if (!validRightTime) return -1;
-  return validLeftTime.localeCompare(validRightTime);
+function getEventMarkerClass(event, todayKey) {
+  if (event.eventType === "race") return "";
+  if (event.eventType === "personalRace") return "calendar-session-dot";
+  return `calendar-session-dot calendar-training-dot is-${getWorkoutState(event, todayKey)}`;
 }
 
-function showMonthView() {
-  monthYearPicker.close();
-  closeRaceEventForm();
-  document.querySelector(".calendar-heading").classList.remove("is-day-view");
-  monthPickerToggle.hidden = false;
-  calendarDayTitle.hidden = true;
-  calendarGrid.hidden = false;
-  calendarEventDetails.hidden = true;
-  calendarCreateSection.hidden = true;
-  calendarHint.hidden = !calendarHint.textContent;
-  previousMonthButton.hidden = false;
-  nextMonthButton.hidden = false;
-  previousDayButton.hidden = true;
-  nextDayButton.hidden = true;
-  backToMonthButton.hidden = true;
-  selectedDate = null;
-  closeTrainingForm();
-  renderCalendar();
-}
+/**
+ * @param {Promise<unknown>} racesPromise Chargement du catalogue, attendu avant la lecture.
+ * @param {Object} repository
+ * @param {(workouts: Array<Object>) => void} [onWorkoutsUpdated]
+ * @returns {() => Promise<void>} Recharge les événements depuis la base.
+ */
+export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated = () => {}) {
+  const heading = document.querySelector(".calendar-heading");
+  const calendarGrid = document.querySelector(".calendar-grid");
+  const calendarDays = document.getElementById("calendarDays");
+  const dayEvents = document.getElementById("calendarEventDetails");
+  const createSection = document.getElementById("calendarCreateSection");
+  const hint = document.getElementById("calendarHint");
+  const titleText = document.getElementById("calendarTitleText");
+  const dayTitle = document.getElementById("calendarDayTitle");
+  const monthPickerToggle = document.getElementById("calendarMonthPickerToggle");
+  const previousMonthButton = document.getElementById("previousMonth");
+  const nextMonthButton = document.getElementById("nextMonth");
+  const previousDayButton = document.getElementById("previousDay");
+  const nextDayButton = document.getElementById("nextDay");
+  const backToMonthButton = document.getElementById("backToMonth");
+  const addRaceButton = document.getElementById("addRaceButton");
+  const addWorkoutButton = document.getElementById("addTrainingButton");
 
-function formatTrainingSummary(session) {
-  return [session.time, trainingTypes[session.type] || "Entraînement"].filter(Boolean);
-}
+  const currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  let sources = { races: [], personalRaces: [], workouts: [] };
+  let selectedDate = null;
 
-function formatTrainingTargets(session) {
-  const details = [];
-  if (Number.isFinite(session.distanceKm)) {
-    details.push(`${formatNumber(session.distanceKm)} km`);
-  }
-  if (Number.isFinite(session.durationMinutes)) {
-    details.push(formatDuration(session.durationMinutes));
-  }
-  if (Number.isFinite(session.ascentMeters)) {
-    details.push(`${formatNumber(session.ascentMeters)} m D+`);
-  }
-  return details.join(" · ");
-}
-
-function renderRaceEvent(race) {
-  const card = document.createElement("article");
-  card.className = "calendar-item calendar-race-item";
-  const category = document.createElement("span");
-  category.className = "calendar-event-category";
-  category.textContent = [race.startTime, race.organizer ? `COURSE · ${race.organizer}` : "COURSE"]
-    .filter(Boolean)
-    .join(" · ");
-  const title = document.createElement("h3");
-  title.textContent = race.name;
-  const details = document.createElement("p");
-  details.className = "calendar-event-description";
-  details.textContent = `${formatDateRange(race.date, race.endDate)} · ${race.calendarDetails}`;
-  const openPlan = document.createElement("a");
-  openPlan.className = "calendar-event-link";
-  openPlan.href = `./race.html?id=${encodeURIComponent(race.id)}`;
-  openPlan.textContent = "Ouvrir le plan de course";
-  openPlan.setAttribute("aria-label", `Ouvrir la fiche de ${race.name}`);
-  card.append(category, title, details, openPlan);
-  return card;
-}
-
-function renderPersonalRaceEvent(race) {
-  const card = document.createElement("article");
-  card.className = "calendar-item calendar-race-item";
-  const header = document.createElement("div");
-  header.className = "calendar-training-header";
-  const category = document.createElement("span");
-  category.className = "calendar-event-category";
-  category.textContent = "COURSE";
-  header.append(category);
-  const actions = document.createElement("div");
-  actions.className = "calendar-session-actions";
-  const editButton = document.createElement("button");
-  editButton.className = "calendar-session-details";
-  editButton.type = "button";
-  editButton.textContent = "Modifier";
-  editButton.setAttribute("aria-label", `Modifier la course : ${race.name}`);
-  editButton.addEventListener("click", () => openRaceEventForm(race));
-  const deleteButton = document.createElement("button");
-  deleteButton.className = "calendar-delete-button";
-  deleteButton.type = "button";
-  deleteButton.textContent = "×";
-  deleteButton.setAttribute("aria-label", `Supprimer la course : ${race.name}`);
-  deleteButton.title = "Supprimer la course";
-  deleteButton.addEventListener("click", async () => {
-    if (!window.confirm(`Supprimer la course « ${race.name} » ? Cette action est définitive.`))
-      return;
-    deleteButton.disabled = true;
-    try {
-      await repository.remove("raceEvents", race.id);
-      await refreshEvents();
-    } catch (error) {
-      console.error("Impossible de supprimer la course.", error);
-      deleteButton.disabled = false;
-      calendarHint.textContent = "La suppression a échoué. Réessaie.";
-      calendarHint.dataset.state = "error";
-      calendarHint.hidden = false;
-    }
-  });
-  actions.append(editButton, deleteButton);
-  const title = document.createElement("h3");
-  title.textContent = race.name;
-  const details = document.createElement("p");
-  details.className = "calendar-event-description";
-  details.textContent = formatDateRange(race.date, race.endDate);
-  card.append(header, title, details, actions);
-  return card;
-}
-
-function renderTrainingEvent(session) {
-  const card = document.createElement("article");
-  card.className = "calendar-item calendar-training-item";
-  const state = getWorkoutState(session, toDateKey(new Date()));
-  card.dataset.state = state;
-  const header = document.createElement("div");
-  header.className = "calendar-training-header";
-  const category = document.createElement("span");
-  category.className = "calendar-event-category";
-  category.textContent = `ENTRAÎNEMENT · ${sessionStateLabels[state].toLocaleUpperCase("fr-FR")}`;
-  header.append(category);
-  if (session.status === "planned") {
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "calendar-delete-button";
-    deleteButton.type = "button";
-    deleteButton.textContent = "×";
-    deleteButton.setAttribute("aria-label", `Supprimer la séance : ${session.title}`);
-    deleteButton.title = "Supprimer la séance";
-    deleteButton.addEventListener("click", async () => {
-      if (
-        !window.confirm(
-          `Supprimer l’entraînement « ${session.title} » ? Cette action est définitive.`
-        )
-      ) {
-        return;
-      }
-      deleteButton.disabled = true;
-      try {
-        await repository.remove("plannedSessions", session.id);
-        await refreshEvents();
-      } catch (error) {
-        console.error("Impossible de supprimer l’entraînement.", error);
-        deleteButton.disabled = false;
-        calendarHint.textContent = "La suppression a échoué. Réessaie.";
-        calendarHint.dataset.state = "error";
-        calendarHint.hidden = false;
-      }
-    });
-    header.append(deleteButton);
-  }
-  card.append(header);
-  const title = document.createElement("h3");
-  title.textContent = session.title;
-  card.append(title);
-  const summary = document.createElement("p");
-  summary.className = "calendar-event-description calendar-training-description";
-  summary.textContent = [
-    formatDateRange(session.date, session.endDate),
-    ...formatTrainingSummary(session)
-  ]
-    .filter(Boolean)
-    .join(" · ");
-  card.append(summary);
-  const targets = formatTrainingTargets(session);
-  const pace = formatPace(session.distanceKm, session.durationMinutes);
-  const details = [targets, session.status === "completed" ? pace : ""].filter(Boolean).join(" · ");
-  if (details) {
-    const targetDetails = document.createElement("p");
-    targetDetails.className = "calendar-event-description calendar-training-targets";
-    targetDetails.textContent = details;
-    card.append(targetDetails);
-  }
-  if (session.status === "completed") {
-    const feeling = [
-      Number.isFinite(session.perceivedEffort) ? `Ressenti ${session.perceivedEffort}/10` : "",
-      formatHeartRate(session)
-    ]
-      .filter(Boolean)
-      .join(" · ");
-    if (feeling) {
-      const feelingDetails = document.createElement("p");
-      feelingDetails.className = "calendar-event-description calendar-training-targets";
-      feelingDetails.textContent = feeling;
-      card.append(feelingDetails);
-    }
-  }
-  if (session.notes) {
-    const notes = document.createElement("p");
-    notes.className = "calendar-event-description calendar-training-notes";
-    notes.textContent = session.notes;
-    card.append(notes);
-  }
-  const actions = document.createElement("div");
-  actions.className = "calendar-session-actions";
-  const statusLabel = document.createElement("label");
-  statusLabel.className = "calendar-session-toggle";
-  const statusCheckbox = document.createElement("input");
-  statusCheckbox.type = "checkbox";
-  statusCheckbox.checked = session.status === "completed";
-  statusCheckbox.setAttribute(
-    "aria-label",
-    `${statusCheckbox.checked ? "Remettre à faire" : "Marquer comme réalisée"} : ${session.title}`
-  );
-  const statusText = document.createElement("span");
-  statusText.textContent = "Réalisée";
-  statusLabel.append(statusCheckbox, statusText);
-  statusCheckbox.addEventListener("change", async () => {
-    statusCheckbox.disabled = true;
-    try {
-      const completed = statusCheckbox.checked;
-      const { eventType, ...record } = session;
-      await repository.save("plannedSessions", {
-        ...record,
-        status: completed ? "completed" : "planned",
-        ...(completed ? { completedAt: new Date().toISOString() } : { completedAt: null })
-      });
-      await refreshEvents();
-    } catch (error) {
-      console.error("Impossible de mettre à jour l’entraînement.", error);
-      statusCheckbox.checked = session.status === "completed";
-      statusCheckbox.disabled = false;
-      calendarHint.textContent = "La mise à jour a échoué. Réessaie.";
-      calendarHint.dataset.state = "error";
-      calendarHint.hidden = false;
-    }
-  });
-  const detailsButton = document.createElement("button");
-  detailsButton.className = "calendar-session-details";
-  detailsButton.type = "button";
-  const detailsAreOpen = editingSession?.id === session.id;
-  detailsButton.title = detailsAreOpen ? "Fermer les détails" : "Détails et modification";
-  detailsButton.setAttribute("aria-expanded", String(detailsAreOpen));
-  detailsButton.setAttribute(
-    "aria-label",
-    detailsAreOpen
-      ? `Fermer les détails de la séance : ${session.title}`
-      : `Détails de la séance : ${session.title}. Ouvrir pour modifier.`
-  );
-  detailsButton.innerHTML =
-    '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.5"></circle></svg>';
-  detailsButton.addEventListener("click", () => {
-    if (editingSession?.id === session.id) {
-      closeTrainingForm();
-      detailsButton.title = "Détails et modification";
-      detailsButton.setAttribute("aria-expanded", "false");
-      detailsButton.setAttribute(
-        "aria-label",
-        `Détails de la séance : ${session.title}. Ouvrir pour modifier.`
-      );
-      return;
-    }
-    openTrainingForm(session);
-    detailsButton.title = "Fermer les détails";
-    detailsButton.setAttribute("aria-expanded", "true");
-    detailsButton.setAttribute("aria-label", `Fermer les détails de la séance : ${session.title}`);
-  });
-  actions.append(statusLabel, detailsButton);
-  card.append(actions);
-  return card;
-}
-
-function showDayDetails(date) {
-  selectedDate = date;
-  currentMonth.setFullYear(date.getFullYear(), date.getMonth(), 1);
-  document.querySelector(".calendar-heading").classList.add("is-day-view");
-  const events = getDayEvents(date);
-  calendarDayTitle.textContent = formatLongDate(date);
-  calendarDayTitle.hidden = false;
-  monthPickerToggle.hidden = true;
-  monthYearPicker.close();
-  calendarGrid.hidden = true;
-  calendarEventDetails.replaceChildren();
-  calendarEventDetails.hidden = false;
-  calendarCreateSection.hidden = false;
-  calendarHint.hidden = true;
-  previousMonthButton.hidden = true;
-  nextMonthButton.hidden = true;
-  previousDayButton.hidden = false;
-  nextDayButton.hidden = false;
-  backToMonthButton.hidden = false;
-  previousDayButton.setAttribute(
-    "aria-label",
-    `Jour précédent : ${formatLongDate(addDays(date, -1))}`
-  );
-  nextDayButton.setAttribute("aria-label", `Jour suivant : ${formatLongDate(addDays(date, 1))}`);
-
-  if (events.length) {
-    for (const event of events) {
-      calendarEventDetails.append(
-        event.eventType === "race"
-          ? renderRaceEvent(event)
-          : event.eventType === "personalRace"
-            ? renderPersonalRaceEvent(event)
-            : renderTrainingEvent(event)
-      );
-    }
-  } else {
-    const category = document.createElement("span");
-    category.className = "calendar-event-category";
-    category.textContent = "JOURNÉE";
-
-    const title = document.createElement("h3");
-    title.textContent = "Aucun événement prévu";
-
-    calendarEventDetails.append(category, title);
-  }
-}
-
-function moveSelectedDay(offset) {
-  if (!selectedDate) return;
-  const adjacent = new Date(selectedDate);
-  adjacent.setDate(adjacent.getDate() + offset);
-  closeTrainingForm();
-  closeRaceEventForm();
-  showDayDetails(adjacent);
-}
-
-function closeTrainingForm() {
-  trainingForm.reset();
-  trainingForm.hidden = true;
-  trainingFormStatus.textContent = "";
-  delete trainingFormStatus.dataset.state;
-  editingSession = null;
-  selectedEffort = "";
-  addTrainingButton.hidden = false;
-  trainingComputed.textContent = "";
-  trainingComputed.hidden = true;
-  trainingCompletedFields.hidden = true;
-}
-
-function syncCompletedFields() {
-  trainingCompletedFields.hidden = !trainingForm.elements.namedItem("completed").checked;
-}
-
-function closeRaceEventForm() {
-  raceEventForm.reset();
-  raceEventForm.hidden = true;
-  raceEventFormStatus.textContent = "";
-  delete raceEventFormStatus.dataset.state;
-  editingPersonalRace = null;
-  addRaceButton.hidden = false;
-}
-
-function updateDateRangeValidity(form) {
-  const startField = form.elements.namedItem("date");
-  const endField = form.elements.namedItem("endDate");
-  const startDate = startField.value;
-  const endDate = endField.value;
-  const rangeIsValid = !startDate || !endDate || endDate >= startDate;
-  endField.min = startDate;
-  startField.setCustomValidity(
-    rangeIsValid ? "" : "La date de début doit précéder la date de fin."
-  );
-  endField.setCustomValidity(
-    rangeIsValid ? "" : "La date de fin doit être égale ou postérieure à la date de début."
-  );
-}
-
-function updateTrainingComputed() {
-  const timeField = trainingForm.elements.namedItem("time");
-  const time = parseTimeOfDay(timeField.value);
-  timeField.setCustomValidity(
-    time === null ? "Saisis une heure entre 00:00 et 23:59, par exemple 930 pour 09:30." : ""
-  );
-  const durationField = trainingForm.elements.namedItem("duration");
-  const durationMinutes = parseDuration(durationField.value);
-  durationField.setCustomValidity(
-    Number.isNaN(durationMinutes)
-      ? "Saisis une durée comme 45 (minutes), 130 (1:30) ou 1020 (10:20)."
-      : ""
-  );
-
-  const heartRateAvgField = trainingForm.elements.namedItem("heartRateAvg");
-  const heartRateMaxField = trainingForm.elements.namedItem("heartRateMax");
-  heartRateMaxField.setCustomValidity(
-    heartRateAvgField.value &&
-      heartRateMaxField.value &&
-      Number(heartRateMaxField.value) < Number(heartRateAvgField.value)
-      ? "La FC max doit être supérieure ou égale à la FC moyenne."
-      : ""
-  );
-
-  const distanceField = trainingForm.elements.namedItem("distanceKm");
-  const distanceValue = distanceField.value.trim();
-  const distanceKm = parseDecimal(distanceValue);
-  const isInRange =
-    !distanceValue ||
-    (Number.isFinite(distanceKm) &&
-      distanceKm >= 0.1 &&
-      distanceKm <= 1000 &&
-      /^\d+(?:[,.]\d{1,2})?$/.test(distanceValue));
-  distanceField.setCustomValidity(
-    isInRange ? "" : "Saisis une distance entre 0,1 et 1 000 km, avec au maximum deux décimales."
-  );
-  const computed = [];
-  if (durationMinutes) computed.push(formatDuration(durationMinutes));
-  const pace = formatPace(distanceKm, durationMinutes);
-  if (pace) computed.push(`Allure ${pace}`);
-  const date = trainingForm.elements.namedItem("date").value;
-  if (durationMinutes && time !== null) {
-    const { endDate, endTime } = computeWorkoutEnd(date, time, durationMinutes);
-    const endDay = parseDateKey(endDate);
-    if (endDate === date && endTime) computed.push(`Fin ${endTime}`);
-    else if (endDate !== date && endDay) {
-      computed.push(`Fin le ${formatWeekdayDate(endDay)}${endTime ? ` à ${endTime}` : ""}`);
-    }
-  }
-  trainingComputed.textContent = computed.join(" · ");
-  trainingComputed.hidden = !computed.length;
-}
-
-function openTrainingForm(session = null) {
-  closeRaceEventForm();
-  closeTrainingForm();
-  editingSession = session ? { ...session } : null;
-  trainingFormTitle.textContent = session
-    ? `Modifier · ${session.title}`
-    : `Entraînement du ${formatLongDate(selectedDate)}`;
-  trainingForm.elements.namedItem("date").value = session?.date || toDateKey(selectedDate);
-  if (session) {
-    for (const field of [
-      "title",
-      "type",
-      "time",
-      "ascentMeters",
-      "heartRateAvg",
-      "heartRateMax",
-      "weather",
-      "notes"
-    ]) {
-      trainingForm.elements.namedItem(field).value = session[field] ?? "";
-    }
-    if (Number.isFinite(session.distanceKm)) {
-      trainingForm.elements.namedItem("distanceKm").value = String(session.distanceKm).replace(
-        ".",
-        ","
-      );
-    }
-    if (Number.isFinite(session.durationMinutes) && session.durationMinutes > 0) {
-      trainingForm.elements.namedItem("duration").value = formatDurationClock(
-        session.durationMinutes
-      );
-    }
-    if (Number.isFinite(session.perceivedEffort)) {
-      trainingForm.elements.namedItem("perceivedEffort").value = String(session.perceivedEffort);
-      selectedEffort = String(session.perceivedEffort);
-    }
-    trainingForm.elements.namedItem("completed").checked = session.status === "completed";
-  }
-  syncCompletedFields();
-  updateTrainingComputed();
-  trainingForm.hidden = false;
-  addTrainingButton.hidden = true;
-  trainingForm.querySelector('[name="type"]:checked').focus();
-}
-
-function openRaceEventForm(race = null) {
-  closeTrainingForm();
-  closeRaceEventForm();
-  editingPersonalRace = race ? { ...race } : null;
-  raceEventFormTitle.textContent = race ? `Modifier · ${race.name}` : "Nouvelle course";
-  raceEventForm.elements.namedItem("name").value = race?.name || "";
-  raceEventForm.elements.namedItem("date").value = race?.date || toDateKey(selectedDate);
-  raceEventForm.elements.namedItem("endDate").value =
-    race?.endDate || race?.date || toDateKey(selectedDate);
-  raceEventForm.hidden = false;
-  addRaceButton.hidden = true;
-  updateDateRangeValidity(raceEventForm);
-  raceEventForm.elements.namedItem("name").focus();
-}
-
-async function refreshEvents() {
-  const [races, personalRaces, sessions] = await Promise.all([
-    repository.list("raceCatalog"),
-    repository.list("raceEvents"),
-    repository.list("plannedSessions")
-  ]);
-  showLoadedEvents(races, personalRaces, sessions);
-}
-
-function renderCalendar() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayKey = toDateKey(today);
-  calendarTitleText.textContent = capitalize(formatMonthYear(currentMonth));
-  eventsByDate = buildMonthEvents(currentMonth);
-  renderCalendarGrid({
-    container: calendarDays,
-    currentMonth,
-    eventsByDate,
-    today,
-    onSelectDate: showDayDetails,
-    getEventLabel: event => {
-      if (event.eventType === "race") return `Course : ${event.name}`;
-      if (event.eventType === "personalRace") return `Course : ${event.name}`;
-      const status = sessionStateLabels[getWorkoutState(event, todayKey)];
-      const time = event.time ? ` à ${event.time}` : "";
-      return `Entraînement ${status}${time} : ${event.title}`;
-    },
-    getEventMarkerClass: event => {
-      if (event.eventType === "race") return "";
-      if (event.eventType === "personalRace") return "calendar-session-dot";
-      return `calendar-session-dot calendar-training-dot is-${getWorkoutState(event, todayKey)}`;
-    }
-  });
-}
-
-export function initializeCalendar(racesPromise, personalRepository, onSessionsUpdated = () => {}) {
-  repository = personalRepository;
-  sessionsUpdated = onSessionsUpdated;
-  monthYearPicker = createMonthYearPicker({
+  const monthYearPicker = createMonthYearPicker({
     toggle: monthPickerToggle,
-    form: monthPickerForm,
-    monthWheel,
-    yearWheel,
+    form: document.getElementById("calendarMonthPicker"),
+    monthWheel: document.getElementById("calendarMonthWheel"),
+    yearWheel: document.getElementById("calendarYearWheel"),
     currentMonth,
-    onApply: renderCalendar
+    onApply: renderMonth
   });
-  previousMonthButton.addEventListener("click", () => {
+  const raceForm = createPersonalRaceForm({
+    form: document.getElementById("raceEventForm"),
+    openButton: addRaceButton,
+    save: race => repository.save("raceEvents", race),
+    onSaved: refreshEvents
+  });
+  const workoutForm = createWorkoutForm({
+    form: document.getElementById("trainingForm"),
+    openButton: addWorkoutButton,
+    save: workout => repository.save("plannedSessions", workout),
+    onSaved: refreshEvents
+  });
+
+  function showError(message, error) {
+    console.error(message, error);
+    hint.textContent = message;
+    hint.dataset.state = "error";
+    hint.hidden = false;
+  }
+
+  async function refreshEvents() {
+    const [races, personalRaces, workouts] = await Promise.all([
+      repository.list("raceCatalog"),
+      repository.list("raceEvents"),
+      repository.list("plannedSessions")
+    ]);
+    onWorkoutsUpdated(workouts);
+    sources = { races, personalRaces, workouts };
+    hint.textContent = "";
+    delete hint.dataset.state;
+    hint.hidden = true;
+    renderMonth();
+    if (selectedDate) showDay(selectedDate);
+  }
+
+  function renderMonth() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayKey = toDateKey(today);
+    titleText.textContent = capitalize(formatMonthYear(currentMonth));
+    renderCalendarGrid({
+      container: calendarDays,
+      currentMonth,
+      eventsByDate: groupMonthEventsByDate(sources, currentMonth),
+      today,
+      onSelectDate: showDay,
+      getEventLabel: event => getEventLabel(event, todayKey),
+      getEventMarkerClass: event => getEventMarkerClass(event, todayKey)
+    });
+  }
+
+  function renderEventCard(event) {
+    if (event.eventType === "race") return renderRaceCard(event);
+    if (event.eventType === "personalRace") {
+      return renderPersonalRaceCard(event, {
+        onEdit: () => {
+          workoutForm.close();
+          raceForm.open(selectedDate, event);
+        },
+        onDelete: async () => {
+          await repository.remove("raceEvents", event.id);
+          await refreshEvents();
+        },
+        onError: showError
+      });
+    }
+    return renderWorkoutCard(event, {
+      onDelete: async () => {
+        await repository.remove("plannedSessions", event.id);
+        await refreshEvents();
+      },
+      onSetCompleted: async completed => {
+        const { eventType, ...workout } = event;
+        await repository.save("plannedSessions", {
+          ...workout,
+          status: completed ? "completed" : "planned",
+          completedAt: completed ? new Date().toISOString() : null
+        });
+        await refreshEvents();
+      },
+      isEditing: () => workoutForm.isEditing(event.id),
+      onOpenDetails: () => {
+        raceForm.close();
+        workoutForm.open(selectedDate, event);
+      },
+      onCloseDetails: workoutForm.close,
+      onError: showError
+    });
+  }
+
+  function setView(view) {
+    const isDay = view === "day";
+    heading.classList.toggle("is-day-view", isDay);
+    monthPickerToggle.hidden = isDay;
+    dayTitle.hidden = !isDay;
+    calendarGrid.hidden = isDay;
+    dayEvents.hidden = !isDay;
+    createSection.hidden = !isDay;
+    previousMonthButton.hidden = isDay;
+    nextMonthButton.hidden = isDay;
+    previousDayButton.hidden = !isDay;
+    nextDayButton.hidden = !isDay;
+    backToMonthButton.hidden = !isDay;
+    hint.hidden = isDay || !hint.textContent;
+  }
+
+  function showMonth() {
     monthYearPicker.close();
-    currentMonth.setMonth(currentMonth.getMonth() - 1);
-    renderCalendar();
-  });
-  nextMonthButton.addEventListener("click", () => {
+    raceForm.close();
+    setView("month");
+    selectedDate = null;
+    workoutForm.close();
+    renderMonth();
+  }
+
+  function showDay(date) {
+    selectedDate = date;
+    currentMonth.setFullYear(date.getFullYear(), date.getMonth(), 1);
     monthYearPicker.close();
-    currentMonth.setMonth(currentMonth.getMonth() + 1);
-    renderCalendar();
-  });
-  backToMonthButton.addEventListener("click", showMonthView);
+    setView("day");
+    dayTitle.textContent = formatLongDate(date);
+    previousDayButton.setAttribute(
+      "aria-label",
+      `Jour précédent : ${formatLongDate(addDays(date, -1))}`
+    );
+    nextDayButton.setAttribute("aria-label", `Jour suivant : ${formatLongDate(addDays(date, 1))}`);
+
+    const events = listEventsOnDate(sources, toDateKey(date));
+    dayEvents.replaceChildren(
+      ...(events.length
+        ? events.map(renderEventCard)
+        : [
+            el("span", { className: "calendar-event-category", text: "JOURNÉE" }),
+            el("h3", { text: "Aucun événement prévu" })
+          ])
+    );
+  }
+
+  function moveSelectedDay(offset) {
+    if (!selectedDate) return;
+    workoutForm.close();
+    raceForm.close();
+    showDay(addDays(selectedDate, offset));
+  }
+
+  function moveMonth(offset) {
+    monthYearPicker.close();
+    currentMonth.setMonth(currentMonth.getMonth() + offset);
+    renderMonth();
+  }
+
+  previousMonthButton.addEventListener("click", () => moveMonth(-1));
+  nextMonthButton.addEventListener("click", () => moveMonth(1));
+  backToMonthButton.addEventListener("click", showMonth);
   previousDayButton.addEventListener("click", () => moveSelectedDay(-1));
   nextDayButton.addEventListener("click", () => moveSelectedDay(1));
   addRaceButton.addEventListener("click", () => {
     if (!selectedDate) return;
-    openRaceEventForm();
+    workoutForm.close();
+    raceForm.open(selectedDate);
   });
-  addTrainingButton.addEventListener("click", () => {
+  addWorkoutButton.addEventListener("click", () => {
     if (!selectedDate) return;
-    openTrainingForm();
-  });
-  cancelRaceEventButton.addEventListener("click", closeRaceEventForm);
-  raceEventForm.elements
-    .namedItem("date")
-    .addEventListener("input", () => updateDateRangeValidity(raceEventForm));
-  raceEventForm.elements
-    .namedItem("endDate")
-    .addEventListener("input", () => updateDateRangeValidity(raceEventForm));
-  raceEventForm.addEventListener("submit", async event => {
-    event.preventDefault();
-    updateDateRangeValidity(raceEventForm);
-    if (!raceEventForm.reportValidity()) return;
-    const formData = new FormData(raceEventForm);
-    const race = {
-      ...(editingPersonalRace || {}),
-      id: editingPersonalRace?.id || crypto.randomUUID(),
-      name: String(formData.get("name")).trim(),
-      date: String(formData.get("date")),
-      createdAt: editingPersonalRace?.createdAt || new Date().toISOString()
-    };
-    const endDate = String(formData.get("endDate"));
-    if (endDate > race.date) race.endDate = endDate;
-    else delete race.endDate;
-    const isEditing = Boolean(editingPersonalRace);
-    const saveButton = raceEventForm.querySelector('[type="submit"]');
-    saveButton.disabled = true;
-    raceEventFormStatus.textContent = "Enregistrement…";
-    try {
-      await repository.save("raceEvents", race);
-      closeRaceEventForm();
-      await refreshEvents();
-    } catch (error) {
-      console.error(
-        isEditing ? "Impossible de modifier la course." : "Impossible d’enregistrer la course.",
-        error
-      );
-      raceEventFormStatus.textContent = isEditing
-        ? "La modification a échoué. Vérifie le stockage de cet appareil."
-        : "L’enregistrement a échoué. Vérifie le stockage de cet appareil.";
-      raceEventFormStatus.dataset.state = "error";
-    } finally {
-      saveButton.disabled = false;
-    }
-  });
-  cancelTrainingButton.addEventListener("click", closeTrainingForm);
-  trainingForm.addEventListener("input", updateTrainingComputed);
-  trainingForm.elements.namedItem("completed").addEventListener("change", syncCompletedFields);
-  for (const fieldName of ["time", "duration"]) {
-    const field = trainingForm.elements.namedItem(fieldName);
-    field.addEventListener("blur", () => {
-      if (fieldName === "time") {
-        const time = parseTimeOfDay(field.value);
-        if (time) field.value = time;
-      } else {
-        const durationMinutes = parseDuration(field.value);
-        if (durationMinutes) field.value = formatDurationClock(durationMinutes);
-      }
-      updateTrainingComputed();
-    });
-  }
-  for (const radio of trainingForm.elements.namedItem("perceivedEffort")) {
-    radio.addEventListener("click", () => {
-      if (radio.value === selectedEffort) {
-        radio.checked = false;
-        selectedEffort = "";
-      } else {
-        selectedEffort = radio.value;
-      }
-    });
-  }
-  trainingForm.addEventListener("submit", async event => {
-    event.preventDefault();
-    updateTrainingComputed();
-    if (!selectedDate || !trainingForm.reportValidity()) return;
-    const formData = new FormData(trainingForm);
-    const type = String(formData.get("type"));
-    const time = parseTimeOfDay(formData.get("time"));
-    const durationMinutes = parseDuration(formData.get("duration"));
-    const session = {
-      ...(editingSession || {}),
-      id: editingSession?.id || crypto.randomUUID(),
-      date: String(formData.get("date")),
-      type,
-      title: String(formData.get("title")).trim() || trainingTypes[type] || "Entraînement",
-      status: formData.get("completed") === "on" ? "completed" : "planned",
-      createdAt: editingSession?.createdAt || new Date().toISOString()
-    };
-    const { endDate } = computeWorkoutEnd(session.date, time, durationMinutes);
-    if (endDate > session.date) session.endDate = endDate;
-    else delete session.endDate;
-    delete session.eventType;
-    if (session.status === "completed") {
-      session.completedAt = editingSession?.completedAt || new Date().toISOString();
-    } else {
-      delete session.completedAt;
-    }
-    if (time) session.time = time;
-    else delete session.time;
-    if (durationMinutes) session.durationMinutes = durationMinutes;
-    else delete session.durationMinutes;
-    const distanceValue = String(formData.get("distanceKm")).trim();
-    if (distanceValue) session.distanceKm = parseDecimal(distanceValue);
-    else delete session.distanceKm;
-    const ascentValue = String(formData.get("ascentMeters")).trim();
-    if (ascentValue) session.ascentMeters = Number(ascentValue);
-    else delete session.ascentMeters;
-    // Le ressenti, la FC et la météo ne concernent qu’une séance réalisée.
-    for (const field of ["perceivedEffort", "heartRateAvg", "heartRateMax"]) {
-      const value = session.status === "completed" ? String(formData.get(field) ?? "").trim() : "";
-      if (value) session[field] = Number(value);
-      else delete session[field];
-    }
-    const weather = session.status === "completed" ? String(formData.get("weather")) : "";
-    if (weather) session.weather = weather;
-    else delete session.weather;
-    const notes = String(formData.get("notes")).trim();
-    if (notes) session.notes = notes;
-    else delete session.notes;
-    const isEditing = Boolean(editingSession);
-    const saveButton = trainingForm.querySelector('[type="submit"]');
-    saveButton.disabled = true;
-    trainingFormStatus.textContent = "Enregistrement…";
-    delete trainingFormStatus.dataset.state;
-    try {
-      await repository.save("plannedSessions", session);
-      closeTrainingForm();
-      await refreshEvents();
-    } catch (error) {
-      console.error(
-        isEditing
-          ? "Impossible de modifier l’entraînement."
-          : "Impossible d’enregistrer l’entraînement.",
-        error
-      );
-      trainingFormStatus.textContent = isEditing
-        ? "La modification a échoué. Vérifie le stockage de cet appareil."
-        : "L’enregistrement a échoué. Vérifie le stockage de cet appareil.";
-      trainingFormStatus.dataset.state = "error";
-    } finally {
-      saveButton.disabled = false;
-    }
+    raceForm.close();
+    workoutForm.open(selectedDate);
   });
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden && !calendarGrid.hidden) renderCalendar();
+    if (!document.hidden && !calendarGrid.hidden) renderMonth();
   });
 
   monthPickerToggle.hidden = false;
-  renderCalendar();
+  renderMonth();
   monthYearPicker.sync(currentMonth, true);
   Promise.resolve(racesPromise)
     .then(() => refreshEvents())
-    .catch(error => {
-      console.error("Impossible de charger le calendrier.", error);
-      calendarHint.textContent = "Impossible de charger le calendrier. Réessaie.";
-      calendarHint.hidden = false;
-    });
+    .catch(error => showError("Impossible de charger le calendrier. Réessaie.", error));
 
-  return async () => {
-    await refreshEvents();
-  };
+  return refreshEvents;
 }
