@@ -16,7 +16,11 @@ export default async function* githubReporter(source) {
     const error = details?.error?.cause ?? details?.error;
     const message = error?.message ?? String(error);
     const path = file ? relative(process.cwd(), file).replaceAll("\\", "/") : "";
-    const location = path ? `file=${escapeProperty(path)},line=${line ?? 1},` : "";
+    // Ligne de l’assertion en échec si la pile d’appels la donne, sinon ligne du test.
+    const fileName = path.split("/").at(-1);
+    const frame = fileName && error?.stack?.split("\n").find(entry => entry.includes(fileName));
+    const stackLine = frame?.split(`${fileName}:`)[1]?.split(":")[0];
+    const location = path ? `file=${escapeProperty(path)},line=${stackLine ?? line ?? 1},` : "";
     yield `::error ${location}title=${escapeProperty(name)}::${escapeData(message)}\n`;
   }
 }

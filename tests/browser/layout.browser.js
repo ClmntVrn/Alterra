@@ -20,12 +20,20 @@ after(() => browser?.close());
 
 const titleColor = () =>
   page.evaluate(() => getComputedStyle(document.getElementById("calendarTitleText")).color);
+/** État utile au diagnostic si la couleur n’est pas celle attendue. */
+const focusState = () =>
+  page.evaluate(() =>
+    JSON.stringify({
+      focus: document.activeElement?.id || document.activeElement?.tagName,
+      documentFocused: document.hasFocus()
+    })
+  );
 
 test("au toucher, le titre du mois est orange pendant le choix seulement", async () => {
   await page.setViewport(375, 812, { touch: true });
   await openHome(page);
   assert.equal(await page.evaluate(() => matchMedia("(hover: none)").matches), true);
-  assert.equal(await titleColor(), CHARCOAL);
+  assert.equal(await titleColor(), CHARCOAL, `au repos : ${await focusState()}`);
   await page.tap("#calendarTitleText");
   await page.waitFor(() => document.activeElement?.id === "calendarMonthInput");
   assert.equal(await titleColor(), ACCENT);
@@ -40,7 +48,7 @@ test("au toucher, le titre du mois est orange pendant le choix seulement", async
     await page.evaluate(() => document.getElementById("calendarTitleText").textContent),
     "Janvier 2027"
   );
-  assert.equal(await titleColor(), CHARCOAL);
+  assert.equal(await titleColor(), CHARCOAL, `après le choix : ${await focusState()}`);
 });
 
 for (const width of [320, 375]) {
