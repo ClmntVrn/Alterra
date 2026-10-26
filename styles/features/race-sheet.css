@@ -1,0 +1,298 @@
+/* Fiche course : chiffres clés, scénarios, ravitos, nutrition, rappels, sources. */
+
+.personal-plan-tools {
+  margin: 20px 4px 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 65%);
+  box-shadow: none;
+}
+
+.personal-plan-tools p {
+  margin: 0 0 8px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.scenario-help {
+  margin: 8px 2px 11px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.stat {
+  min-width: 0;
+  padding: 12px 9px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 13px;
+  background: rgb(20 25 29 / 24%);
+}
+
+.stat strong {
+  display: block;
+  font-size: clamp(16px, 4.5vw, 21px);
+  letter-spacing: -0.03em;
+}
+
+.stat span {
+  color: rgb(255 255 255 / 70%);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.selector {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.selector button,
+.smallbtn {
+  min-height: 48px;
+  padding: 9px 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: #f1f3f4;
+  color: var(--color-charcoal);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+  white-space: pre-line;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.selector button.active {
+  border-color: var(--color-accent-bright);
+  background: var(--color-accent-bright);
+  color: var(--color-charcoal);
+}
+
+.checkpoint-list {
+  display: grid;
+  gap: 8px;
+}
+
+.checkpoint {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: #fff;
+  transition:
+    opacity 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.fuel-overview {
+  display: grid;
+  gap: 5px;
+  margin: 10px 0;
+  padding: 12px 14px;
+  border: 1px solid #f2c7ae;
+  border-radius: 14px;
+  background: var(--color-accent-soft);
+  color: var(--color-text);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.fuel-overview strong {
+  color: var(--color-charcoal);
+}
+
+.fuel-overview p {
+  margin: 0;
+}
+
+.checkpoint-plan {
+  grid-column: 1 / -1;
+  align-self: stretch;
+  padding-top: 9px;
+  border-top: 1px solid var(--color-line);
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.checkpoint-plan p {
+  margin: 0;
+}
+
+.checkpoint-plan p + p {
+  margin-top: 4px;
+}
+
+.checkpoint-plan strong {
+  color: var(--color-charcoal);
+}
+
+.checkpoint.done {
+  background: #f1f3f4;
+  opacity: 0.7;
+}
+
+.checkpoint.done .place {
+  text-decoration: line-through;
+}
+
+.place {
+  color: var(--color-charcoal);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.km,
+.clock {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.km {
+  margin-top: 2px;
+}
+
+.timing {
+  text-align: right;
+}
+
+.elapsed {
+  color: var(--color-charcoal);
+  font-size: 17px;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock {
+  font-variant-numeric: tabular-nums;
+}
+
+.mark {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  margin-top: 2px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.mark input,
+.gear-item input {
+  width: 19px;
+  height: 19px;
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.smallbtn {
+  width: 100%;
+  margin-top: 10px;
+  border-color: var(--color-line);
+  background: transparent;
+}
+
+.smallbtn:hover,
+.gear-reset:hover {
+  background: #f1f3f4;
+}
+
+.rules {
+  display: grid;
+  gap: 9px;
+}
+
+.rule {
+  padding: 13px;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.rule b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--color-charcoal);
+}
+
+.rule p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.race-sources {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.race-sources a {
+  color: var(--color-charcoal);
+  text-decoration-color: var(--color-line);
+  text-underline-offset: 3px;
+}
+
+.race-sources a:hover {
+  text-decoration-color: currentColor;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.pill {
+  padding: 7px 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: #f1f3f4;
+  color: var(--color-charcoal);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+@media (min-width: 560px) {
+  .checkpoint-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 380px) {
+  .stats {
+    gap: 5px;
+  }
+
+  .stat {
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+
+  .selector {
+    gap: 5px;
+  }
+
+  .selector button {
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+}

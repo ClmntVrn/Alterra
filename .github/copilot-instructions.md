@@ -10,7 +10,7 @@
 ## Structure technique
 
 - Le projet est un site statique en HTML, CSS et JavaScript natif ; ne pas ajouter de framework ou de dépendance sans besoin concret.
-- `styles/main.css` est la feuille de styles partagée. Réutiliser ses variables et composants plutôt que dupliquer les styles dans les pages.
+- Les styles sont dans `styles/` : `tokens.css` (variables), `base.css`, `layout.css`, puis `components/` et `features/`. Chaque page charge les feuilles dont elle a besoin. Réutiliser les variables et composants existants plutôt que dupliquer les styles.
 - `index.html` contient le calendrier et la navigation vers les plans de course.
 - `race.html` et `src/pages/race.js` forment la fiche générique ; les fiches de course et GPX vivent dans la base locale et les sauvegardes, pas dans le dépôt.
 - Le code est rangé dans `src/` : `pages/` (points d'entrée), `features/` (fonctionnalités), `domain/` (règles pures, testées), `storage/` (repository et IndexedDB), `ui/` (formats partagés). Les icônes sont dans `assets/icons/`.

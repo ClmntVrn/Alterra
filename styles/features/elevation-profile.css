@@ -1,0 +1,126 @@
+/* Profil d’altitude de la fiche course. */
+
+.elevation-section {
+  padding: 16px 14px 12px;
+}
+
+.elevation-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.elevation-heading h2 {
+  margin-bottom: 3px;
+}
+
+.elevation-caption,
+.elevation-hint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.elevation-ascent {
+  flex-shrink: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  color: var(--color-charcoal);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.elevation-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 8px;
+  overflow: visible;
+}
+
+.elevation-grid line {
+  stroke: var(--color-line);
+  stroke-dasharray: 3 5;
+  stroke-width: 1;
+}
+
+.elevation-grid text {
+  fill: var(--color-muted);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11px;
+}
+
+.elevation-axis {
+  fill: none;
+  stroke: #aab2b8;
+  stroke-width: 1;
+}
+
+.elevation-area {
+  fill: #e2e6e9;
+}
+
+.elevation-line {
+  fill: none;
+  stroke: var(--color-slate);
+  stroke-linejoin: round;
+  stroke-width: 2.5;
+}
+
+.elevation-completed {
+  fill: none;
+  stroke: var(--color-accent-bright);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 4;
+}
+
+.elevation-stop-dot {
+  fill: var(--color-paper);
+  stroke: var(--color-charcoal);
+  stroke-width: 2;
+}
+
+.elevation-stop-dot[role="button"] {
+  cursor: pointer;
+}
+
+.elevation-stop-dot[role="button"]:focus-visible {
+  outline: 3px solid var(--color-accent-bright);
+  outline-offset: 3px;
+}
+
+.elevation-stop-dot.is-done {
+  fill: var(--color-accent-bright);
+}
+
+.elevation-stop-label {
+  fill: var(--color-charcoal);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 10px;
+  font-weight: 750;
+  paint-order: stroke;
+  stroke: var(--color-paper);
+  stroke-linejoin: round;
+  stroke-width: 3px;
+}
+
+.elevation-current {
+  fill: var(--color-accent-bright);
+  stroke: white;
+  stroke-width: 2;
+}
+
+.elevation-progress {
+  margin: -3px 0 3px;
+  color: var(--color-charcoal);
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.elevation-hint {
+  text-align: center;
+}

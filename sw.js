@@ -1,4 +1,4 @@
-const CACHE_NAME = "alterra-v50";
+const CACHE_NAME = "alterra-v51";
 
 const FILES = [
   "./",
@@ -6,7 +6,18 @@ const FILES = [
   "./race.html",
   "./versions.html",
   "./manifest.json",
-  "./styles/main.css",
+  "./styles/tokens.css",
+  "./styles/base.css",
+  "./styles/layout.css",
+  "./styles/components/forms.css",
+  "./styles/features/statistics.css",
+  "./styles/features/backup.css",
+  "./styles/features/calendar.css",
+  "./styles/features/calendar-day.css",
+  "./styles/features/race-sheet.css",
+  "./styles/features/elevation-profile.css",
+  "./styles/features/gear-checklist.css",
+  "./styles/features/versions.css",
   "./assets/icons/icon.svg",
   "./assets/icons/apple-touch-icon.png",
   "./src/pages/home.js",

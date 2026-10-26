@@ -1,0 +1,56 @@
+/* Page d’historique des versions. */
+
+.version-hero {
+  margin-top: 8px;
+}
+
+.version-hero .version-eyebrow {
+  margin: 0 0 10px;
+  color: var(--color-accent-bright);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.14em;
+}
+
+.version-hero h1 {
+  max-width: 12ch;
+}
+
+.version-hero .sub {
+  margin: 12px 0 0;
+}
+
+.version-list {
+  display: grid;
+  gap: 20px;
+}
+
+.version-entry + .version-entry {
+  padding-top: 18px;
+  border-top: 1px solid var(--color-line);
+}
+
+.version-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+}
+
+.version-heading time {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.version-entry ul {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding-left: 20px;
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.version-entry li::marker {
+  color: var(--color-accent);
+}

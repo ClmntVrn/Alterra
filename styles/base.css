@@ -1,0 +1,65 @@
+/* Base commune à toutes les pages : boîte, typographie, focus, mouvements réduits. */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  touch-action: manipulation;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(ellipse at 12% 0%, rgb(105 116 125 / 12%), transparent 34rem),
+    var(--color-stone);
+  color: var(--color-text);
+  font:
+    16px/1.55 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+main {
+  width: min(100%, 720px);
+  margin: 0 auto;
+}
+
+a {
+  color: var(--color-charcoal);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+@media (min-width: 560px) {
+  body {
+    padding-right: 22px;
+    padding-left: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

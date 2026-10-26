@@ -1,0 +1,64 @@
+/* Sauvegarde et restauration des données. */
+
+.personal-data-tools {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+  background: var(--color-paper);
+  box-shadow: var(--shadow-card);
+}
+
+.personal-data-tools h2 {
+  margin: 0 0 6px;
+  color: var(--color-charcoal);
+  font-size: 17px;
+}
+
+.personal-data-tools p {
+  margin: 6px 0 12px;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.personal-data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.personal-data-actions button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: #f1f3f4;
+  color: var(--color-charcoal);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.personal-data-actions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.personal-data-tools .personal-data-last-backup {
+  color: var(--color-charcoal);
+  font-weight: 650;
+}
+
+.personal-data-tools .personal-data-last-backup[data-state="stale"] {
+  padding: 8px 10px;
+  border: 1px solid var(--color-warning-line);
+  border-radius: 10px;
+  background: var(--color-warning);
+}
+
+.personal-data-status[data-state="error"] {
+  color: #9c2f19;
+}
+
+.personal-data-status:empty {
+  display: none;
+}

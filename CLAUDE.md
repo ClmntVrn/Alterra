@@ -24,7 +24,7 @@ Documentation de référence, à lire avant une évolution fonctionnelle :
 - `src/storage/` : `repository.js` (interface stable) et `indexeddb.js` (adaptateur). Les écrans passent par le repository, jamais directement par IndexedDB. `personal-data.js` gère l'export/restauration, y compris les clés `localStorage` préfixées `alterra-`.
 - `src/ui/` : `format.js` (formats d'affichage français partagés) et `dom.js` (`el()` pour créer des éléments).
 - `race.html` + `src/pages/race.js` : fiche de course générique. Les fiches et leurs GPX (`profile.gpxData`) vivent dans la collection `raceCatalog` de la base locale et dans les sauvegardes, jamais dans le dépôt.
-- `styles/main.css` : feuille de styles unique ; réutiliser ses variables et composants. Icônes dans `assets/icons/`.
+- `styles/` : `tokens.css` (variables), `base.css`, `layout.css`, `components/` et `features/` (un fichier par fonctionnalité). Chaque page charge par des `<link>` les seules feuilles qu'elle utilise, de la plus générale à la plus spécifique ; réutiliser les variables et composants existants. Icônes dans `assets/icons/`.
 - Les blocs d'une fiche (scénarios, ravitos, nutrition, rappels, matériel, sources) sont facultatifs : ne pas coder de contenu propre à une course dans le moteur de rendu. Les identifiants des repères du profil correspondent à ceux des ravitos.
 
 ## Données et confidentialité

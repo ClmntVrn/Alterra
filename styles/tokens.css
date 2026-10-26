@@ -1,0 +1,18 @@
+/* Variables partagées : couleurs, ombres. */
+
+:root {
+  color-scheme: light;
+  --color-charcoal: #20262b;
+  --color-slate: #454f58;
+  --color-stone: #eceff1;
+  --color-paper: #ffffff;
+  --color-text: #252c32;
+  --color-muted: #69747d;
+  --color-line: #d9dfe3;
+  --color-accent: #b94f1f;
+  --color-accent-bright: #ed6b2e;
+  --color-accent-soft: #fff0e7;
+  --color-warning: #fff3d9;
+  --color-warning-line: #e6c78e;
+  --shadow-card: 0 12px 32px rgb(31 41 48 / 8%);
+}
