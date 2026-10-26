@@ -32,7 +32,8 @@ Documentation de référence, à lire avant une évolution fonctionnelle :
 
 - Le dépôt GitHub est public : aucune donnée personnelle, donnée de course, trace GPX, sauvegarde JSON, secret ou clé d'API dans les fichiers suivis.
 - Ne jamais inventer d'horaires, distances, dénivelés, ravitaillements ou conseils sportifs : ils viennent des informations fournies ou vérifiées.
-- Toute modification du format de données doit rester compatible avec les sauvegardes existantes (formats 1 et 2 acceptés) ou prévoir une migration ; incrémenter `DATABASE_VERSION` si le schéma IndexedDB change.
+- Vocabulaire : une séance est un `workout` (collection `workouts`), une course ajoutée au calendrier une `personalRace` (`personalRaces`), une fiche de référence une `raceSheet` (`raceCatalog`), un plan personnel un `racePlan` (`racePlans`).
+- Toute modification du format de données doit rester compatible avec les sauvegardes existantes (formats 1, 2 et 3 acceptés, convertis par `migratePersonalData`) ou prévoir une migration ; incrémenter `DATABASE_VERSION` si le schéma IndexedDB change.
 - Dates : toujours en heure locale de l'appareil, clés au format `AAAA-MM-JJ`. Recalculer la date du jour à l'affichage et au retour au premier plan.
 
 ## Livrer une nouvelle version

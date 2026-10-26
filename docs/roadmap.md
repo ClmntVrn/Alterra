@@ -1,7 +1,7 @@
 # Plan de développement d’Alterra
 
 **Mis à jour le :** 26 octobre 2026  
-**État général :** version locale utilisable (0.8.14) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
+**État général :** version locale utilisable (0.8.15) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
 
 ## Vision
 
@@ -21,7 +21,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 ## État actuel
 
 - [x] PWA statique (HTML, CSS, JavaScript natif) installable et utilisable hors ligne.
-- [x] Base locale IndexedDB avec sauvegarde autonome (export/import JSON, format 2), rappel de la dernière sauvegarde et demande de stockage persistant.
+- [x] Base locale IndexedDB avec sauvegarde autonome (export/import JSON, format 3), rappel de la dernière sauvegarde et demande de stockage persistant.
 - [x] Calendrier mois/jour avec sorties, courses personnelles et courses de référence, y compris sur plusieurs jours.
 - [x] Sorties prévues ou réalisées, modifiables ; statistiques des 12 dernières semaines sur les sorties réalisées.
 - [x] Fiches de course génériques : profil GPX, ravitos, scénarios, nutrition, rappels, matériel, sources.
@@ -40,7 +40,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 
 ### Sorties prévues et réalisées
 
-- **Une sortie est un seul enregistrement** (`plannedSessions`) avec un statut `planned` ou `completed`. Une fois réalisée, ses valeurs sont les valeurs réelles : **l’objectif prévu n’est pas conservé** (décision du 26 octobre 2026, qui remplace la règle initiale « garder le prévu consultable après réalisation »).
+- **Une sortie est un seul enregistrement** (`workouts`, anciennement `plannedSessions`) avec un statut `planned` ou `completed`. Une fois réalisée, ses valeurs sont les valeurs réelles : **l’objectif prévu n’est pas conservé** (décision du 26 octobre 2026, qui remplace la règle initiale « garder le prévu consultable après réalisation »).
 - La collection `activities` n’est pas utilisée. Elle reste dans le format de sauvegarde pour compatibilité ; un futur import (Garmin, GPX) marquera ou créera directement une sortie réalisée plutôt qu’une activité séparée.
 - Types de sortie : trail, course à pied, renforcement musculaire, vélo. Météo : une catégorie au choix (ensoleillé, nuageux, pluie, neige, vent, orage).
 - Une sortie n’a qu’une date de début saisie ; sa date de fin est calculée depuis l’heure et la durée (26 octobre 2026). Une sortie prévue dont la date est passée est « à vérifier », sans être déclarée manquée.
@@ -101,7 +101,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 
 **Statut :** à faire
 
-- [x] Tests unitaires `node --test` des dates, durées, séances et KPI ; reste la validation des sauvegardes.
+- [x] Tests unitaires `node --test` des dates, durées, séances, KPI et de la validation des sauvegardes.
 - Tester les parcours principaux sur petit écran et sur iPhone/PWA.
 - Tester les cas hors ligne, les erreurs de stockage, les exports invalides et les restaurations.
 - Vérifier l’accessibilité clavier, les libellés et les confirmations avant suppression.
@@ -191,11 +191,12 @@ Chantier de qualité du code décidé le 26 octobre 2026, mené en parallèle de
 
 ### R7 — Renommage des données
 
-**Statut :** en cours
+**Statut :** terminée — 26 octobre 2026 (0.8.15)
 
-- [ ] Collections `plannedSessions` → `workouts` et `raceEvents` → `personalRaces`, avec migration de la base IndexedDB.
-- [ ] Sauvegarde au format 3 ; les formats 1 et 2 restent acceptés à l’import.
-- [ ] Migration testée sur une copie d’une vraie sauvegarde (gardée hors du dépôt).
+- [x] Collections `plannedSessions` → `workouts` et `raceEvents` → `personalRaces`, avec migration de la base IndexedDB (version 3) dans la transaction de mise à niveau.
+- [x] Sauvegarde au format 3 ; les formats 1 et 2 restent acceptés à l’import ; champ interne `eventType` retiré au passage.
+- [x] Migration testée sur une copie d’une vraie sauvegarde (gardée hors du dépôt) : mise à niveau v2 → v3 dans le navigateur, contenu identique enregistrement par enregistrement, écrans, export, réimport. Test facultatif : `ALTERRA_BACKUP=… npm test`.
+- [ ] À vérifier sur iPhone : la mise à jour de la base au premier lancement de la nouvelle version.
 
 ### R8 — Automatisation
 

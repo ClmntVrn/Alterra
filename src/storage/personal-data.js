@@ -39,8 +39,8 @@ export function createPersonalDataStore() {
       return validatePersonalData(data);
     },
 
-    async restore(data) {
-      validatePersonalData(data);
+    async restore(backup) {
+      const data = validatePersonalData(backup);
       await adapter.replaceAll(data);
       const browserStorage = data.settings.browserStorage || {};
       for (const key of Object.keys(localStorage)) {

@@ -66,13 +66,13 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   const raceForm = createPersonalRaceForm({
     form: document.getElementById("raceEventForm"),
     openButton: addRaceButton,
-    save: race => repository.save("raceEvents", race),
+    save: race => repository.save("personalRaces", race),
     onSaved: refreshEvents
   });
   const workoutForm = createWorkoutForm({
     form: document.getElementById("trainingForm"),
     openButton: addWorkoutButton,
-    save: workout => repository.save("plannedSessions", workout),
+    save: workout => repository.save("workouts", workout),
     onSaved: refreshEvents
   });
 
@@ -86,8 +86,8 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   async function refreshEvents() {
     const [races, personalRaces, workouts] = await Promise.all([
       repository.list("raceCatalog"),
-      repository.list("raceEvents"),
-      repository.list("plannedSessions")
+      repository.list("personalRaces"),
+      repository.list("workouts")
     ]);
     onWorkoutsUpdated(workouts);
     sources = { races, personalRaces, workouts };
@@ -124,7 +124,7 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
           raceForm.open(selectedDate, event);
         },
         onDelete: async () => {
-          await repository.remove("raceEvents", event.id);
+          await repository.remove("personalRaces", event.id);
           await refreshEvents();
         },
         onError: showError
@@ -132,12 +132,12 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
     }
     return renderWorkoutCard(event, {
       onDelete: async () => {
-        await repository.remove("plannedSessions", event.id);
+        await repository.remove("workouts", event.id);
         await refreshEvents();
       },
       onSetCompleted: async completed => {
         const { eventType, ...workout } = event;
-        await repository.save("plannedSessions", {
+        await repository.save("workouts", {
           ...workout,
           status: completed ? "completed" : "planned",
           completedAt: completed ? new Date().toISOString() : null

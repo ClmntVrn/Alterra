@@ -132,7 +132,7 @@ export function initializeActivityStatistics(container, repository) {
 
   render();
   repository
-    .list("plannedSessions")
+    .list("workouts")
     .then(updateSessions)
     .catch(error => {
       console.error("Impossible de charger les statistiques d’entraînement.", error);

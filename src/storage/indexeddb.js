@@ -1,7 +1,12 @@
-import { PERSONAL_DATA_COLLECTIONS, validatePersonalData } from "../domain/backup-format.js";
+import {
+  PERSONAL_DATA_COLLECTIONS,
+  RENAMED_COLLECTIONS,
+  validatePersonalData
+} from "../domain/backup-format.js";
 
 const DATABASE_NAME = "alterra-personal-data";
-const DATABASE_VERSION = 2;
+// 3 : collections renommées (plannedSessions → workouts, raceEvents → personalRaces).
+const DATABASE_VERSION = 3;
 const SETTINGS_KEY = "root";
 
 function openDatabase() {
@@ -21,6 +26,7 @@ function openDatabase() {
       if (!database.objectStoreNames.contains("settings")) {
         database.createObjectStore("settings", { keyPath: "key" });
       }
+      moveRenamedCollections(database, request.transaction);
     };
     request.onsuccess = () => {
       const database = request.result;
@@ -32,6 +38,23 @@ function openDatabase() {
     request.onblocked = () =>
       reject(new Error("La base locale est bloquée par un autre onglet Alterra."));
   });
+}
+
+/**
+ * Recopie les anciennes collections sous leur nouveau nom, puis les supprime. Tout se passe dans
+ * la transaction de mise à niveau : en cas d’échec, la base reste intacte dans sa version précédente.
+ */
+function moveRenamedCollections(database, transaction) {
+  for (const [oldName, newName] of Object.entries(RENAMED_COLLECTIONS)) {
+    if (!database.objectStoreNames.contains(oldName)) continue;
+    const request = transaction.objectStore(oldName).getAll();
+    request.onsuccess = () => {
+      const target = transaction.objectStore(newName);
+      // eventType : champ d’affichage enregistré par erreur avant la version 0.8.10.
+      for (const { eventType: _eventType, ...record } of request.result) target.put(record);
+      database.deleteObjectStore(oldName);
+    };
+  }
 }
 
 function requestResult(request, transaction) {
@@ -161,8 +184,8 @@ export function createIndexedDbAdapter() {
       return records;
     },
 
-    async replaceAll(data) {
-      validatePersonalData(data);
+    async replaceAll(backup) {
+      const data = validatePersonalData(backup);
       const db = await getDatabase();
       const storeNames = [...PERSONAL_DATA_COLLECTIONS, "settings"];
       const transaction = db.transaction(storeNames, "readwrite");

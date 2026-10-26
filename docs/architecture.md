@@ -66,8 +66,8 @@ Collections IndexedDB (clé `id`, identifiant stable généré par `crypto.rando
 
 | Collection                       | Contenu                                                               | Utilisation              |
 | -------------------------------- | --------------------------------------------------------------------- | ------------------------ |
-| `plannedSessions`                | Sorties prévues ou réalisées (statut `planned` ou `completed`)        | Calendrier, statistiques |
-| `raceEvents`                     | Courses personnelles (nom, dates)                                     | Calendrier               |
+| `workouts`                       | Sorties prévues ou réalisées (statut `planned` ou `completed`)        | Calendrier, statistiques |
+| `personalRaces`                  | Courses personnelles (nom, dates)                                     | Calendrier               |
 | `raceCatalog`                    | Fiches de course de référence, GPX embarqué dans `profile.gpxData`    | Calendrier, fiches       |
 | `racePlans`                      | Plan personnel d’une course (objectif, scénarios, nutrition, rappels) | Fiches                   |
 | `activities`                     | Non utilisée, conservée pour compatibilité du format                  | —                        |
@@ -82,10 +82,10 @@ Les dates sont des clés locales `AAAA-MM-JJ`, interprétées dans le fuseau de 
 
 ## 3. Sauvegarde et limites
 
-- L’export est un JSON autonome (format 2, le format 1 reste accepté) : toutes les collections, les réglages, les états `localStorage` et la date de la sauvegarde.
+- L’export est un JSON autonome (format 3) : toutes les collections, les réglages, les états `localStorage` et la date de la sauvegarde. Les formats 1 et 2 (collections `plannedSessions` et `raceEvents`) restent acceptés : `migratePersonalData` les convertit à l’import.
 - L’import valide le fichier puis, après confirmation, remplace toute la base en une seule transaction.
 - L’accueil affiche la date de la dernière sauvegarde et la met en avant au-delà de 7 jours. Au démarrage, l’application demande un stockage persistant (`navigator.storage.persist()`).
-- Le schéma IndexedDB a un numéro de version (`DATABASE_VERSION`) pour migrer sans effacer les données.
+- Le schéma IndexedDB a un numéro de version (`DATABASE_VERSION`, 3) pour migrer sans effacer les données. Le passage à la version 3 recopie `plannedSessions` et `raceEvents` vers `workouts` et `personalRaces` dans la transaction de mise à niveau : en cas d’échec, la base reste intacte dans sa version précédente.
 
 Limites :
 

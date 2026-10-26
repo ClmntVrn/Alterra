@@ -1,4 +1,4 @@
-// Règles des séances d’entraînement (collection plannedSessions).
+// Règles des séances d’entraînement (collection workouts).
 
 import { addDays, formatTimeOfDay, parseDateKey, toDateKey } from "./dates.js";
 
