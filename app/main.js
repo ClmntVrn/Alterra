@@ -2,6 +2,8 @@ import { initializeCalendar } from "./calendar.js";
 import { initializeActivityStatistics } from "../components/statistics/activity-statistics.js";
 import { createPersonalDataStore } from "./personal-data.js";
 import { loadRaceCatalog } from "./race-catalog.js";
+import { daysBetween } from "../src/domain/dates.js";
+import { formatDaysAgo } from "../src/ui/format.js";
 
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
@@ -19,7 +21,6 @@ if (navigator.storage?.persist) {
 }
 
 const BACKUP_REMINDER_DAYS = 7;
-const relativeDayFormatter = new Intl.RelativeTimeFormat("fr-FR", { numeric: "auto" });
 const exportButton = document.getElementById("exportPersonalData");
 const importButton = document.getElementById("importPersonalData");
 const importInput = document.getElementById("personalDataFile");
@@ -49,16 +50,8 @@ async function showLastBackup() {
     lastBackup.textContent = "Aucune sauvegarde exportée depuis cet appareil.";
     lastBackup.dataset.state = "stale";
   } else {
-    const today = new Date();
-    const days = Math.max(
-      0,
-      Math.round(
-        (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
-          Date.UTC(backupDate.getFullYear(), backupDate.getMonth(), backupDate.getDate())) /
-          86400000
-      )
-    );
-    lastBackup.textContent = `Dernière sauvegarde : ${relativeDayFormatter.format(-days, "day")}.`;
+    const days = Math.max(0, daysBetween(backupDate, new Date()));
+    lastBackup.textContent = `Dernière sauvegarde : ${formatDaysAgo(days)}.`;
     lastBackup.dataset.state = days >= BACKUP_REMINDER_DAYS ? "stale" : "recent";
   }
   lastBackup.hidden = false;

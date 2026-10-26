@@ -37,6 +37,11 @@ Adaptateur IndexedDB (app/storage/indexeddb.js)
 | `app/race-catalog.js`                          | Chargement du catalogue de courses depuis la base locale.                         |
 | `races/race.js`                                | Fiche de course générique : profil GPX, ravitos, scénarios, nutrition, matériel.  |
 | `sw.js`                                        | Précache de l’interface pour l’usage hors ligne.                                  |
+| `src/domain/`                                  | Règles pures, sans DOM ni stockage : dates, durées, séances, statistiques.        |
+| `src/ui/format.js`                             | Formats d’affichage français partagés (dates, nombres, périodes).                 |
+| `tests/`                                       | Tests `node --test` du domaine, des formats et du précache du service worker.     |
+
+Le code des écrans délègue les calculs à `src/domain/` ; c’est la partie couverte par les tests. Un test vérifie aussi que chaque ressource livrée figure dans le précache de `sw.js`.
 
 Les écrans passent par le repository, jamais directement par les transactions IndexedDB. Le jour où une synchronisation sera nécessaire, une implémentation distante du même repository pourra remplacer ou compléter IndexedDB.
 
@@ -84,7 +89,7 @@ Le service worker ne met en cache que l’interface ; les données personnelles 
 
 ## 4. Évolutions prévues
 
-- **Tests :** extraire les règles pures (dates, KPI, validation) dans `app/domain/` et les tester avec `node --test`, sans dépendance.
+- **Structure :** réorganiser le code dans `src/` par fonctionnalité (voir la proposition de restructuration en cours).
 - **Découpage :** séparer dans `app/calendar.js` la vue, les formulaires et l’accès aux données lorsque le fichier devra évoluer.
 - **Backend :** quand la synchronisation sera nécessaire, ajouter une implémentation distante du repository avec authentification et isolation des données par utilisateur vérifiées côté serveur ; migrer par export puis import vérifié, sans supprimer la sauvegarde source.
 - **Intégrations :** Garmin/Strava et IA passeront par un serveur ; aucun secret d’API dans le navigateur. Les séances générées par IA restent des propositions à valider.

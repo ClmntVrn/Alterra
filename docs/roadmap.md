@@ -1,7 +1,7 @@
 # Plan de développement d’Alterra
 
 **Mis à jour le :** 26 octobre 2026  
-**État général :** version locale utilisable (0.8.7) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
+**État général :** version locale utilisable (0.8.8) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
 
 ## Vision
 
@@ -94,14 +94,14 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - [x] Graphique des 12 dernières semaines sur les sorties réalisées : distance, durée, D+ et km-effort.
 - [x] Filtres Trail + course à pied, Trail, Course à pied, Vélo ; totaux de la semaine sélectionnée.
 - [x] Repères du calendrier distinguant entraînement/course et prévu/réalisé sans reposer uniquement sur la couleur.
-- [ ] Extraire les calculs KPI dans `app/domain/` et les couvrir par des tests.
+- [x] Calculs KPI extraits dans `src/domain/statistics.js` et couverts par des tests.
 - [ ] Éventuellement : nombre de sorties par semaine, comparaison avec le volume prévu.
 
 ### Étape 7 — Fiabiliser la version gratuite
 
 **Statut :** à faire
 
-- Ajouter des tests unitaires sans dépendance (`node --test`) pour les règles de dates, de KPI et de validation des sauvegardes.
+- [x] Tests unitaires `node --test` des dates, durées, séances et KPI ; reste la validation des sauvegardes.
 - Tester les parcours principaux sur petit écran et sur iPhone/PWA.
 - Tester les cas hors ligne, les erreurs de stockage, les exports invalides et les restaurations.
 - Vérifier l’accessibilité clavier, les libellés et les confirmations avant suppression.

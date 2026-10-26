@@ -1,9 +1,6 @@
-const monthNameFormatter = new Intl.DateTimeFormat("fr-FR", { month: "long" });
-const eventDateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-  year: "numeric"
-});
+import { toDateKey } from "../../src/domain/dates.js";
+import { formatLongDate, formatMonthName } from "../../src/ui/format.js";
+
 const firstCalendarYear = 1900;
 const lastCalendarYear = 9999;
 const wheelYearBatchSize = 50;
@@ -46,7 +43,7 @@ export function renderCalendarGrid({
       }
 
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-      const key = dateKey(date);
+      const key = toDateKey(date);
       const isToday = date.getTime() === today.getTime();
       if (isToday) {
         dayCell.classList.add("is-today");
@@ -60,7 +57,7 @@ export function renderCalendarGrid({
       dateButton.setAttribute(
         "aria-label",
         `${eventLabels.join(", ")}` +
-          `${events.length ? ", " : ""}${eventDateFormatter.format(date)}, afficher la journée`
+          `${events.length ? ", " : ""}${formatLongDate(date)}, afficher la journée`
       );
       const dateNumber = document.createElement("span");
       dateNumber.className = "calendar-date";
@@ -100,7 +97,7 @@ export function createMonthYearPicker({
 
   for (let month = 0; month < 12; month += 1) {
     monthWheel.append(
-      createWheelOption(monthWheel, month, monthNameFormatter.format(new Date(2026, month, 1)))
+      createWheelOption(monthWheel, month, formatMonthName(new Date(2026, month, 1)))
     );
   }
   appendYearOptions(
@@ -267,12 +264,4 @@ function findCenteredWheelOption(wheel) {
     }
   }
   return nearestOption;
-}
-
-function dateKey(date) {
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, "0"),
-    String(date.getDate()).padStart(2, "0")
-  ].join("-");
 }

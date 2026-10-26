@@ -1,5 +1,14 @@
-const weekCount = 12;
-const weekStartsOnMonday = 1;
+import { formatDuration } from "../../src/domain/durations.js";
+import {
+  WEEK_COUNT,
+  computeWeeklyTotals,
+  createWeeks,
+  filterCompletedWorkouts,
+  getWorkoutsInWeek,
+  sumWorkouts
+} from "../../src/domain/statistics.js";
+import { formatLongDate, formatNumber, formatShortDayMonth } from "../../src/ui/format.js";
+
 const metrics = Object.freeze({
   distance: { label: "Distance", unit: "km" },
   duration: { label: "Temps", unit: "min" },
@@ -11,18 +20,6 @@ const categories = Object.freeze({
   running: { label: "Course à pied", types: ["running"] },
   combined: { label: "Trail + course à pied", types: ["trail", "running"] },
   cycling: { label: "Vélo", types: ["cycling"] }
-});
-const weekRangeFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "short"
-});
-const fullDateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-  year: "numeric"
-});
-const numberFormatter = new Intl.NumberFormat("fr-FR", {
-  maximumFractionDigits: 1
 });
 
 export function initializeActivityStatistics(container, repository) {
@@ -37,7 +34,7 @@ export function initializeActivityStatistics(container, repository) {
   let sessions = [];
   let selectedCategory = "combined";
   let selectedMetric = "distance";
-  let selectedWeekIndex = weekCount - 1;
+  let selectedWeekIndex = WEEK_COUNT - 1;
   let dragStartX = 0;
   let dragStartScroll = 0;
   let dragTarget = null;
@@ -121,7 +118,7 @@ export function initializeActivityStatistics(container, repository) {
     button.addEventListener("click", () => {
       selectedMetric = key;
       updateSelectedButtons(metricsElement, "metric", key);
-      renderChart(createWeeks(), filterSessions(sessions));
+      renderChart(createWeeks(new Date()), filterSessions(sessions));
     });
     button.textContent = metric.label;
     if (key === "effort") {
@@ -153,69 +150,33 @@ export function initializeActivityStatistics(container, repository) {
   }
 
   function render() {
-    const weeks = createWeeks();
+    const weeks = createWeeks(new Date());
     const filteredSessions = filterSessions(sessions);
     renderSelectedWeek(weeks, filteredSessions);
     renderChart(weeks, filteredSessions);
   }
 
-  function createWeeks() {
-    const currentWeek = startOfWeek(new Date());
-    return Array.from({ length: weekCount }, (_, index) => {
-      const start = new Date(currentWeek);
-      start.setDate(start.getDate() - (weekCount - index - 1) * 7);
-      const end = new Date(start);
-      end.setDate(end.getDate() + 6);
-      return { start, end, totals: createTotals() };
-    });
-  }
-
   function filterSessions(records) {
-    const types = categories[selectedCategory].types;
-    return records.filter(
-      session =>
-        session.status === "completed" &&
-        types.includes(session.type) &&
-        parseLocalDate(session.date) !== null
-    );
+    return filterCompletedWorkouts(records, categories[selectedCategory].types);
   }
 
   function renderSelectedWeek(weeks, records) {
     const selectedWeek = weeks[selectedWeekIndex];
     const dateLabel =
       selectedWeek.start.getFullYear() === selectedWeek.end.getFullYear()
-        ? `${weekRangeFormatter.format(selectedWeek.start)} – ${weekRangeFormatter.format(selectedWeek.end)} ${selectedWeek.end.getFullYear()}`
-        : `${fullDateFormatter.format(selectedWeek.start)} – ${fullDateFormatter.format(selectedWeek.end)}`;
+        ? `${formatShortDayMonth(selectedWeek.start)} – ${formatShortDayMonth(selectedWeek.end)} ${selectedWeek.end.getFullYear()}`
+        : `${formatLongDate(selectedWeek.start)} – ${formatLongDate(selectedWeek.end)}`;
     weekLabel.textContent = dateLabel;
 
-    const sessionsInWeek = records.filter(session => {
-      const date = parseLocalDate(session.date);
-      return date >= selectedWeek.start && date <= selectedWeek.end;
-    });
-    const totals = sumSessions(sessionsInWeek);
-    distanceValue.textContent = `${numberFormatter.format(totals.distance)} km`;
-    durationValue.textContent = formatDuration(totals.duration);
-    ascentValue.textContent = `${numberFormatter.format(totals.ascent)} m`;
+    const totals = sumWorkouts(getWorkoutsInWeek(records, selectedWeek));
+    distanceValue.textContent = `${formatNumber(totals.distance)} km`;
+    durationValue.textContent = formatDuration(totals.duration, { minuteUnit: true });
+    ascentValue.textContent = `${formatNumber(totals.ascent)} m`;
   }
 
-  function renderChart(weeks, records) {
-    for (const session of records) {
-      const date = parseLocalDate(session.date);
-      const sessionWeek = startOfWeek(date);
-      const index = Math.round(
-        (Date.UTC(sessionWeek.getFullYear(), sessionWeek.getMonth(), sessionWeek.getDate()) -
-          Date.UTC(
-            weeks[0].start.getFullYear(),
-            weeks[0].start.getMonth(),
-            weeks[0].start.getDate()
-          )) /
-          604800000
-      );
-      if (index < 0 || index >= weekCount) continue;
-      addSession(weeks[index].totals, session);
-    }
-
-    selectedWeekIndex = Math.min(selectedWeekIndex, weekCount - 1);
+  function renderChart(emptyWeeks, records) {
+    const weeks = computeWeeklyTotals(emptyWeeks, records);
+    selectedWeekIndex = Math.min(selectedWeekIndex, WEEK_COUNT - 1);
     renderSelectedWeek(weeks, records);
     chart.replaceChildren();
 
@@ -254,7 +215,7 @@ export function initializeActivityStatistics(container, repository) {
       axisLabel.setAttribute("x", "358");
       axisLabel.setAttribute("y", y + 3);
       axisLabel.setAttribute("class", "activity-chart-axis-label");
-      axisLabel.textContent = numberFormatter.format(axisValues[index]);
+      axisLabel.textContent = formatNumber(axisValues[index]);
       axisLabels.push(axisLabel);
     });
 
@@ -284,8 +245,8 @@ export function initializeActivityStatistics(container, repository) {
       group.setAttribute("aria-pressed", index === selectedWeekIndex ? "true" : "false");
       group.setAttribute(
         "aria-label",
-        `${fullDateFormatter.format(weeks[index].start)}, ` +
-          `${numberFormatter.format(weeks[index].totals[selectedMetric])} ${metrics[selectedMetric].unit}`
+        `${formatLongDate(weeks[index].start)}, ` +
+          `${formatNumber(weeks[index].totals[selectedMetric])} ${metrics[selectedMetric].unit}`
       );
       const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       hitArea.setAttribute("x", point.x - 13);
@@ -313,69 +274,18 @@ export function initializeActivityStatistics(container, repository) {
       });
       svg.append(group);
 
-      if (index % 2 === 0 || index === weekCount - 1) {
+      if (index % 2 === 0 || index === WEEK_COUNT - 1) {
         const weekLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
         weekLabel.setAttribute("x", point.x);
         weekLabel.setAttribute("y", "174");
         weekLabel.setAttribute("class", "activity-chart-week-label");
-        weekLabel.textContent = weekRangeFormatter.format(weeks[index].start);
+        weekLabel.textContent = formatShortDayMonth(weeks[index].start);
         svg.append(weekLabel);
       }
     });
 
     chart.append(svg);
   }
-}
-
-function createTotals() {
-  return { distance: 0, duration: 0, ascent: 0, effort: 0 };
-}
-
-function addSession(totals, session) {
-  const distance = finiteOrZero(session.distanceKm);
-  const ascent = finiteOrZero(session.ascentMeters);
-  totals.distance += distance;
-  totals.duration += finiteOrZero(session.durationMinutes);
-  totals.ascent += ascent;
-  totals.effort += distance + ascent / 100;
-}
-
-function sumSessions(sessions) {
-  const totals = createTotals();
-  sessions.forEach(session => addSession(totals, session));
-  return totals;
-}
-
-function finiteOrZero(value) {
-  return Number.isFinite(value) && value > 0 ? value : 0;
-}
-
-function startOfWeek(date) {
-  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const daysSinceMonday = (start.getDay() - weekStartsOnMonday + 7) % 7;
-  start.setDate(start.getDate() - daysSinceMonday);
-  return start;
-}
-
-function parseLocalDate(value) {
-  if (typeof value !== "string") return null;
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) return null;
-  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-  return date.getFullYear() === Number(match[1]) &&
-    date.getMonth() === Number(match[2]) - 1 &&
-    date.getDate() === Number(match[3])
-    ? date
-    : null;
-}
-
-function formatDuration(minutes) {
-  const totalMinutes = Math.round(minutes);
-  const hours = Math.floor(totalMinutes / 60);
-  const remainingMinutes = totalMinutes % 60;
-  if (hours && remainingMinutes) return `${hours} h ${remainingMinutes} min`;
-  if (hours) return `${hours} h`;
-  return `${remainingMinutes} min`;
 }
 
 function createCurvePath(points) {

@@ -1,4 +1,22 @@
 import { createMonthYearPicker, renderCalendarGrid } from "../components/calendar/calendar.js";
+import {
+  addDays,
+  isDateKeyInRange,
+  parseDateKey,
+  parseTimeOfDay,
+  toDateKey
+} from "../src/domain/dates.js";
+import { formatDuration, formatDurationClock, parseDuration } from "../src/domain/durations.js";
+import { parseDecimal } from "../src/domain/numbers.js";
+import { computeWorkoutEnd, formatPace, getWorkoutState } from "../src/domain/workouts.js";
+import {
+  capitalize,
+  formatDateRange,
+  formatLongDate,
+  formatMonthYear,
+  formatNumber,
+  formatWeekdayDate
+} from "../src/ui/format.js";
 
 const calendarDays = document.getElementById("calendarDays");
 const calendarGrid = document.querySelector(".calendar-grid");
@@ -41,21 +59,6 @@ let selectedEffort = "";
 let monthYearPicker = null;
 let sessionsUpdated = () => {};
 
-const monthFormatter = new Intl.DateTimeFormat("fr-FR", {
-  month: "long",
-  year: "numeric"
-});
-const eventDateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-  year: "numeric"
-});
-const shortDateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  weekday: "short",
-  day: "numeric",
-  month: "short"
-});
-const maxDurationMinutes = 9999 * 60 + 59;
 const sessionStateLabels = Object.freeze({
   planned: "prévu",
   completed: "réalisé",
@@ -68,124 +71,6 @@ const trainingTypes = Object.freeze({
   strength: "Renforcement musculaire",
   cycling: "Vélo"
 });
-
-function dateKey(date) {
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, "0"),
-    String(date.getDate()).padStart(2, "0")
-  ].join("-");
-}
-
-function dateInRange(date, startDate, endDate = startDate) {
-  return date >= startDate && date <= endDate;
-}
-
-function formatDateRange(startDate, endDate) {
-  const start = parseCalendarDate(startDate);
-  const end = parseCalendarDate(endDate || startDate);
-  if (!start || !end || startDate === (endDate || startDate)) {
-    return start ? eventDateFormatter.format(start) : "";
-  }
-  const sameYear = start.getFullYear() === end.getFullYear();
-  const startText = sameYear
-    ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" }).format(start)
-    : eventDateFormatter.format(start);
-  return `${startText} – ${eventDateFormatter.format(end)}`;
-}
-
-function parseCalendarDate(value) {
-  if (typeof value !== "string") return null;
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) return null;
-  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-  return date.getFullYear() === Number(match[1]) &&
-    date.getMonth() === Number(match[2]) - 1 &&
-    date.getDate() === Number(match[3])
-    ? date
-    : null;
-}
-
-// Accepte 45 (minutes), 130 ou 1:30 ou 1h30 (1 h 30), 1020 (10 h 20) et 90min.
-function parseDurationInput(value) {
-  const text = String(value ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "");
-  if (!text) return null;
-  let hours = 0;
-  let minutes;
-  let match;
-  if ((match = /^(\d{1,4})[:h](\d{1,2})?$/.exec(text))) {
-    hours = Number(match[1]);
-    minutes = Number(match[2] || 0);
-    if (minutes > 59) return NaN;
-  } else if ((match = /^(\d{1,4})(?:min|mn|m)$/.exec(text))) {
-    minutes = Number(match[1]);
-  } else if (/^\d{1,6}$/.test(text)) {
-    if (text.length <= 2) {
-      minutes = Number(text);
-    } else {
-      hours = Number(text.slice(0, -2));
-      minutes = Number(text.slice(-2));
-      if (minutes > 59) return NaN;
-    }
-  } else {
-    return NaN;
-  }
-  const total = hours * 60 + minutes;
-  return total > 0 && total <= maxDurationMinutes ? total : NaN;
-}
-
-function formatDurationInput(durationMinutes) {
-  const totalMinutes = Math.round(durationMinutes);
-  return `${Math.floor(totalMinutes / 60)}:${String(totalMinutes % 60).padStart(2, "0")}`;
-}
-
-function formatDurationText(durationMinutes) {
-  const totalMinutes = Math.round(durationMinutes);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return hours ? `${hours} h${minutes ? ` ${minutes}` : ""}` : `${minutes} min`;
-}
-
-// Retourne "" si vide, "HH:mm" si valide, null sinon. Accepte 9, 930, 9h30 et 09:30.
-function parseTimeInput(value) {
-  const text = String(value ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "");
-  if (!text) return "";
-  const match = /^(\d{1,2})(?:[:h](\d{2})?)?$/.exec(text) || /^(\d{1,2})(\d{2})$/.exec(text);
-  if (!match) return null;
-  const hours = Number(match[1]);
-  const minutes = Number(match[2] || 0);
-  if (hours > 23 || minutes > 59) return null;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-}
-
-function computeSessionEnd(date, time, durationMinutes) {
-  const start = parseCalendarDate(date);
-  if (!start || !Number.isFinite(durationMinutes) || durationMinutes <= 0) {
-    return { endDate: date, endTime: null };
-  }
-  const [hours, minutes] = time ? time.split(":").map(Number) : [0, 0];
-  const startMinutes = hours * 60 + minutes;
-  const end = new Date(start);
-  end.setDate(end.getDate() + Math.floor((startMinutes + durationMinutes - 1) / 1440));
-  const endMinutes = Math.round(startMinutes + durationMinutes) % 1440;
-  return {
-    endDate: dateKey(end),
-    endTime: time
-      ? `${String(Math.floor(endMinutes / 60)).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`
-      : null
-  };
-}
-
-function getSessionState(session) {
-  if (session.status === "completed") return "completed";
-  return (session.endDate || session.date) < dateKey(new Date()) ? "toCheck" : "planned";
-}
 
 function formatHeartRate(session) {
   const average = Number.isFinite(session.heartRateAvg) ? session.heartRateAvg : null;
@@ -209,21 +94,21 @@ function showLoadedEvents(races, personalRaces, sessions) {
 }
 
 function getDayEvents(date) {
-  const key = dateKey(date);
+  const key = toDateKey(date);
   return [
     ...calendarRaces
-      .filter(race => dateInRange(key, race.date, race.endDate))
+      .filter(race => isDateKeyInRange(key, race.date, race.endDate))
       .map(race => ({ ...race, eventType: "race" })),
     ...calendarPersonalRaces
       .filter(
         race =>
           typeof race.name === "string" &&
-          parseCalendarDate(race.date) &&
-          dateInRange(key, race.date, race.endDate)
+          parseDateKey(race.date) &&
+          isDateKeyInRange(key, race.date, race.endDate)
       )
       .map(race => ({ ...race, eventType: "personalRace" })),
     ...calendarSessions
-      .filter(session => dateInRange(key, session.date, session.endDate))
+      .filter(session => isDateKeyInRange(key, session.date, session.endDate))
       .map(session => ({ ...session, eventType: "training" }))
   ].sort(compareEventTimes);
 }
@@ -234,8 +119,8 @@ function buildMonthEvents(currentMonth) {
     currentMonth.getMonth() + 1,
     0
   ).getDate();
-  const monthStart = dateKey(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1));
-  const monthEnd = dateKey(
+  const monthStart = toDateKey(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1));
+  const monthEnd = toDateKey(
     new Date(currentMonth.getFullYear(), currentMonth.getMonth(), daysInMonth)
   );
   const events = {};
@@ -248,11 +133,11 @@ function buildMonthEvents(currentMonth) {
     const startDate = event.date;
     const endDate = event.endDate || startDate;
     if (endDate < monthStart || startDate > monthEnd) continue;
-    const start = parseCalendarDate(startDate < monthStart ? monthStart : startDate);
-    const end = parseCalendarDate(endDate > monthEnd ? monthEnd : endDate);
+    const start = parseDateKey(startDate < monthStart ? monthStart : startDate);
+    const end = parseDateKey(endDate > monthEnd ? monthEnd : endDate);
     if (!start || !end) continue;
     for (const day = new Date(start); day <= end; day.setDate(day.getDate() + 1)) {
-      const key = dateKey(day);
+      const key = toDateKey(day);
       (events[key] ||= []).push(event);
     }
   }
@@ -297,32 +182,15 @@ function formatTrainingSummary(session) {
 function formatTrainingTargets(session) {
   const details = [];
   if (Number.isFinite(session.distanceKm)) {
-    details.push(
-      `${Number(session.distanceKm).toLocaleString("fr-FR", { maximumFractionDigits: 1 })} km`
-    );
+    details.push(`${formatNumber(session.distanceKm)} km`);
   }
   if (Number.isFinite(session.durationMinutes)) {
-    details.push(formatDurationText(session.durationMinutes));
+    details.push(formatDuration(session.durationMinutes));
   }
   if (Number.isFinite(session.ascentMeters)) {
-    details.push(`${Number(session.ascentMeters).toLocaleString("fr-FR")} m D+`);
+    details.push(`${formatNumber(session.ascentMeters)} m D+`);
   }
   return details.join(" · ");
-}
-
-function formatPace(distanceKm, durationMinutes) {
-  if (
-    !Number.isFinite(distanceKm) ||
-    distanceKm <= 0 ||
-    !Number.isFinite(durationMinutes) ||
-    durationMinutes <= 0
-  ) {
-    return "";
-  }
-  const secondsPerKm = Math.round((durationMinutes * 60) / distanceKm);
-  const paceMinutes = Math.floor(secondsPerKm / 60);
-  const paceSeconds = String(secondsPerKm % 60).padStart(2, "0");
-  return `${paceMinutes}:${paceSeconds} min/km`;
 }
 
 function renderRaceEvent(race) {
@@ -398,7 +266,7 @@ function renderPersonalRaceEvent(race) {
 function renderTrainingEvent(session) {
   const card = document.createElement("article");
   card.className = "calendar-item calendar-training-item";
-  const state = getSessionState(session);
+  const state = getWorkoutState(session, toDateKey(new Date()));
   card.dataset.state = state;
   const header = document.createElement("div");
   header.className = "calendar-training-header";
@@ -551,7 +419,7 @@ function showDayDetails(date) {
   currentMonth.setFullYear(date.getFullYear(), date.getMonth(), 1);
   document.querySelector(".calendar-heading").classList.add("is-day-view");
   const events = getDayEvents(date);
-  calendarDayTitle.textContent = eventDateFormatter.format(date);
+  calendarDayTitle.textContent = formatLongDate(date);
   calendarDayTitle.hidden = false;
   monthPickerToggle.hidden = true;
   monthYearPicker.close();
@@ -567,12 +435,9 @@ function showDayDetails(date) {
   backToMonthButton.hidden = false;
   previousDayButton.setAttribute(
     "aria-label",
-    `Jour précédent : ${eventDateFormatter.format(previousDate(date))}`
+    `Jour précédent : ${formatLongDate(addDays(date, -1))}`
   );
-  nextDayButton.setAttribute(
-    "aria-label",
-    `Jour suivant : ${eventDateFormatter.format(nextDate(date))}`
-  );
+  nextDayButton.setAttribute("aria-label", `Jour suivant : ${formatLongDate(addDays(date, 1))}`);
 
   if (events.length) {
     for (const event of events) {
@@ -594,18 +459,6 @@ function showDayDetails(date) {
 
     calendarEventDetails.append(category, title);
   }
-}
-
-function previousDate(date) {
-  const adjacent = new Date(date);
-  adjacent.setDate(adjacent.getDate() - 1);
-  return adjacent;
-}
-
-function nextDate(date) {
-  const adjacent = new Date(date);
-  adjacent.setDate(adjacent.getDate() + 1);
-  return adjacent;
 }
 
 function moveSelectedDay(offset) {
@@ -660,12 +513,12 @@ function updateDateRangeValidity(form) {
 
 function updateTrainingComputed() {
   const timeField = trainingForm.elements.namedItem("time");
-  const time = parseTimeInput(timeField.value);
+  const time = parseTimeOfDay(timeField.value);
   timeField.setCustomValidity(
     time === null ? "Saisis une heure entre 00:00 et 23:59, par exemple 930 pour 09:30." : ""
   );
   const durationField = trainingForm.elements.namedItem("duration");
-  const durationMinutes = parseDurationInput(durationField.value);
+  const durationMinutes = parseDuration(durationField.value);
   durationField.setCustomValidity(
     Number.isNaN(durationMinutes)
       ? "Saisis une durée comme 45 (minutes), 130 (1:30) ou 1020 (10:20)."
@@ -684,7 +537,7 @@ function updateTrainingComputed() {
 
   const distanceField = trainingForm.elements.namedItem("distanceKm");
   const distanceValue = distanceField.value.trim();
-  const distanceKm = parseLocalizedDecimal(distanceValue);
+  const distanceKm = parseDecimal(distanceValue);
   const isInRange =
     !distanceValue ||
     (Number.isFinite(distanceKm) &&
@@ -695,25 +548,20 @@ function updateTrainingComputed() {
     isInRange ? "" : "Saisis une distance entre 0,1 et 1 000 km, avec au maximum deux décimales."
   );
   const computed = [];
-  if (durationMinutes) computed.push(formatDurationText(durationMinutes));
+  if (durationMinutes) computed.push(formatDuration(durationMinutes));
   const pace = formatPace(distanceKm, durationMinutes);
   if (pace) computed.push(`Allure ${pace}`);
   const date = trainingForm.elements.namedItem("date").value;
   if (durationMinutes && time !== null) {
-    const { endDate, endTime } = computeSessionEnd(date, time, durationMinutes);
-    const endDay = parseCalendarDate(endDate);
+    const { endDate, endTime } = computeWorkoutEnd(date, time, durationMinutes);
+    const endDay = parseDateKey(endDate);
     if (endDate === date && endTime) computed.push(`Fin ${endTime}`);
     else if (endDate !== date && endDay) {
-      computed.push(`Fin le ${shortDateFormatter.format(endDay)}${endTime ? ` à ${endTime}` : ""}`);
+      computed.push(`Fin le ${formatWeekdayDate(endDay)}${endTime ? ` à ${endTime}` : ""}`);
     }
   }
   trainingComputed.textContent = computed.join(" · ");
   trainingComputed.hidden = !computed.length;
-}
-
-function parseLocalizedDecimal(value) {
-  const normalizedValue = String(value).trim().replace(",", ".");
-  return normalizedValue ? Number(normalizedValue) : NaN;
 }
 
 function openTrainingForm(session = null) {
@@ -722,8 +570,8 @@ function openTrainingForm(session = null) {
   editingSession = session ? { ...session } : null;
   trainingFormTitle.textContent = session
     ? `Modifier · ${session.title}`
-    : `Entraînement du ${eventDateFormatter.format(selectedDate)}`;
-  trainingForm.elements.namedItem("date").value = session?.date || dateKey(selectedDate);
+    : `Entraînement du ${formatLongDate(selectedDate)}`;
+  trainingForm.elements.namedItem("date").value = session?.date || toDateKey(selectedDate);
   if (session) {
     for (const field of [
       "title",
@@ -744,7 +592,7 @@ function openTrainingForm(session = null) {
       );
     }
     if (Number.isFinite(session.durationMinutes) && session.durationMinutes > 0) {
-      trainingForm.elements.namedItem("duration").value = formatDurationInput(
+      trainingForm.elements.namedItem("duration").value = formatDurationClock(
         session.durationMinutes
       );
     }
@@ -767,9 +615,9 @@ function openRaceEventForm(race = null) {
   editingPersonalRace = race ? { ...race } : null;
   raceEventFormTitle.textContent = race ? `Modifier · ${race.name}` : "Nouvelle course";
   raceEventForm.elements.namedItem("name").value = race?.name || "";
-  raceEventForm.elements.namedItem("date").value = race?.date || dateKey(selectedDate);
+  raceEventForm.elements.namedItem("date").value = race?.date || toDateKey(selectedDate);
   raceEventForm.elements.namedItem("endDate").value =
-    race?.endDate || race?.date || dateKey(selectedDate);
+    race?.endDate || race?.date || toDateKey(selectedDate);
   raceEventForm.hidden = false;
   addRaceButton.hidden = true;
   updateDateRangeValidity(raceEventForm);
@@ -788,9 +636,8 @@ async function refreshEvents() {
 function renderCalendar() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const formattedMonth = monthFormatter.format(currentMonth);
-  calendarTitleText.textContent =
-    formattedMonth.charAt(0).toLocaleUpperCase("fr-FR") + formattedMonth.slice(1);
+  const todayKey = toDateKey(today);
+  calendarTitleText.textContent = capitalize(formatMonthYear(currentMonth));
   eventsByDate = buildMonthEvents(currentMonth);
   renderCalendarGrid({
     container: calendarDays,
@@ -801,14 +648,14 @@ function renderCalendar() {
     getEventLabel: event => {
       if (event.eventType === "race") return `Course : ${event.name}`;
       if (event.eventType === "personalRace") return `Course : ${event.name}`;
-      const status = sessionStateLabels[getSessionState(event)];
+      const status = sessionStateLabels[getWorkoutState(event, todayKey)];
       const time = event.time ? ` à ${event.time}` : "";
       return `Entraînement ${status}${time} : ${event.title}`;
     },
     getEventMarkerClass: event => {
       if (event.eventType === "race") return "";
       if (event.eventType === "personalRace") return "calendar-session-dot";
-      return `calendar-session-dot calendar-training-dot is-${getSessionState(event)}`;
+      return `calendar-session-dot calendar-training-dot is-${getWorkoutState(event, todayKey)}`;
     }
   });
 }
@@ -895,11 +742,11 @@ export function initializeCalendar(racesPromise, personalRepository, onSessionsU
     const field = trainingForm.elements.namedItem(fieldName);
     field.addEventListener("blur", () => {
       if (fieldName === "time") {
-        const time = parseTimeInput(field.value);
+        const time = parseTimeOfDay(field.value);
         if (time) field.value = time;
       } else {
-        const durationMinutes = parseDurationInput(field.value);
-        if (durationMinutes) field.value = formatDurationInput(durationMinutes);
+        const durationMinutes = parseDuration(field.value);
+        if (durationMinutes) field.value = formatDurationClock(durationMinutes);
       }
       updateTrainingComputed();
     });
@@ -920,8 +767,8 @@ export function initializeCalendar(racesPromise, personalRepository, onSessionsU
     if (!selectedDate || !trainingForm.reportValidity()) return;
     const formData = new FormData(trainingForm);
     const type = String(formData.get("type"));
-    const time = parseTimeInput(formData.get("time"));
-    const durationMinutes = parseDurationInput(formData.get("duration"));
+    const time = parseTimeOfDay(formData.get("time"));
+    const durationMinutes = parseDuration(formData.get("duration"));
     const session = {
       ...(editingSession || {}),
       id: editingSession?.id || crypto.randomUUID(),
@@ -931,7 +778,7 @@ export function initializeCalendar(racesPromise, personalRepository, onSessionsU
       status: formData.get("completed") === "on" ? "completed" : "planned",
       createdAt: editingSession?.createdAt || new Date().toISOString()
     };
-    const { endDate } = computeSessionEnd(session.date, time, durationMinutes);
+    const { endDate } = computeWorkoutEnd(session.date, time, durationMinutes);
     if (endDate > session.date) session.endDate = endDate;
     else delete session.endDate;
     delete session.eventType;
@@ -945,7 +792,7 @@ export function initializeCalendar(racesPromise, personalRepository, onSessionsU
     if (durationMinutes) session.durationMinutes = durationMinutes;
     else delete session.durationMinutes;
     const distanceValue = String(formData.get("distanceKm")).trim();
-    if (distanceValue) session.distanceKm = parseLocalizedDecimal(distanceValue);
+    if (distanceValue) session.distanceKm = parseDecimal(distanceValue);
     else delete session.distanceKm;
     const ascentValue = String(formData.get("ascentMeters")).trim();
     if (ascentValue) session.ascentMeters = Number(ascentValue);

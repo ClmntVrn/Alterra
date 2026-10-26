@@ -1,3 +1,5 @@
+import { isDateKey } from "../../src/domain/dates.js";
+
 export const PERSONAL_DATA_FORMAT_VERSION = 2;
 
 export const PERSONAL_DATA_COLLECTIONS = Object.freeze([
@@ -35,18 +37,6 @@ export function createEmptyPersonalData() {
     equipment: [],
     settings: {}
   };
-}
-
-function isValidDateKey(value) {
-  if (typeof value !== "string") return false;
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) return false;
-  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-  return (
-    date.getFullYear() === Number(match[1]) &&
-    date.getMonth() === Number(match[2]) - 1 &&
-    date.getDate() === Number(match[3])
-  );
 }
 
 export function validatePersonalData(data) {
@@ -97,7 +87,7 @@ export function validatePersonalData(data) {
         }
         if (
           item.endDate !== undefined &&
-          (!isValidDateKey(item.date) || !isValidDateKey(item.endDate) || item.endDate < item.date)
+          (!isDateKey(item.date) || !isDateKey(item.endDate) || item.endDate < item.date)
         ) {
           throw new TypeError(`La date de fin de la course « ${item.id} » est invalide.`);
         }

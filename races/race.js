@@ -1,14 +1,10 @@
 import { createPersonalDataStore } from "../app/personal-data.js";
 import { loadRaceCatalog } from "../app/race-catalog.js";
+import { formatDateRange, formatNumber } from "../src/ui/format.js";
 
 const content = document.getElementById("raceContent");
 const raceId = new URLSearchParams(location.search).get("id");
 const siteRoot = new URL("../", location.href);
-const dateFormatter = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "long",
-  year: "numeric"
-});
 const personalData = createPersonalDataStore();
 
 function makeElement(tag, className, text) {
@@ -18,28 +14,8 @@ function makeElement(tag, className, text) {
   return node;
 }
 
-function localDate(dateString) {
-  const [year, month, day] = dateString.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
-
-function formatRaceDates(race) {
-  const start = localDate(race.date);
-  if (!race.endDate || race.endDate === race.date) return dateFormatter.format(start);
-  const end = localDate(race.endDate);
-  const sameYear = start.getFullYear() === end.getFullYear();
-  const startText = sameYear
-    ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" }).format(start)
-    : dateFormatter.format(start);
-  return `${startText} – ${dateFormatter.format(end)}`;
-}
-
-function formatDuration(duration) {
+function formatTimeLabel(duration) {
   return duration.replace(":", "h");
-}
-
-function formatKilometers(kilometers) {
-  return Number(kilometers).toLocaleString("fr-FR", { maximumFractionDigits: 1 });
 }
 
 function addText(parent, tag, className, text) {
@@ -52,7 +28,7 @@ function renderHero(race) {
   const hero = makeElement("section", "hero");
   addText(hero, "h1", "", race.name);
   const subtitle = [
-    formatRaceDates(race),
+    formatDateRange(race.date, race.endDate),
     race.startTime ? `Départ ${race.startTime}` : "",
     race.route || ""
   ]
@@ -62,8 +38,8 @@ function renderHero(race) {
 
   const stats = makeElement("div", "stats");
   const values = [
-    [`${formatKilometers(race.distanceKm)} km`, "Distance"],
-    [`${Number(race.ascentMeters).toLocaleString("fr-FR")} m`, "D+"],
+    [`${formatNumber(race.distanceKm)} km`, "Distance"],
+    [`${formatNumber(race.ascentMeters)} m`, "D+"],
     race.targetTime ? [race.targetTime, "Temps cible"] : null
   ].filter(Boolean);
   stats.style.gridTemplateColumns = `repeat(${values.length}, minmax(0, 1fr))`;
@@ -93,11 +69,7 @@ function renderElevationSection(race) {
   addText(headingText, "p", "elevation-caption", race.profile.caption);
   heading.append(
     headingText,
-    makeElement(
-      "span",
-      "elevation-ascent",
-      `${Number(race.ascentMeters).toLocaleString("fr-FR")} m D+`
-    )
+    makeElement("span", "elevation-ascent", `${formatNumber(race.ascentMeters)} m D+`)
   );
   section.append(heading);
 
@@ -257,7 +229,7 @@ function renderCheckpoints(race) {
     const details = document.createElement("div");
     addText(details, "div", "place", checkpoint.name);
     const checkpointDetails = [
-      Number.isFinite(checkpoint.km) ? `KM ${formatKilometers(checkpoint.km)}` : "",
+      Number.isFinite(checkpoint.km) ? `KM ${formatNumber(checkpoint.km)}` : "",
       checkpoint.description || ""
     ]
       .filter(Boolean)
@@ -273,7 +245,7 @@ function renderCheckpoints(race) {
     if (checkpoint.elapsed?.length || checkpoint.clocks?.length) {
       const timing = makeElement("div", "timing");
       if (checkpoint.elapsed?.length) {
-        const elapsed = addText(timing, "div", "elapsed", formatDuration(checkpoint.elapsed[0]));
+        const elapsed = addText(timing, "div", "elapsed", formatTimeLabel(checkpoint.elapsed[0]));
         elapsed.dataset.times = checkpoint.elapsed.join("|");
       }
       if (checkpoint.clocks?.length) {
@@ -332,7 +304,7 @@ function renderSources(sources, verifiedAt) {
   });
   section.append(list);
   if (verifiedAt) {
-    addText(section, "p", "sub", `Vérifié le ${dateFormatter.format(localDate(verifiedAt))}.`);
+    addText(section, "p", "sub", `Vérifié le ${formatDateRange(verifiedAt)}.`);
   }
   return section;
 }
@@ -348,7 +320,7 @@ function setupCheckpoints(race) {
     });
     document.querySelectorAll("[data-times]").forEach(element => {
       const time = element.dataset.times.split("|")[index];
-      if (time) element.textContent = formatDuration(time);
+      if (time) element.textContent = formatTimeLabel(time);
     });
     document.querySelectorAll("[data-clocks]").forEach(element => {
       const clock = element.dataset.clocks.split("|")[index];
