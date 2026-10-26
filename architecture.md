@@ -1,156 +1,94 @@
-# Architecture proposée pour Alterra
+# Architecture d’Alterra
 
-**Statut :** architecture validée le 22 octobre 2026 ; étape 3 terminée
-**Mise à jour :** 22 octobre 2026
+**Statut :** architecture validée le 22 octobre 2026, en place pour la version locale  
+**Mise à jour :** 26 octobre 2026
 
-Ce document décrit une évolution progressive de l’application actuelle, sans backend ni frais au départ. Les choix déjà confirmés par l’utilisateur sont marqués comme tels ; les détails techniques restent modifiables avant de coder.
+Ce document décrit l’architecture actuelle et son évolution prévue, sans backend ni frais au départ.
 
-## 1. Point de départ
+## 1. Vue d’ensemble
 
-Alterra est actuellement une PWA statique en HTML, CSS et JavaScript natif :
-
-- `index.html` contient le calendrier ; sa logique est maintenant déplacée dans `app/calendar.js`.
-- `app/main.js` initialise le calendrier et le service worker.
-- `app/domain/models.js` définit la version et la validation de base du format personnel.
-- `app/storage/repository.js` définit l’interface entre les fonctions de l’application et l’adaptateur de stockage, sans encore persister de données.
-- `races/race.html` et `races/race.js` affichent les fiches de course génériques.
-- Les fiches génériques affichent les courses stockées dans la base locale.
-- `sw.js` met en cache l’interface et les ressources du site pour l’utilisation hors ligne.
-
-Cette base peut évoluer sans introduire immédiatement de framework, de compte utilisateur ou de service payant.
-
-## 2. Architecture cible pour la première version personnelle
+Alterra est une PWA statique en HTML, CSS et JavaScript natif (modules ES), sans framework ni étape de build.
 
 ```text
-Interface PWA
-  Calendrier mensuel · détails du jour · formulaires · KPIs
+Interface (index.html, races/race.html, versions.html, styles.css)
+  statistiques · calendrier mois/jour · formulaires · fiches de course
                      │
                      ▼
-Services métier
-  entraînements · activités · courses personnelles · nutrition · équipement
-  calculs KPI purs et testables
+Logique applicative (app/, components/)
+  calendrier, statistiques, sauvegarde, fiche de course
                      │
                      ▼
-Interface de stockage
-  repositories / opérations de lecture, création, modification, suppression
+Repository (app/storage/repository.js)
+  list · get · save · remove, indépendant du stockage
                      │
                      ▼
-IndexedDB dans le navigateur
-  données privées enregistrées sur cet appareil
+Adaptateur IndexedDB (app/storage/indexeddb.js)
+  base « alterra-personal-data » sur l’appareil
 ```
 
-Le code reste en JavaScript natif avec des modules ES. Les pages et les styles existants sont conservés ; le code du calendrier est déplacé progressivement hors du HTML lorsque l’on commencera à le faire évoluer.
+| Fichier | Rôle |
+| --- | --- |
+| `app/main.js` | Initialise l’accueil, le service worker, le stockage persistant et la sauvegarde. |
+| `app/calendar.js` | Calendrier mois/jour, formulaires de sorties et de courses personnelles. |
+| `components/calendar/calendar.js` | Grille du calendrier et sélecteur mois/année, génériques. |
+| `components/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines. |
+| `app/domain/models.js` | Format de sauvegarde versionné et validation. |
+| `app/personal-data.js` | Export/restauration complète, y compris les clés `localStorage` `alterra-*`. |
+| `app/race-catalog.js` | Chargement du catalogue de courses depuis la base locale. |
+| `races/race.js` | Fiche de course générique : profil GPX, ravitos, scénarios, nutrition, matériel. |
+| `sw.js` | Précache de l’interface pour l’usage hors ligne. |
 
-Structure indicative, à ajuster au moment de l’implémentation :
+Les écrans passent par le repository, jamais directement par les transactions IndexedDB. Le jour où une synchronisation sera nécessaire, une implémentation distante du même repository pourra remplacer ou compléter IndexedDB.
 
-```text
-app/
-  main.js
-  calendar.js
-  domain/
-    models.js
-    kpis.js
-  storage/
-    database.js
-    repositories.js
-```
+## 2. Données
 
-Ne créer que les modules nécessaires à la première fonctionnalité ; éviter de bâtir une couche abstraite complexe avant d’en avoir besoin.
+### Données du dépôt
 
-## 3. Séparer données publiques et données personnelles
+Le dépôt ne contient que le code de l’application : aucune fiche de course, trace GPX ni donnée personnelle. Une installation neuve démarre avec un calendrier vide ; une sauvegarde restaure courses, traces et données privées.
 
-### Données publiques du site
+### Données sur l’appareil
 
-Le dépôt ne contient pas de données de course. Une installation neuve démarre avec un calendrier vide ; les courses et leurs traces GPX sont ajoutées à la base locale par import d’une sauvegarde autonome. Les ajouts et modifications doivent vivre dans cette base personnelle et sa sauvegarde.
+Collections IndexedDB (clé `id`, identifiant stable généré par `crypto.randomUUID()` pour les créations) :
 
-### Données privées de l’utilisateur
+| Collection | Contenu | Utilisation |
+| --- | --- | --- |
+| `plannedSessions` | Sorties prévues ou réalisées (statut `planned` ou `completed`) | Calendrier, statistiques |
+| `raceEvents` | Courses personnelles (nom, dates) | Calendrier |
+| `raceCatalog` | Fiches de course de référence, GPX embarqué dans `profile.gpxData` | Calendrier, fiches |
+| `racePlans` | Plan personnel d’une course (objectif, scénarios, nutrition, rappels) | Fiches |
+| `activities` | Non utilisée, conservée pour compatibilité du format | — |
+| `nutritionProducts`, `equipment` | Prévues pour l’étape 5 | — |
+| `settings` | Réglages : catalogue initialisé, date de la dernière sauvegarde | Accueil |
 
-Elles sont enregistrées dans IndexedDB sur l’appareil et ne sont pas :
+Une sortie réalisée est le même enregistrement que la sortie prévue, mis à jour avec les valeurs réelles : le prévu n’est pas conservé après réalisation. Champs d’une sortie : `date`, `endDate` facultative, `type`, `title`, `status`, `time`, `distanceKm`, `durationMinutes`, `ascentMeters`, `weather`, `notes`, `createdAt`, `completedAt`.
 
-- écrites dans les fichiers suivis par Git ;
-- incluses dans le précache du service worker ;
-- envoyées à un serveur pendant la phase locale ;
-- partagées avec un autre compte.
+Les états de progression des fiches (ravitos cochés, matériel) sont dans `localStorage` sous des clés `alterra-*` et sont inclus dans la sauvegarde.
 
-Collections locales :
+Les dates sont des clés locales `AAAA-MM-JJ`, interprétées dans le fuseau de l’appareil ; les périodes (`date` → `endDate`) sont inclusives.
 
-- `plannedSessions` : entraînements prévus, objectifs, étapes, notes, nutrition et équipement prévus, statut ;
-- `activities` : séances réellement faites, saisies manuellement ou, plus tard, importées ;
-- `raceEvents` : courses ajoutées par l’utilisateur à son calendrier, distinctes des fiches publiques du catalogue ;
-- `raceCatalog` : fiches de référence des courses et contenu GPX, inclus dans l’export autonome ;
-- `nutritionProducts` : produits personnels et valeurs nutritionnelles ;
-- `equipment` : chaussures, vêtements, sac et matériel ;
-- `settings` : version du format de données et préférences non sensibles.
+## 3. Sauvegarde et limites
 
-Chaque entrée reçoit un identifiant stable. Une activité peut référencer une séance prévue, sans effacer ni remplacer l’objectif d’origine. Les références aux équipements et produits sont des identifiants, pas des copies de leurs fiches.
+- L’export est un JSON autonome (format 2, le format 1 reste accepté) : toutes les collections, les réglages, les états `localStorage` et la date de la sauvegarde.
+- L’import valide le fichier puis, après confirmation, remplace toute la base en une seule transaction.
+- L’accueil affiche la date de la dernière sauvegarde et la met en avant au-delà de 7 jours. Au démarrage, l’application demande un stockage persistant (`navigator.storage.persist()`).
+- Le schéma IndexedDB a un numéro de version (`DATABASE_VERSION`) pour migrer sans effacer les données.
 
-Les champs validés pour les activités et les séances figurent dans [plan.md](./plan.md). Les unités de référence sont métriques : km, mètres, durée en heures/minutes/secondes, allure en min/km et fréquence cardiaque en bpm. Les traces GPS restent hors du premier modèle ; ce choix est reporté.
+Limites :
 
-Les informations personnelles propres à Mallorca — objectif de temps, scénarios et horaires de passage personnels, plan nutritionnel et rappels d’effort — sont conservées dans la base locale et l’archive personnelle, pas dans les fichiers versionnés du dépôt.
-
-## 4. Calendrier et calcul des KPIs
-
-- L’accueil conserve le calendrier mensuel actuel, son titre et son court descriptif.
-- Les repères d’une journée distinguent entraînement/course et prévu/réalisé ; ils ne reposent pas uniquement sur la couleur.
-- Toucher une journée ouvre ses séances prévues, activités réelles et courses.
-- En vue journalière, les flèches encadrent la date pour passer au jour précédent ou suivant ; une icône calendrier, séparée à droite, revient au mois correspondant à la date affichée.
-- Une séance planifiée peut être ajoutée depuis le jour choisi, avec une heure facultative au format 24 h, et marquée comme réalisée sans effacer ses objectifs prévus. Les éléments d’une même journée sont triés par heure ; ceux sans heure viennent ensuite. Le statut prévu/réalisé se change avec une case à cocher, et les séances réalisées ne sont pas supprimables.
-- Une séance prévue ou réalisée peut être modifiée dans sa fiche ; lorsqu’elle est réalisée, ses valeurs sont remplacées par les résultats réels. L’allure moyenne en min/km est calculée depuis la distance et la durée, et la météo se choisit dans une liste visible dans les détails, pas sur la carte du jour.
-- Une séance peut être supprimée depuis sa carte dans le détail du jour après confirmation.
-- La séance prévue reste consultable après réalisation.
-- Le tableau de bord propose les indicateurs distance, durée, dénivelé positif et nombre de séances sur les 12 dernières semaines, avec sélection des valeurs prévues ou réalisées.
-- Les règles de calcul sont isolées dans des fonctions métier sans dépendance à l’interface ou à IndexedDB, afin de pouvoir les tester avec des données déterministes.
-- Les valeurs d’une séance réalisée sont celles de la fiche de séance ; elles remplacent donc directement les objectifs précédemment saisis.
-- Une séance déplacée change de date sans doublon ; une séance partielle utilise les valeurs réelles ; une séance annulée n’est pas comptée comme réalisée ; une séance passée non confirmée reste « à vérifier ».
-
-Les règles détaillées de remplacement et les cas limites sont suivis dans [plan.md](./plan.md).
-
-## 5. Stockage local, sauvegarde et limites
-
-IndexedDB sert de base locale structurée. Une petite couche de repositories fournit les opérations métier ; les écrans ne manipulent pas directement les transactions IndexedDB. Le schéma possède un numéro de version pour permettre des migrations locales sans effacer les données existantes.
-
-Les sauvegardes exportées sont des fichiers JSON versionnés validés avant restauration. Elles incluent toutes les collections locales, les fiches de référence complètes et leurs traces GPX embarquées, ainsi que les états d’interface actuellement stockés dans le navigateur. Restaurer remplace toutes les données Alterra de l’appareil après confirmation. Une fois le catalogue initial importé localement, le dépôt peut ne contenir que le code de l’application ; une sauvegarde restaure courses, données privées et traces sans dépendre des fichiers de course du dépôt. Les données locales ne sont pas synchronisées automatiquement.
-
-L’accueil propose l’export de la base complète vers un fichier JSON et l’import d’un fichier depuis l’appareil. Sur iPhone, le navigateur gère le téléchargement ; le fichier peut ensuite être conservé dans Fichiers ou un autre emplacement.
-
-La sauvegarde complète contient les fiches de course de référence, les traces GPX, les données privées, les réglages et les états locaux du navigateur. La restauration valide le format avant import et, après confirmation, remplace entièrement la base et les états concernés.
-
-**Limites à afficher clairement :**
-
-- les données ne sont pas synchronisées entre appareils ;
-- la suppression des données du navigateur ou la perte de l’appareil peut supprimer la base locale ;
+- pas de synchronisation entre appareils ;
+- l’effacement des données du navigateur ou la perte de l’appareil supprime la base ;
 - les exports contiennent des données personnelles et doivent être conservés en lieu sûr ;
-- IndexedDB n’est pas un coffre chiffré : la protection de l’appareil et de son compte système reste importante.
+- IndexedDB n’est pas chiffré : la protection de l’appareil reste importante.
 
-Pendant cette phase, le service worker ne met en cache que l’interface et les ressources publiques ; les données d’activité ne transitent pas par son cache.
+Le service worker ne met en cache que l’interface ; les données personnelles ne transitent pas par son cache. Chaque changement des ressources livrées impose d’incrémenter `CACHE_NAME`.
 
-## 6. Migration future vers un backend
+## 4. Évolutions prévues
 
-Quand le besoin de synchronisation sera confirmé, la même interface de repositories pourra recevoir une implémentation distante à la place ou en complément d’IndexedDB. La migration commencera par un export local et un import vérifié, sans supprimer la sauvegarde source.
+- **Tests :** extraire les règles pures (dates, KPI, validation) dans `app/domain/` et les tester avec `node --test`, sans dépendance.
+- **Découpage :** séparer dans `app/calendar.js` la vue, les formulaires et l’accès aux données lorsque le fichier devra évoluer.
+- **Backend :** quand la synchronisation sera nécessaire, ajouter une implémentation distante du repository avec authentification et isolation des données par utilisateur vérifiées côté serveur ; migrer par export puis import vérifié, sans supprimer la sauvegarde source.
+- **Intégrations :** Garmin/Strava et IA passeront par un serveur ; aucun secret d’API dans le navigateur. Les séances générées par IA restent des propositions à valider.
 
-Le backend devra fournir :
+## 5. Confidentialité de l’historique
 
-- authentification et isolation des données par utilisateur vérifiées côté serveur/base de données ;
-- synchronisation multi-appareils ;
-- export et suppression des données ;
-- un espace indépendant pour chaque ami, sans partage implicite.
-
-L’intégration Garmin et l’IA viendront après. Les secrets d’API ne seront jamais livrés au navigateur ; les appels à des services qui les exigent passeront par un serveur. Les séances générées par IA resteront des propositions à valider par l’utilisateur.
-
-## 7. Données Mallorca et confidentialité
-
-Le dépôt GitHub est public. Les données de course (fiches JSON et GPX) ont été retirées du dépôt après vérification d’une archive complète sur le téléphone. Les données de Mallorca, y compris les informations personnelles de préparation, sont conservées dans la base locale et l’archive personnelle.
-
-Des données privées de Mallorca ont déjà été publiées dans le dépôt et peuvent rester présentes dans l’historique Git, même après leur retrait de la version courante. Ne pas y ajouter de nouvelles données personnelles. Une éventuelle purge de l’historique est une décision distincte qui devra être discutée avant toute action, car elle réécrit les commits du dépôt.
-
-## 8. Ordre d’implémentation proposé
-
-1. [x] Valider cette architecture et le modèle minimal des données.
-2. [x] Extraire le code du calendrier en modules sans changer son comportement.
-3. [x] Définir le format personnel initial et l’interface du repository.
-4. [x] Créer et tester la base IndexedDB, son versionnage et l’adaptateur.
-5. [x] Ajouter les fonctions d’export et de validation/restauration des sauvegardes.
-6. [ ] Relier ensuite les formulaires du calendrier aux données locales.
-7. [ ] Ajouter les activités, les KPIs et les autres domaines par étapes, avec tests des règles prévu/réalisé.
-
-La vérification se fait d’abord sur le serveur local et dans le navigateur mobile, puis sur la PWA installée en HTTPS. Aucun compte, synchronisation, intégration Garmin ou coût récurrent n’est nécessaire pour ces premières étapes.
+Le dépôt GitHub est public. Des données privées de Mallorca ont été publiées dans d’anciens commits et peuvent rester dans l’historique Git. Une éventuelle purge réécrirait l’historique : c’est une décision distincte à discuter avant toute action.

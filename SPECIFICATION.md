@@ -10,6 +10,7 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 - Depuis une journée, on peut créer une sortie/entraînement ou une course personnelle. Chaque événement a une date de début et une date de fin inclusives ; il apparaît chaque jour couvert, y compris lors d’un changement de mois ou d’année.
 - Les plages sont contrôlées : la fin doit être égale ou postérieure au début.
 - Une sortie comprend un nom, un type (trail, course à pied, renforcement ou vélo), une heure facultative, une distance facultative, une durée facultative, un D+, une météo et des notes. Elle peut être marquée comme réalisée. Les sorties peuvent être modifiées ; les sorties prévues peuvent être supprimées.
+- Une sortie réalisée porte les valeurs réellement effectuées : ses champs sont modifiés directement et l’objectif prévu n’est pas conservé.
 - La distance accepte le point ou la virgule décimale, de 0,1 à 1 000 km, avec deux décimales au maximum. La durée est saisie en heures et minutes (jusqu’à 9 999 h et 59,9 min) et conservée comme un nombre de minutes. L’allure moyenne est calculée lorsque distance et durée sont valides.
 - Une course personnelle comprend un nom et des dates ; elle peut être modifiée ou supprimée.
 - Les courses de référence importées apparaissent aussi au calendrier et ouvrent leur fiche. Elles sont gérées dans la sauvegarde locale ; le bouton d’ajout depuis le calendrier crée une course personnelle, pas une fiche de référence détaillée.
@@ -33,7 +34,7 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 
 ## Données, sauvegarde et disponibilité
 
-- IndexedDB stocke les sorties, activités, courses personnelles et de référence, plans de course, produits de nutrition, matériel et réglages.
+- IndexedDB stocke les sorties (prévues ou réalisées), courses personnelles et de référence, plans de course et réglages ; les collections de produits de nutrition et de matériel sont prévues. La collection `activities` reste dans le format de sauvegarde pour compatibilité mais n’est pas utilisée.
 - L’export produit un JSON autonome incluant les données de référence et les états locaux Alterra. L’import, après confirmation, remplace toutes les données de l’appareil. Le format courant est la version 2 ; le format 1 reste accepté.
 - Les données ne sont pas synchronisées entre appareils. La sauvegarde doit être transférée manuellement et conservée en lieu sûr.
 - L’accueil indique la date de la dernière sauvegarde exportée ; le rappel est mis en avant lorsqu’aucune sauvegarde n’existe ou qu’elle date de 7 jours ou plus. La date est incluse dans l’export, si bien qu’une restauration reprend celle du fichier importé.
