@@ -29,7 +29,8 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 | Fichier                                          | Rôle                                                                                   |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------- |
 | `src/pages/home.js`                              | Initialise l’accueil, le service worker, le stockage persistant et la sauvegarde.      |
-| `src/pages/race.js`                              | Fiche de course générique : profil GPX, ravitos, scénarios, nutrition, matériel.       |
+| `src/pages/race.js`                              | Fiche course : chargement de la fiche et du plan personnel, assemblage des blocs.      |
+| `src/features/race-sheet/`                       | Blocs de la fiche : en-tête, profil GPX, ravitos et scénarios, matériel, infos.        |
 | `src/features/calendar/calendar.js`              | Calendrier : vue mois/jour, navigation et rafraîchissement, sans état global.          |
 | `src/features/calendar/month-grid.js`            | Grille du calendrier, générique.                                                       |
 | `src/features/calendar/month-picker.js`          | Choix du mois avec le sélecteur natif (`<input type="month">`).                        |
@@ -38,6 +39,8 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 | `src/features/races/`                            | Cartes des courses et formulaire d’une course personnelle.                             |
 | `src/domain/`                                    | Règles pures, sans DOM ni stockage : dates, durées, séances, statistiques, calendrier. |
 | `src/domain/backup-format.js`                    | Format de sauvegarde versionné et validation.                                          |
+| `src/domain/race-plan.js`                        | Application du plan personnel à la fiche de référence.                                 |
+| `src/domain/elevation-profile.js`                | Distances de la trace, points du profil, graduations et progression.                   |
 | `src/storage/personal-data.js`                   | Export/restauration complète, y compris les clés `localStorage` `alterra-*`.           |
 | `src/storage/race-catalog.js`                    | Chargement du catalogue de courses depuis la base locale.                              |
 | `src/ui/format.js`                               | Formats d’affichage français partagés (dates, nombres, périodes).                      |
@@ -95,7 +98,7 @@ Le service worker ne met en cache que l’interface ; les données personnelles 
 
 ## 4. Évolutions prévues
 
-- **Découpage :** séparer `src/pages/race.js` en modules par responsabilité, sans état global, puis découper la feuille de styles.
+- **Découpage :** découper la feuille de styles par composant et remplacer les couleurs écrites en dur par des variables.
 - **Backend :** quand la synchronisation sera nécessaire, ajouter une implémentation distante du repository avec authentification et isolation des données par utilisateur vérifiées côté serveur ; migrer par export puis import vérifié, sans supprimer la sauvegarde source.
 - **Intégrations :** Garmin/Strava et IA passeront par un serveur ; aucun secret d’API dans le navigateur. Les séances générées par IA restent des propositions à valider.
 

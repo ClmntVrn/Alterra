@@ -19,7 +19,7 @@ Documentation de référence, à lire avant une évolution fonctionnelle :
 - HTML, CSS et JavaScript natif en modules ES. Pas de framework, de bundler ni de dépendance sans besoin concret.
 - Pages à la racine (`index.html`, `race.html`, `versions.html`), avec `sw.js` et `manifest.json` qui doivent y rester.
 - `src/pages/` : points d'entrée des pages (`home.js` pour l'accueil, `race.js` pour la fiche).
-- `src/features/<fonctionnalité>/` : `calendar/` (vues mois/jour), `workouts/` (carte et formulaire de séance), `races/` (cartes et formulaire de course personnelle), `statistics/`. Génériques, sans donnée propre à une course. Chaque module reçoit ses éléments et ses callbacks ; pas d'état global modifiable.
+- `src/features/<fonctionnalité>/` : `calendar/` (vues mois/jour), `workouts/` (carte et formulaire de séance), `races/` (cartes et formulaire de course personnelle), `race-sheet/` (blocs de la fiche course), `statistics/`. Génériques, sans donnée propre à une course. Chaque module reçoit ses éléments et ses callbacks ; pas d'état global modifiable.
 - `src/domain/` : règles pures, sans DOM ni stockage, couvertes par les tests (`tests/`). `backup-format.js` porte le format de sauvegarde versionné (`PERSONAL_DATA_FORMAT_VERSION`) et sa validation.
 - `src/storage/` : `repository.js` (interface stable) et `indexeddb.js` (adaptateur). Les écrans passent par le repository, jamais directement par IndexedDB. `personal-data.js` gère l'export/restauration, y compris les clés `localStorage` préfixées `alterra-`.
 - `src/ui/` : `format.js` (formats d'affichage français partagés) et `dom.js` (`el()` pour créer des éléments).

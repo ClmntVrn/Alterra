@@ -1,4 +1,4 @@
-const CACHE_NAME = "alterra-v49";
+const CACHE_NAME = "alterra-v50";
 
 const FILES = [
   "./",
@@ -20,7 +20,14 @@ const FILES = [
   "./src/features/workouts/workout-card.js",
   "./src/features/workouts/workout-form.js",
   "./src/features/workouts/workout-labels.js",
+  "./src/features/race-sheet/checkpoints.js",
+  "./src/features/race-sheet/elevation-profile.js",
+  "./src/features/race-sheet/gear-checklist.js",
+  "./src/features/race-sheet/info-sections.js",
+  "./src/features/race-sheet/race-header.js",
   "./src/domain/calendar.js",
+  "./src/domain/elevation-profile.js",
+  "./src/domain/race-plan.js",
   "./src/domain/backup-format.js",
   "./src/domain/dates.js",
   "./src/domain/durations.js",
