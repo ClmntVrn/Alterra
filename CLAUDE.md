@@ -4,9 +4,9 @@ PWA statique, mobile-first, de préparation au trail et à la montagne, utilisé
 
 Documentation de référence, à lire avant une évolution fonctionnelle :
 
-- [SPECIFICATION.md](./SPECIFICATION.md) — comportement attendu et règles de gestion ;
-- [plan.md](./plan.md) — feuille de route par étapes et décisions prises ;
-- [architecture.md](./architecture.md) — choix techniques et confidentialité.
+- [docs/specification.md](./docs/specification.md) — comportement attendu et règles de gestion ;
+- [docs/roadmap.md](./docs/roadmap.md) — feuille de route par étapes et décisions prises ;
+- [docs/architecture.md](./docs/architecture.md) — choix techniques et confidentialité.
 
 ## Expérience et style
 
@@ -41,7 +41,7 @@ Quand une modification change les ressources livrées :
 1. Ajouter toute nouvelle ressource à la liste `FILES` de `sw.js` et incrémenter `CACHE_NAME`.
 2. Mettre à jour le numéro de version en bas de `index.html`.
 3. Documenter l'évolution dans `versions.html`.
-4. Mettre à jour les cases et statuts de `plan.md`, et `SPECIFICATION.md` si le comportement change.
+4. Mettre à jour les cases et statuts de `docs/roadmap.md`, et `docs/specification.md` si le comportement change.
 
 ## Façon de travailler
 

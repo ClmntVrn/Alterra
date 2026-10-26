@@ -18,6 +18,6 @@ L’export et l’import se font depuis l’accueil. L’import remplace toutes 
 
 ## Documentation du projet
 
-- [Spécification fonctionnelle et règles de gestion](./SPECIFICATION.md)
-- [Plan de développement](./plan.md)
-- [Architecture proposée et décisions techniques](./architecture.md)
+- [Spécification fonctionnelle et règles de gestion](./docs/specification.md)
+- [Plan de développement](./docs/roadmap.md)
+- [Architecture et décisions techniques](./docs/architecture.md)
