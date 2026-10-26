@@ -93,6 +93,7 @@ class Page {
   #nextId = 0;
   #pending = new Map();
   #listeners = new Set();
+  #hoveredNodes = new Map();
 
   constructor(socket, origin) {
     this.#socket = socket;
@@ -193,6 +194,24 @@ class Page {
     await this.send("Emulation.setTouchEmulationEnabled", { enabled: touch, maxTouchPoints: 5 });
   }
 
+  /** Force l’état :hover de l’élément désigné, comme un survol resté actif après un toucher. */
+  async forceHover(selector, enabled = true) {
+    // Un nouveau DOM.getDocument renumérote les nœuds : on garde celui déjà forcé pour l’annuler.
+    let nodeId = this.#hoveredNodes.get(selector);
+    if (!nodeId) {
+      await this.send("DOM.enable");
+      await this.send("CSS.enable");
+      const { root } = await this.send("DOM.getDocument");
+      ({ nodeId } = await this.send("DOM.querySelector", { nodeId: root.nodeId, selector }));
+    }
+    if (enabled) this.#hoveredNodes.set(selector, nodeId);
+    else this.#hoveredNodes.delete(selector);
+    await this.send("CSS.forcePseudoState", {
+      nodeId,
+      forcedPseudoClasses: enabled ? ["hover"] : []
+    });
+  }
+
   /** Toucher au centre de l’élément désigné par le sélecteur. */
   async tap(selector) {
     const point = await this.evaluate(selector => {
@@ -253,6 +272,8 @@ export async function launchBrowser({ width = 375, height = 812 } = {}) {
     const page = new Page(socket, origin);
     await page.send("Page.enable");
     await page.send("Runtime.enable");
+    // Sans interface, la page n’a jamais le focus et :focus ne s’applique pas : on l’émule.
+    await page.send("Emulation.setFocusEmulationEnabled", { enabled: true });
     await page.setViewport(width, height);
     return {
       page,

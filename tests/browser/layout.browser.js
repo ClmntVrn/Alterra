@@ -20,23 +20,29 @@ after(() => browser?.close());
 
 const titleColor = () =>
   page.evaluate(() => getComputedStyle(document.getElementById("calendarTitleText")).color);
-/** État utile au diagnostic si la couleur n’est pas celle attendue. */
-const focusState = () =>
-  page.evaluate(() =>
-    JSON.stringify({
-      focus: document.activeElement?.id || document.activeElement?.tagName,
-      documentFocused: document.hasFocus()
-    })
-  );
+/** Élément actif, joint aux messages d’échec pour le diagnostic. */
+const activeElement = () =>
+  page.evaluate(() => document.activeElement?.id || document.activeElement?.tagName);
 
-test("au toucher, le titre du mois est orange pendant le choix seulement", async () => {
+// Le sélecteur natif lui-même (roues de l’iPhone, fenêtre de Chrome) ne se pilote pas d’un test :
+// on vérifie que le toucher atteint le champ, puis la couleur selon que le champ est actif ou non.
+test("toucher le titre du mois atteint le champ de mois natif", async () => {
   await page.setViewport(375, 812, { touch: true });
   await openHome(page);
   assert.equal(await page.evaluate(() => matchMedia("(hover: none)").matches), true);
-  assert.equal(await titleColor(), CHARCOAL, `au repos : ${await focusState()}`);
-  await page.tap("#calendarTitleText");
-  await page.waitFor(() => document.activeElement?.id === "calendarMonthInput");
-  assert.equal(await titleColor(), ACCENT);
+  const target = await page.evaluate(() => {
+    const title = document.getElementById("calendarTitleText");
+    title.scrollIntoView({ block: "center", behavior: "instant" });
+    const box = title.getBoundingClientRect();
+    return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)?.id;
+  });
+  assert.equal(target, "calendarMonthInput");
+});
+
+test("sur écran tactile, le titre du mois n’est orange que pendant le choix", async () => {
+  assert.equal(await titleColor(), CHARCOAL, `au repos, actif : ${await activeElement()}`);
+  await page.evaluate(() => document.getElementById("calendarMonthInput").focus());
+  assert.equal(await titleColor(), ACCENT, "pendant le choix");
   // « Terminé » sur iPhone : le mois est appliqué et le sélecteur se referme.
   await page.evaluate(() => {
     const input = document.getElementById("calendarMonthInput");
@@ -48,7 +54,18 @@ test("au toucher, le titre du mois est orange pendant le choix seulement", async
     await page.evaluate(() => document.getElementById("calendarTitleText").textContent),
     "Janvier 2027"
   );
-  assert.equal(await titleColor(), CHARCOAL, `après le choix : ${await focusState()}`);
+  assert.equal(await titleColor(), CHARCOAL, `après le choix, actif : ${await activeElement()}`);
+});
+
+test("le survol ne colore le titre du mois qu’avec une souris", async () => {
+  // Sur iPhone, le survol reste actif après un toucher : il ne doit pas laisser le titre orange.
+  await page.forceHover("#calendarMonthPickerToggle");
+  assert.equal(await titleColor(), CHARCOAL, "écran tactile");
+  await page.setViewport(375, 812, { touch: false });
+  await page.forceHover("#calendarMonthPickerToggle");
+  assert.equal(await titleColor(), ACCENT, "souris");
+  await page.forceHover("#calendarMonthPickerToggle", false);
+  assert.equal(await titleColor(), CHARCOAL, "souris sortie");
 });
 
 for (const width of [320, 375]) {
