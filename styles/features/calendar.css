@@ -54,9 +54,15 @@
   align-items: center;
 }
 
-.calendar-month-picker-toggle:has(.calendar-month-input:not([hidden])):hover,
-.calendar-month-picker-toggle:has(.calendar-month-input:focus-visible) {
+/* Orange pendant le choix du mois seulement ; sur écran tactile, :hover resterait actif après le toucher. */
+.calendar-month-picker-toggle:has(.calendar-month-input:focus) {
   color: var(--color-accent);
+}
+
+@media (hover: hover) {
+  .calendar-month-picker-toggle:has(.calendar-month-input:not([hidden])):hover {
+    color: var(--color-accent);
+  }
 }
 
 .calendar-month-picker-toggle[hidden] {

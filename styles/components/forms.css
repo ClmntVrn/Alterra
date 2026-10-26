@@ -65,6 +65,18 @@
   font-size: 16px;
 }
 
+/* Safari iOS impose une largeur minimale aux champs de date, qui débordent alors sur le champ voisin. */
+.training-form input[type="date"] {
+  display: block;
+  min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.training-form input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+
 .training-form textarea {
   min-height: 76px;
   resize: vertical;
@@ -82,6 +94,11 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+/* La date a besoin de plus de place que l’heure (5 caractères). */
+.training-date-row {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
 }
 
 .training-form-measures {

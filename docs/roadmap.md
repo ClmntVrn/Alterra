@@ -1,7 +1,7 @@
 # Plan de développement d’Alterra
 
 **Mis à jour le :** 26 octobre 2026  
-**État général :** version locale utilisable (0.8.15) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
+**État général :** version locale utilisable (0.8.16) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
 
 ## Vision
 
