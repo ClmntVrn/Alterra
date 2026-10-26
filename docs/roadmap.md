@@ -173,7 +173,9 @@ Chantier de qualité du code décidé le 26 octobre 2026, mené en parallèle de
 
 - [x] `calendar.js` réduit aux vues mois/jour ; cartes et formulaires dans `features/workouts/` et `features/races/` ; règles du calendrier dans `src/domain/calendar.js` avec tests ; plus d’état global.
 - [x] Corrigé au passage : la modification d’une course personnelle enregistrait un champ interne (`eventType`).
-- [x] Sélecteur de mois natif (`<input type="month">`) à la place des roues maison. À vérifier sur iPhone.
+- [x] Sélecteur de mois natif (`<input type="month">`) à la place des roues maison ; vérifié sur iPhone le 26 octobre 2026.
+- [x] Retours iPhone corrigés en 0.8.16 : titre du mois orange seulement pendant le choix, champ de date qui ne déborde plus sur l’heure.
+- [ ] À vérifier sur iPhone : les deux correctifs de la 0.8.16.
 
 ### R5 — Découpage de la fiche course
 
@@ -196,7 +198,7 @@ Chantier de qualité du code décidé le 26 octobre 2026, mené en parallèle de
 - [x] Collections `plannedSessions` → `workouts` et `raceEvents` → `personalRaces`, avec migration de la base IndexedDB (version 3) dans la transaction de mise à niveau.
 - [x] Sauvegarde au format 3 ; les formats 1 et 2 restent acceptés à l’import ; champ interne `eventType` retiré au passage.
 - [x] Migration testée sur une copie d’une vraie sauvegarde (gardée hors du dépôt) : mise à niveau v2 → v3 dans le navigateur, contenu identique enregistrement par enregistrement, écrans, export, réimport. Test facultatif : `ALTERRA_BACKUP=… npm test`.
-- [ ] À vérifier sur iPhone : la mise à jour de la base au premier lancement de la nouvelle version.
+- [x] Vérifié sur iPhone le 26 octobre 2026 : base mise à jour au premier lancement, données intactes, sauvegarde exportée au format 3.
 
 ### R8 — Automatisation
 
