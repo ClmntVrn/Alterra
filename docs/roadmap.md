@@ -202,10 +202,10 @@ Chantier de qualité du code décidé le 26 octobre 2026, mené en parallèle de
 
 ### R8 — Automatisation
 
-**Statut :** à faire
+**Statut :** en cours
 
 - [ ] `npm run release` : numéro de version, `versions.html` et cache du service worker en une commande.
-- [ ] Scénarios de test navigateur dans `tools/`, lançables par une commande npm.
+- [x] Tests navigateur dans `tests/browser/` (calendrier, fiche course, mise à niveau de la base, mise en page mobile), lancés par `npm run test:browser` ; pilotage de Chrome ou Edge sans dépendance dans `tools/browser.js`. Vérifié qu’une migration sabotée fait échouer les tests.
 - [ ] Intégration continue GitHub : `npm run check` à chaque push.
 
 ## Suivi

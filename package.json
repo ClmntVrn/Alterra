@@ -9,6 +9,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "test": "node --test",
+    "test:browser": "node --test --test-concurrency=1 \"tests/browser/*.browser.js\"",
     "check": "npm run format:check && npm run lint && npm test"
   },
   "devDependencies": {

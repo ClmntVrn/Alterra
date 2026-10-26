@@ -48,7 +48,9 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 | `styles/`                                        | `tokens.css`, `base.css`, `layout.css`, puis une feuille par composant et fonctionnalité ; chaque page charge les siennes. |
 | `assets/icons/`                                  | Icônes du site et de l’écran d’accueil.                                                                                    |
 | `sw.js`, `manifest.json`                         | Précache hors ligne et manifeste de la PWA, à la racine pour couvrir tout le site.                                         |
-| `tests/`                                         | Tests `node --test` du domaine, des formats et du précache du service worker.                                              |
+| `tests/`                                         | Tests `node --test` du domaine, des formats, des sauvegardes et du précache du service worker (`npm test`).                |
+| `tests/browser/`                                 | Parcours dans Chrome ou Edge sans interface, sur données fictives (`npm run test:browser`).                                |
+| `tools/browser.js`                               | Pilotage du navigateur pour ces tests, sans dépendance.                                                                    |
 
 Le code des écrans délègue les calculs à `src/domain/` ; c’est la partie couverte par les tests. Un test vérifie aussi que chaque ressource livrée figure dans le précache de `sw.js`.
 
