@@ -60,13 +60,19 @@ test("sur écran tactile, le titre du mois n’est orange que pendant le choix",
   assert.equal(await titleColor(), CHARCOAL, `après le choix, actif : ${await activeElement()}`);
 });
 
-test("le survol ne colore le titre du mois qu’avec une souris", async () => {
+test("le survol ne colore le titre du mois qu’avec une souris", async t => {
   // Sur iPhone, le survol reste actif après un toucher : il ne doit pas laisser le titre orange.
   await leaveMonthInput();
   assert.notEqual(await activeElement(), "calendarMonthInput");
   await page.forceHover("#calendarMonthPickerToggle");
   assert.equal(await titleColor(), CHARCOAL, "écran tactile");
   await page.setViewport(375, 812, { touch: false });
+  // Les serveurs de la CI n’ont pas de souris : le navigateur n’y signale aucun survol possible.
+  if (!(await page.evaluate(() => matchMedia("(hover: hover)").matches))) {
+    await page.forceHover("#calendarMonthPickerToggle", false);
+    t.diagnostic("Pas de souris sur cette machine : survol à la souris non vérifié.");
+    return;
+  }
   await page.forceHover("#calendarMonthPickerToggle");
   assert.equal(await titleColor(), ACCENT, "souris");
   await page.forceHover("#calendarMonthPickerToggle", false);
