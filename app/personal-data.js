@@ -17,6 +17,11 @@ export function createPersonalDataStore() {
     saveSettings: value => adapter.saveSettings(value),
     initializeRaceCatalog: records => adapter.initializeRaceCatalog(records),
 
+    async recordBackup(lastBackupAt) {
+      const settings = await adapter.getSettings();
+      await adapter.saveSettings({ ...settings, lastBackupAt });
+    },
+
     async exportAll() {
       const data = createEmptyPersonalData();
       for (const collection of PERSONAL_DATA_COLLECTIONS) {
@@ -30,7 +35,7 @@ export function createPersonalDataStore() {
           browserStorage[key] = localStorage.getItem(key);
         }
       }
-      data.settings = { ...data.settings, browserStorage };
+      data.settings = { ...data.settings, browserStorage, lastBackupAt: new Date().toISOString() };
       return validatePersonalData(data);
     },
 

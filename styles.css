@@ -449,6 +449,18 @@ button {
   opacity: .65;
 }
 
+.personal-data-tools .personal-data-last-backup {
+  color: var(--color-charcoal);
+  font-weight: 650;
+}
+
+.personal-data-tools .personal-data-last-backup[data-state="stale"] {
+  padding: 8px 10px;
+  border: 1px solid var(--color-warning-line);
+  border-radius: 10px;
+  background: var(--color-warning);
+}
+
 .personal-data-status[data-state="error"] {
   color: #9c2f19;
 }

@@ -10,10 +10,19 @@ if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   });
 }
 
+if (navigator.storage?.persist) {
+  navigator.storage.persisted()
+    .then(persisted => persisted || navigator.storage.persist())
+    .catch(error => console.warn("Stockage persistant :", error));
+}
+
+const BACKUP_REMINDER_DAYS = 7;
+const relativeDayFormatter = new Intl.RelativeTimeFormat("fr-FR", { numeric: "auto" });
 const exportButton = document.getElementById("exportPersonalData");
 const importButton = document.getElementById("importPersonalData");
 const importInput = document.getElementById("personalDataFile");
 const status = document.getElementById("personalDataStatus");
+const lastBackup = document.getElementById("personalDataLastBackup");
 const personalData = createPersonalDataStore();
 let raceCatalogPromise = loadRaceCatalog(personalData);
 const updateActivityStatistics = initializeActivityStatistics(
@@ -31,6 +40,34 @@ function showPersonalDataStatus(message, isError = false) {
   status.dataset.state = isError ? "error" : "success";
 }
 
+async function showLastBackup() {
+  const { lastBackupAt } = await personalData.getSettings();
+  const backupDate = lastBackupAt ? new Date(lastBackupAt) : null;
+  if (!backupDate || Number.isNaN(backupDate.getTime())) {
+    lastBackup.textContent = "Aucune sauvegarde exportée depuis cet appareil.";
+    lastBackup.dataset.state = "stale";
+  } else {
+    const today = new Date();
+    const days = Math.max(0, Math.round(
+      (Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
+        Date.UTC(backupDate.getFullYear(), backupDate.getMonth(), backupDate.getDate())) /
+        86400000
+    ));
+    lastBackup.textContent = `Dernière sauvegarde : ${relativeDayFormatter.format(-days, "day")}.`;
+    lastBackup.dataset.state = days >= BACKUP_REMINDER_DAYS ? "stale" : "recent";
+  }
+  lastBackup.hidden = false;
+}
+
+function refreshLastBackup() {
+  showLastBackup().catch(error => console.error("Date de la dernière sauvegarde :", error));
+}
+
+refreshLastBackup();
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) refreshLastBackup();
+});
+
 exportButton.addEventListener("click", async () => {
   exportButton.disabled = true;
   showPersonalDataStatus("Préparation de la sauvegarde…");
@@ -46,6 +83,8 @@ exportButton.addEventListener("click", async () => {
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    await personalData.recordBackup(data.settings.lastBackupAt);
+    refreshLastBackup();
     showPersonalDataStatus("Base complète exportée. Garde ce fichier en lieu sûr.");
   } catch (error) {
     console.error("Échec de la sauvegarde des données personnelles.", error);
@@ -68,6 +107,7 @@ importInput.addEventListener("change", async () => {
     await personalData.restore(data);
     raceCatalogPromise = loadRaceCatalog(personalData);
     await refreshCalendar(await raceCatalogPromise);
+    refreshLastBackup();
     showPersonalDataStatus("Base complète restaurée sur cet appareil.");
   } catch (error) {
     console.error("Échec de la restauration des données personnelles.", error);

@@ -36,6 +36,8 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 - IndexedDB stocke les sorties, activités, courses personnelles et de référence, plans de course, produits de nutrition, matériel et réglages.
 - L’export produit un JSON autonome incluant les données de référence et les états locaux Alterra. L’import, après confirmation, remplace toutes les données de l’appareil. Le format courant est la version 2 ; le format 1 reste accepté.
 - Les données ne sont pas synchronisées entre appareils. La sauvegarde doit être transférée manuellement et conservée en lieu sûr.
+- L’accueil indique la date de la dernière sauvegarde exportée ; le rappel est mis en avant lorsqu’aucune sauvegarde n’existe ou qu’elle date de 7 jours ou plus. La date est incluse dans l’export, si bien qu’une restauration reprend celle du fichier importé.
+- Au démarrage, l’application demande au navigateur un stockage persistant pour limiter le risque d’effacement automatique de la base locale.
 - Le manifeste permet l’installation comme application. Le service worker précache les ressources de l’application pour un usage hors ligne ; chaque changement de ressources livrées hors ligne nécessite une nouvelle version de cache.
 
 ## Règles d’interface et de contenu
