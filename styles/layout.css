@@ -150,27 +150,6 @@
   letter-spacing: 0.15em;
 }
 
-/* Retour à l’écran précédent, en haut à gauche. */
-.back-button {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  padding: 8px 14px;
-  border: 1px solid var(--color-line);
-  border-radius: 999px;
-  background: var(--color-paper);
-  color: var(--color-charcoal);
-  font-size: 15px;
-  font-weight: 750;
-  text-decoration: none;
-}
-
-.back-button:hover,
-.back-button:focus-visible {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-}
-
 .home-button {
   display: inline-grid;
   width: 42px;
