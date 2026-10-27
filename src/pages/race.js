@@ -46,11 +46,12 @@ function renderRace(race, personalPlan = null, storageError = null) {
   if (checkpoints) content.append(checkpoints.element);
   if (displayRace.nutrition) content.append(renderNutrition(displayRace.nutrition));
   if (displayRace.reminders?.items?.length) content.append(renderReminders(displayRace.reminders));
-  if (displayRace.practicalInfo?.items?.length) {
-    content.append(renderPracticalInfo(displayRace.practicalInfo));
-  }
+  // Blocs repliés, utiles avant la course : matériel, infos pratiques, sources.
   if (displayRace.gear?.groups?.length) {
     content.append(createGearChecklist(displayRace, displayRace.gear));
+  }
+  if (displayRace.practicalInfo?.items?.length) {
+    content.append(renderPracticalInfo(displayRace.practicalInfo));
   }
   if (displayRace.sources?.length) {
     content.append(renderSources(displayRace.sources, displayRace.verifiedAt));

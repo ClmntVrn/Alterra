@@ -34,7 +34,10 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 
 - Le moteur générique affiche les informations de référence disponibles : dates, départ, distance, D+, objectif et informations pratiques.
 - Les blocs facultatifs sont propres à chaque fiche : profil GPX et repères, ravitaillements/scénarios horaires, nutrition, rappels, matériel, informations pratiques et sources.
-- Le profil d’altitude est calculé depuis le GPX associé à la course. Les repères peuvent synchroniser la progression avec les ravitaillements.
+- La fiche est pensée pour être lue en course, sans mode à activer. Ordre : en-tête, bloc « En course », profil, ravitos, nutrition, rappels ; matériel, informations pratiques et sources sont repliés en bas.
+- Le bloc « En course » montre le prochain ravito : distance jusqu’à lui (depuis les km des ravitos), D+ et D− (calculés sur le GPX en ignorant les variations de moins de 5 m), heure de passage du scénario choisi, distance jusqu’à l’arrivée. Un grand bouton coche le ravito ; « Annuler » décoche le dernier atteint. Aucune avance ni aucun retard n’est calculé.
+- Le profil d’altitude est calculé depuis le GPX associé à la course et dessiné à la largeur de l’écran. La partie parcourue, jusqu’au dernier ravito coché sans interruption depuis le départ, est remplie en orange ; une ligne marque la position. Toucher un repère coche ou décoche son ravito. La position GPS en direct n’est pas utilisée.
+- Toute la carte d’un ravito le coche ; le prochain est encadré en orange, les ravitos passés sont réduits.
 - Les cases de progression et listes de matériel sont conservées localement sur l’appareil.
 - Les contenus détaillés des courses et les fichiers GPX ne sont pas livrés dans le dépôt. Une installation neuve démarre sans catalogue de courses de référence ; une sauvegarde peut les restaurer.
 

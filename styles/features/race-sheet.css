@@ -84,7 +84,8 @@
 
 .checkpoint {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  cursor: pointer;
   align-items: center;
   gap: 12px;
   padding: 12px;
@@ -179,17 +180,24 @@
   font-variant-numeric: tabular-nums;
 }
 
-.mark {
-  display: inline-flex;
-  min-height: 36px;
-  align-items: center;
-  gap: 7px;
-  margin-top: 2px;
-  color: var(--color-muted);
-  font-size: 11px;
+.checkpoint-check {
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
 }
 
-.mark input,
+/* Prochain ravito mis en avant ; ravitos passés réduits à leur nom et leurs temps. */
+.checkpoint.is-next {
+  border: 2px solid var(--color-accent-bright);
+}
+
+.checkpoint.done .km,
+.checkpoint.done .checkpoint-plan {
+  display: none;
+}
+
 .gear-item input {
   width: 19px;
   height: 19px;
@@ -381,4 +389,65 @@
 .live-reach[hidden],
 .live-undo[hidden] {
   display: none;
+}
+
+/* Blocs repliés en bas de fiche. */
+.race-collapsible {
+  padding: 0;
+}
+
+.race-collapsible summary {
+  display: flex;
+  min-height: 60px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 clamp(16px, 4vw, 22px);
+  cursor: pointer;
+  list-style: none;
+}
+
+.race-collapsible summary::-webkit-details-marker {
+  display: none;
+}
+
+.section .race-collapsible summary h2 {
+  margin: 0;
+}
+
+.race-collapsible-chevron {
+  color: var(--color-slate);
+  font-size: 18px;
+  font-weight: 800;
+  transition: transform 0.15s ease;
+}
+
+.race-collapsible details[open] .race-collapsible-chevron {
+  transform: rotate(180deg);
+}
+
+.race-collapsible details > :not(summary) {
+  margin: 0 clamp(16px, 4vw, 22px) clamp(16px, 4vw, 22px);
+}
+
+/* En-tête compact : le bloc « En course » reste visible sans défiler. */
+.hero {
+  padding: clamp(16px, 4.5vw, 22px);
+}
+
+.hero h1 {
+  margin-bottom: 4px;
+  font-size: clamp(26px, 7vw, 36px);
+}
+
+.hero .sub {
+  margin-bottom: 0;
+}
+
+.hero .stats {
+  margin-top: 12px;
+}
+
+.hero .stat {
+  padding: 8px 9px;
 }

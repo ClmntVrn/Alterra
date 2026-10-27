@@ -61,13 +61,20 @@ test("l’en-tête et tous les blocs de la fiche s’affichent", async () => {
   assert.deepEqual(await texts("#raceContent h2"), [
     "Refuge B",
     "Profil de la course",
-    "En course · ravitos",
+    "Ravitos",
     "Nutrition",
     "Rappels",
-    "Infos pratiques",
     "Matériel",
+    "Infos pratiques",
     "Sources"
   ]);
+  assert.deepEqual(
+    await page.evaluate(() =>
+      [...document.querySelectorAll("#raceContent details")].map(d => d.open)
+    ),
+    [false, false, false],
+    "matériel, infos pratiques et sources sont repliés"
+  );
   assert.equal(await text(".footer"), "Pied de fiche.");
   assert.equal(await text(".personal-plan-status"), "Plan personnel enregistré sur cet appareil.");
   assert.deepEqual(
@@ -212,6 +219,30 @@ test("toucher un repère coche le ravito et fait avancer la progression", async 
   assert.deepEqual(
     [finished.label, finished.next, finished.stats, finished.reach, finished.undo],
     ["COURSE TERMINÉE", "Arrivée", [], null, "Annuler"]
+  );
+});
+
+test("toucher la carte d’un ravito le coche ; le prochain est mis en avant", async () => {
+  const cards = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll(".checkpoint")].map(
+        card =>
+          `${card.dataset.id}:${card.classList.contains("done") ? "fait" : ""}${card.classList.contains("is-next") ? "suivant" : ""}`
+      )
+    );
+  await page.evaluate(() => document.getElementById("resetCheckpoints").click());
+  assert.deepEqual(await cards(), ["r1:suivant", "r2:", "finish:"]);
+  await page.evaluate(() => document.querySelector('.checkpoint[data-id="r1"] .place').click());
+  assert.equal(await isChecked("r1"), true);
+  assert.deepEqual(await cards(), ["r1:fait", "r2:suivant", "finish:"]);
+  assert.equal(
+    await page.evaluate(
+      () =>
+        getComputedStyle(document.querySelector('.checkpoint[data-id="r1"] .checkpoint-plan'))
+          .display
+    ),
+    "none",
+    "ravito passé réduit"
   );
 });
 

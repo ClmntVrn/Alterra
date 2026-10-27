@@ -13,6 +13,8 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const MARGIN = Object.freeze({ left: 46, right: 12, top: 30, bottom: 26 });
 // Toucher autour d’un repère : rayon de la zone active, plus large que le point dessiné.
 const STOP_HIT_RADIUS = 18;
+// Largeur réservée au total de km au bout de l’axe, en pixels.
+const TOTAL_LABEL_SPACE = 64;
 
 function svg(name, attributes = {}, text) {
   const node = document.createElementNS(SVG_NS, name);
@@ -72,9 +74,10 @@ function drawGrid(profile) {
     );
   }
   const kmStep = computeAxisStep(profile.distanceKm);
-  // La dernière graduation laisse la place au total, aligné à droite.
-  for (let km = 0; km <= profile.distanceKm - kmStep / 2; km += kmStep) {
+  for (let km = 0; km < profile.distanceKm; km += kmStep) {
     const x = plot.left + (km / profile.distanceKm) * (plot.right - plot.left);
+    // Les graduations laissent la place au total, aligné à droite.
+    if (plot.right - x < TOTAL_LABEL_SPACE) break;
     grid.append(
       svg("line", { x1: x, y1: plot.bottom, x2: x, y2: plot.bottom + 5 }),
       svg("text", { x, y: plot.bottom + 18, "text-anchor": "middle" }, formatNumber(km))

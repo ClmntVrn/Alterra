@@ -8,19 +8,33 @@ export function leadParagraph(lead, text) {
   return el("p", {}, [el("strong", { text: `${lead} :` }), ` ${text}`]);
 }
 
-function renderRules(title, items) {
-  return el("section", { className: "section" }, [
-    el("h2", { text: title }),
-    el(
-      "div",
-      { className: "rules" },
-      items.map(item =>
-        el("div", { className: "rule" }, [
-          el("b", { text: item.title }),
-          el("p", { text: item.text })
-        ])
-      )
+function renderRuleList(items) {
+  return el(
+    "div",
+    { className: "rules" },
+    items.map(item =>
+      el("div", { className: "rule" }, [
+        el("b", { text: item.title }),
+        el("p", { text: item.text })
+      ])
     )
+  );
+}
+
+/** Bloc replié par défaut : utile avant la course, pas pendant. */
+function renderCollapsible(title, children) {
+  return el("section", { className: "section race-collapsible" }, [
+    el("details", {}, [
+      el("summary", {}, [
+        el("h2", { text: title }),
+        el("span", {
+          className: "race-collapsible-chevron",
+          text: "⌄",
+          attrs: { "aria-hidden": "true" }
+        })
+      ]),
+      ...children
+    ])
   ]);
 }
 
@@ -42,16 +56,18 @@ export function renderNutrition(nutrition) {
 }
 
 export function renderReminders(reminders) {
-  return renderRules(reminders.title, reminders.items);
+  return el("section", { className: "section" }, [
+    el("h2", { text: reminders.title }),
+    renderRuleList(reminders.items)
+  ]);
 }
 
 export function renderPracticalInfo(info) {
-  return renderRules(info.title || "Infos pratiques", info.items);
+  return renderCollapsible(info.title || "Infos pratiques", [renderRuleList(info.items)]);
 }
 
 export function renderSources(sources, verifiedAt) {
-  const section = el("section", { className: "section" }, [
-    el("h2", { text: "Sources" }),
+  const children = [
     el(
       "ul",
       { className: "race-sources" },
@@ -64,13 +80,13 @@ export function renderSources(sources, verifiedAt) {
         ])
       )
     )
-  ]);
+  ];
   if (verifiedAt) {
-    section.append(
+    children.push(
       el("p", { className: "sub", text: `Vérifié le ${formatDateRange(verifiedAt)}.` })
     );
   }
-  return section;
+  return renderCollapsible("Sources", children);
 }
 
 /** Indique si le plan personnel est chargé, ou pourquoi il ne l’est pas. */

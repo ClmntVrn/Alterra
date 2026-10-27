@@ -92,16 +92,18 @@ But : comprendre une journée d’un coup d’œil, sans blocs empilés ni déta
 
 ### Étape 6 — Fiche course lisible en course
 
-**Statut :** à faire
+**Statut :** réalisée en 0.8.18 — à vérifier sur iPhone
 
 But : une fiche consultable en quelques secondes pendant la course, sans lire de texte.
 
-- Profil : supprimer la légende et le texte d’aide sous le graphique.
-- Progression bien visible : partie déjà parcourue remplie en orange sous la courbe, position actuelle marquée nettement, reste du parcours en gris.
-- En haut de la fiche, quelques chiffres en grand calculés depuis le GPX et les ravitos : prochain ravito, distance et D+ jusqu’à lui, km restants.
-- Ravitos cochables d’un seul toucher sur une grande zone ; contraste et taille de texte adaptés à l’extérieur.
-- Revoir l’ordre et le repli des blocs : ceux utiles en course d’abord, les autres repliés.
-- À trancher : passage en « mode course » explicite ou fiche unique réorganisée ; position mise à jour seulement par les ravitos cochés (actuel) ou aussi par un toucher sur le profil.
+Décisions du 27 octobre 2026 : fiche unique réorganisée, sans mode course (pour s’y habituer avant la course) ; pas d’avance ni de retard affichés ; pas d’écran maintenu allumé ; position GPS en direct reportée à une version ultérieure.
+
+- [x] Bloc « En course » en haut : prochain ravito en grand, distance, D+ et D− jusqu’à lui (calculés sur le GPX), heure de passage du scénario choisi, km jusqu’à l’arrivée ; grand bouton « Ravito atteint » et « Annuler ».
+- [x] Profil dessiné à la largeur de l’écran (textes lisibles), partie parcourue remplie en orange, ligne de position, noms qui ne se chevauchent plus, zone de toucher élargie ; légende, pastille D+, texte de progression et texte d’aide retirés.
+- [x] Ravitos : toute la carte se touche, le prochain est encadré en orange, les passés sont réduits ; texte d’aide des scénarios retiré.
+- [x] Ordre : en-tête compact, En course, profil, ravitos, nutrition, rappels ; matériel, infos pratiques et sources repliés.
+- [ ] À vérifier sur iPhone avec une vraie fiche : lisibilité dehors, noms des ravitos sur le profil, rotation de l’écran.
+- [ ] Plus tard : position GPS en direct sur le profil, en option.
 
 **Validation :** sur iPhone, en plein soleil et en mouvement, on trouve le prochain ravito et le reste à parcourir en moins de 5 secondes.
 

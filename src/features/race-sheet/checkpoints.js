@@ -1,5 +1,6 @@
 // Ravitos d’une fiche : scénarios de temps, horaires de passage et points atteints.
 
+import { findRaceProgress } from "../../domain/race-progress.js";
 import { el } from "../../ui/dom.js";
 import { formatNumber } from "../../ui/format.js";
 import { leadParagraph } from "./info-sections.js";
@@ -34,7 +35,13 @@ function renderScenarioSelector(scenarios, defaultIndex) {
 }
 
 function renderCheckpointCard(checkpoint) {
-  const checkbox = el("input", { attrs: { type: "checkbox" } });
+  const checkbox = el("input", {
+    className: "checkpoint-check",
+    attrs: {
+      type: "checkbox",
+      "aria-label": `${checkpoint.label || "Point atteint"} : ${checkpoint.name}`
+    }
+  });
   const summary = [
     Number.isFinite(checkpoint.km) ? `KM ${formatNumber(checkpoint.km)}` : "",
     checkpoint.description || ""
@@ -43,11 +50,12 @@ function renderCheckpointCard(checkpoint) {
     .join(" · ");
   const details = el("div", {}, [el("div", { className: "place", text: checkpoint.name })]);
   if (summary) details.append(el("div", { className: "km", text: summary }));
-  details.append(
-    el("label", { className: "mark" }, [checkbox, checkpoint.label || "Point atteint"])
-  );
 
-  const card = el("article", { className: "checkpoint" }, [details]);
+  const card = el("article", { className: "checkpoint" }, [checkbox, details]);
+  // Toute la carte coche le ravito : une grande cible, utilisable en courant.
+  card.addEventListener("click", event => {
+    if (event.target !== checkbox) checkbox.click();
+  });
   card.dataset.id = checkpoint.id;
   if (checkpoint.elapsed?.length || checkpoint.clocks?.length) {
     const timing = el("div", { className: "timing" });
@@ -90,24 +98,17 @@ export function createCheckpointsSection(race, { onChange }) {
   const storageKey = `alterra-${race.id}-checkpoints`;
   let scenarioIndex = 0;
   const section = el("section", { className: "section" }, [
-    el("h2", { text: race.checkpointTitle || "En course · ravitos" })
+    el("h2", { text: race.checkpointTitle || "Ravitos" })
   ]);
 
   const selector = renderScenarioSelector(scenarios, defaultIndex);
-  if (scenarios.length) {
-    section.append(
-      selector,
-      el("p", {
-        className: "sub scenario-help",
-        text: "Temps écoulé · heure de passage estimée. Coche chaque ravito atteint."
-      })
-    );
-  }
+  if (scenarios.length) section.append(selector);
   if (race.checkpointNote) {
     section.append(el("p", { className: "sub scenario-help", text: race.checkpointNote }));
   }
 
   const checkboxes = [];
+  const find = id => checkboxes.find(([checkpointId]) => checkpointId === id)?.[1];
   const list = el("div", { className: "checkpoint-list", attrs: { id: "checkpoints" } });
   for (const checkpoint of race.checkpoints) {
     const { card, checkbox } = renderCheckpointCard(checkpoint);
@@ -140,8 +141,11 @@ export function createCheckpointsSection(race, { onChange }) {
   }
 
   function syncCards() {
-    for (const [, checkbox] of checkboxes) {
-      checkbox.closest(".checkpoint").classList.toggle("done", checkbox.checked);
+    const { next } = findRaceProgress(race.checkpoints, id => Boolean(find(id)?.checked));
+    for (const [id, checkbox] of checkboxes) {
+      const card = checkbox.closest(".checkpoint");
+      card.classList.toggle("done", checkbox.checked);
+      card.classList.toggle("is-next", id === next?.id);
     }
   }
 
@@ -171,8 +175,6 @@ export function createCheckpointsSection(race, { onChange }) {
     for (const [, checkbox] of checkboxes) checkbox.checked = false;
     saveAndNotify();
   });
-
-  const find = id => checkboxes.find(([checkpointId]) => checkpointId === id)?.[1];
 
   return {
     element: section,
