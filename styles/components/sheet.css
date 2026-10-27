@@ -32,7 +32,6 @@
 /* Bouton retour rond, le même que sur la fiche course. */
 .sheet-back {
   justify-self: start;
-  padding: 0;
 }
 
 .sheet .training-form {

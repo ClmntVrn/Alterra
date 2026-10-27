@@ -138,15 +138,19 @@
   letter-spacing: 0.15em;
 }
 
+/* Bouton rond (retour, accueil) : le même partout, lien ou bouton. */
 .home-button {
   display: inline-grid;
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   place-items: center;
-  border: 1px solid var(--color-line);
+  padding: 0;
+  border: 1px solid var(--color-control-line);
   border-radius: 50%;
+  appearance: none;
   background: var(--color-paper);
+  box-shadow: var(--shadow-control);
   color: var(--color-charcoal);
   text-decoration: none;
 }

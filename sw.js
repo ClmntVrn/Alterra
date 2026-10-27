@@ -1,4 +1,4 @@
-const CACHE_NAME = "alterra-0.8.23";
+const CACHE_NAME = "alterra-0.8.24";
 
 const FILES = [
   "./",
