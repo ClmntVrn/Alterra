@@ -1,7 +1,7 @@
 # Plan de développement d’Alterra
 
-**Mis à jour le :** 26 octobre 2026  
-**État général :** version locale utilisable (0.8.16) ; suivi des entraînements et statistiques en place, nutrition et équipement à venir.
+**Mis à jour le :** 27 octobre 2026  
+**État général :** version locale utilisable (0.8.16) ; suivi des entraînements et statistiques en place. Prochaines étapes : simplifier les écrans, navigation en bas d’écran, objectifs et ajout de course, puis nutrition et équipement.
 
 ## Vision
 
@@ -76,9 +76,74 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 
 **Validation :** un utilisateur peut gérer son calendrier sportif sans ordinateur et marquer une sortie comme réalisée avec ses valeurs effectives.
 
-### Étape 5 — Nutrition et équipement
+### Étape 5 — Vue jour simplifiée
 
 **Statut :** à faire
+
+But : comprendre une journée d’un coup d’œil, sans blocs empilés ni détails inutiles.
+
+- Une seule couche par carte : supprimer le bloc orange clair imbriqué dans le bloc orange foncé.
+- Carte résumée : type, nom, état (prévu, réalisé, à vérifier) et une ligne de chiffres, km · D+ · durée ou allure.
+- Le reste (heure, météo, ressenti, FC, notes) et les actions (modifier, supprimer) n’apparaissent que dans le détail ouvert au toucher de la carte.
+- Même logique pour les cartes de course du jour.
+- À trancher : durée ou allure dans le résumé (ou selon le type de sortie) ; détail déplié dans la carte ou affiché en plein écran.
+
+**Validation :** sur iPhone, une journée avec plusieurs sorties se lit sans défiler ni chercher ; tout reste accessible depuis le détail.
+
+### Étape 6 — Fiche course lisible en course
+
+**Statut :** à faire
+
+But : une fiche consultable en quelques secondes pendant la course, sans lire de texte.
+
+- Profil : supprimer la légende et le texte d’aide sous le graphique.
+- Progression bien visible : partie déjà parcourue remplie en orange sous la courbe, position actuelle marquée nettement, reste du parcours en gris.
+- En haut de la fiche, quelques chiffres en grand calculés depuis le GPX et les ravitos : prochain ravito, distance et D+ jusqu’à lui, km restants.
+- Ravitos cochables d’un seul toucher sur une grande zone ; contraste et taille de texte adaptés à l’extérieur.
+- Revoir l’ordre et le repli des blocs : ceux utiles en course d’abord, les autres repliés.
+- À trancher : passage en « mode course » explicite ou fiche unique réorganisée ; position mise à jour seulement par les ravitos cochés (actuel) ou aussi par un toucher sur le profil.
+
+**Validation :** sur iPhone, en plein soleil et en mouvement, on trouve le prochain ravito et le reste à parcourir en moins de 5 secondes.
+
+### Étape 7 — Navigation en bas d’écran
+
+**Statut :** à faire
+
+- Barre d’onglets toujours visible en bas, adaptée à l’iPhone (zone de sécurité, PWA plein écran) : Accueil (calendrier), Objectifs, IA, Profil, et éventuellement KPI.
+- Profil : réglages, sauvegarde/restauration, puis plus tard équipement et nutrition (étape 10).
+- Statistiques déplacées dans l’onglet KPI si on le retient, sinon laissées sur l’accueil.
+- À trancher : onglet KPI séparé ou non ; onglet IA visible dès maintenant (« bientôt ») ou ajouté seulement à l’étape 15 ; une page HTML par onglet (choix le plus simple) ou une seule page avec des vues.
+
+**Validation :** chaque onglet s’ouvre d’un toucher, y compris hors ligne, sans perte de position sur l’accueil ; la barre ne masque aucun contenu.
+
+### Étape 8 — Objectifs
+
+**Statut :** à faire
+
+- Onglet Objectifs : courses à venir (personnelles et fiches de référence) avec compte à rebours, accès direct à la fiche ; courses passées repliées.
+- Autres objectifs datés, par exemple la fin d’un programme d’entraînement.
+- À trancher : types d’objectifs à prévoir au départ en plus des courses ; ce qui est affiché pour un objectif (date, compte à rebours, note).
+
+**Validation :** les objectifs sont créés, modifiés, supprimés sur le téléphone et inclus dans la sauvegarde.
+
+### Étape 9 — Ajout d’une course depuis l’application
+
+**Statut :** à faire
+
+Aujourd’hui une fiche de course n’arrive que par restauration d’une sauvegarde.
+
+- Créer et modifier une fiche depuis le téléphone : nom, dates, lieu, distance, D+, import du fichier GPX, liste des ravitos (nom, km).
+- Les blocs facultatifs (nutrition, rappels, matériel, sources) restent ajoutables plus tard ; aucune valeur inventée.
+- Lien entre la course et l’onglet Objectifs ; ajout possible au calendrier.
+- À trancher : faut-il fusionner course personnelle (`personalRace`) et fiche (`raceSheet`) pour l’utilisateur, ou garder une course simple et une fiche facultative ; champs obligatoires.
+
+**Validation :** une course créée sur iPhone avec son GPX affiche une fiche complète utilisable hors ligne et figure dans la sauvegarde.
+
+### Étape 10 — Nutrition et équipement
+
+**Statut :** à faire
+
+Rangés dans l’onglet Profil.
 
 - Créer un catalogue personnel de produits nutritionnels avec glucides et sodium par portion ou par gramme.
 - Permettre d’ajouter et retirer des produits d’une sortie ou d’une course.
@@ -87,7 +152,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 
 **Validation :** les catalogues sont modifiables par l’utilisateur, enregistrés localement et inclus dans l’export/restauration.
 
-### Étape 6 — Tableau de bord et KPIs
+### Étape 11 — Tableau de bord et KPIs
 
 **Statut :** première version réalisée
 
@@ -97,7 +162,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - [x] Calculs KPI extraits dans `src/domain/statistics.js` et couverts par des tests.
 - [ ] Éventuellement : nombre de sorties par semaine, comparaison avec le volume prévu.
 
-### Étape 7 — Fiabiliser la version gratuite
+### Étape 12 — Fiabiliser la version gratuite
 
 **Statut :** à faire
 
@@ -108,7 +173,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 
 **Validation :** les fonctions des étapes précédentes sont utilisables et les données peuvent être sauvegardées/restaurées sans perte silencieuse.
 
-### Étape 8 — Préparer et tester la migration
+### Étape 13 — Préparer et tester la migration
 
 **Statut :** à faire
 
@@ -118,7 +183,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 
 **Validation :** une sauvegarde locale peut être migrée et vérifiée ; les limites et risques du fournisseur choisi sont compris.
 
-### Étape 9 — Comptes et synchronisation multi-appareils
+### Étape 14 — Comptes et synchronisation multi-appareils
 
 **Statut :** à faire
 
@@ -130,13 +195,14 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 
 **Validation :** les données d’un compte ne sont jamais accessibles depuis un autre ; une modification se synchronise entre appareils.
 
-### Étape 10 — Services payants et intégrations avancées
+### Étape 15 — Services payants et intégrations avancées
 
 **Statut :** à faire — seulement si le besoin est confirmé
 
 - Évaluer un hébergement et un backend payants si les limites de l’offre gratuite gênent l’usage ; décider si un nom de domaine est utile.
 - Étudier l’intégration Garmin (ou Strava) via les accès officiels ; conserver un import de fichier comme solution de repli. Une activité importée marque ou crée la sortie réalisée du jour.
 - Ajouter une IA côté serveur, sans clé dans le navigateur, avec limites de dépenses configurables ; les séances proposées sont examinées et validées avant ajout au calendrier.
+- Onglet IA : assistant conversationnel pour créer une séance spécifique ou une fiche de course à partir d’un lien, avec validation avant tout enregistrement.
 - Présenter les coûts récurrents et obtenir l’accord de l’utilisateur avant d’activer tout service payant.
 
 **Validation :** chaque service externe a un coût et une politique de données documentés ; les clés restent côté serveur.
@@ -175,7 +241,8 @@ Chantier de qualité du code décidé le 26 octobre 2026, mené en parallèle de
 - [x] Corrigé au passage : la modification d’une course personnelle enregistrait un champ interne (`eventType`).
 - [x] Sélecteur de mois natif (`<input type="month">`) à la place des roues maison ; vérifié sur iPhone le 26 octobre 2026.
 - [x] Retours iPhone corrigés en 0.8.16 : titre du mois orange seulement pendant le choix, champ de date qui ne déborde plus sur l’heure.
-- [ ] À vérifier sur iPhone : les deux correctifs de la 0.8.16.
+- [x] Les deux correctifs de la 0.8.16 vérifiés sur iPhone le 27 octobre 2026.
+- Limite acceptée le 27 octobre 2026 : sur Chrome ordinateur/Android, le titre du mois reste orange après le choix jusqu’au toucher suivant ailleurs.
 
 ### R5 — Découpage de la fiche course
 
