@@ -32,6 +32,8 @@ const BROWSER_PATHS = [
 const BROWSER_COMMANDS = ["google-chrome", "google-chrome-stable", "chromium", "chromium-browser"];
 
 const sleep = ms => new Promise(done => setTimeout(done, ms));
+// Un premier lancement à froid (CI, profil neuf) peut dépasser 10 s.
+const STARTUP_TIMEOUT_MS = 30000;
 
 /** Chemin du navigateur : variable CHROME_PATH, emplacements connus, puis commandes du PATH. */
 export function findBrowser() {
@@ -77,7 +79,8 @@ function startServer() {
 
 async function waitForDevToolsPort(profile, browser) {
   const file = join(profile, "DevToolsActivePort");
-  for (let attempt = 0; attempt < 100; attempt += 1) {
+  const deadline = Date.now() + STARTUP_TIMEOUT_MS;
+  while (Date.now() < deadline) {
     if (browser.exitCode !== null) throw new Error("Le navigateur s’est arrêté au démarrage.");
     if (existsSync(file)) {
       const [port] = readFileSync(file, "utf8").split("\n");
