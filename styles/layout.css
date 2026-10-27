@@ -25,7 +25,6 @@
   letter-spacing: 0.08em;
 }
 
-/* Titre d’une vue de l’accueil (Profil…). */
 /* En-tête des onglets : logo (retour à l’accueil), titre, action éventuelle. */
 .view-header {
   display: flex;

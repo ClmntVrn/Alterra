@@ -7,6 +7,7 @@ Documentation de référence, à lire avant une évolution fonctionnelle :
 - [docs/specification.md](./docs/specification.md) — comportement attendu et règles de gestion ;
 - [docs/roadmap.md](./docs/roadmap.md) — feuille de route par étapes et décisions prises ;
 - [docs/architecture.md](./docs/architecture.md) — choix techniques et confidentialité.
+- [docs/historique.md](./docs/historique.md) — détail des étapes terminées, à consulter seulement si besoin.
 
 ## Expérience et style
 
@@ -57,4 +58,4 @@ Quand une modification change les ressources livrées :
 
 ## Mise à jour de ces consignes
 
-Tenir ce fichier à jour lorsqu'une convention ou une décision durable change, en restant concis (pas de notes de session ni de détails propres à une course). `.github/copilot-instructions.md` contient des consignes équivalentes pour Copilot : les garder cohérentes.
+Tenir ce fichier à jour lorsqu'une convention ou une décision durable change, en restant concis (pas de notes de session ni de détails propres à une course).

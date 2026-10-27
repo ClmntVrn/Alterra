@@ -31,3 +31,4 @@ Node.js ne sert qu’aux outils de développement : le site n’a pas d’étape
 - [Spécification fonctionnelle et règles de gestion](./docs/specification.md)
 - [Plan de développement](./docs/roadmap.md)
 - [Architecture et décisions techniques](./docs/architecture.md)
+- [Historique des étapes terminées](./docs/historique.md)
