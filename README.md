@@ -1,6 +1,6 @@
 # Alterra
 
-Site statique de préparation au trail, avec calendrier et fiches de course adaptées aux écrans mobiles.
+Site statique de préparation au trail, adapté aux écrans mobiles : calendrier des sorties, objectifs avec compte à rebours et fiches de course, accessibles par une barre d’onglets.
 
 ## Fiches de course
 
@@ -14,7 +14,7 @@ Le code est dans `src/`, la feuille de styles dans `styles/` et les icônes dans
 
 La base locale comprend les fiches de course et leurs traces GPX, les plans personnels, les sorties (prévues ou réalisées), réglages et états de checklist. L’export est autonome : il contient les données de course de référence et privées nécessaires à la restauration, sans dépendre de fichiers de données de course dans le dépôt.
 
-L’export et l’import se font depuis l’accueil. L’import remplace toutes les données Alterra de l’appareil après confirmation. Les fichiers JSON ne sont pas synchronisés automatiquement entre appareils ; conserve l’export complet dans un endroit sûr.
+L’export et l’import se font depuis l’onglet Profil. L’import remplace toutes les données Alterra de l’appareil après confirmation. Les fichiers JSON ne sont pas synchronisés automatiquement entre appareils ; conserve l’export complet dans un endroit sûr.
 
 ## Développement
 

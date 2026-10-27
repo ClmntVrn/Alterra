@@ -1,7 +1,7 @@
 # Plan de développement d’Alterra
 
 **Mis à jour le :** 27 octobre 2026  
-**État général :** version locale utilisable (0.8.16) ; suivi des entraînements et statistiques en place. Prochaines étapes : simplifier les écrans, navigation en bas d’écran, objectifs et ajout de course, puis nutrition et équipement.
+**État général :** version locale utilisable (0.8.23) ; entraînements, statistiques, barre d’onglets et objectifs en place, retours iPhone attendus sur les étapes 6 à 8. Prochaines étapes : ajout d’une course depuis l’application (fusion course et fiche), puis nutrition et équipement.
 
 ## Vision
 
@@ -24,7 +24,9 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - [x] Base locale IndexedDB avec sauvegarde autonome (export/import JSON, format 3), rappel de la dernière sauvegarde et demande de stockage persistant.
 - [x] Calendrier mois/jour avec sorties, courses personnelles et courses de référence, y compris sur plusieurs jours.
 - [x] Sorties prévues ou réalisées, modifiables ; statistiques des 12 dernières semaines sur les sorties réalisées.
-- [x] Fiches de course génériques : profil GPX, ravitos, scénarios, nutrition, rappels, matériel, sources.
+- [x] Fiches de course génériques : profil GPX, ravitos, scénarios, nutrition, rappels, matériel, sources ; bloc « En course » pour suivre la progression.
+- [x] Barre d’onglets (Accueil, Objectifs, Profil ; Stats et IA à venir) et onglet Objectifs avec compte à rebours.
+- [ ] Ajout d’une fiche de course complète depuis l’application.
 - [ ] Nutrition et équipement personnels.
 - [ ] Comptes, synchronisation multi-appareils et intégrations (Garmin, IA).
 

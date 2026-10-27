@@ -1,7 +1,7 @@
 # Architecture d’Alterra
 
 **Statut :** architecture validée le 22 octobre 2026, en place pour la version locale  
-**Mise à jour :** 26 octobre 2026
+**Mise à jour :** 27 octobre 2026
 
 Ce document décrit l’architecture actuelle et son évolution prévue, sans backend ni frais au départ.
 
@@ -11,11 +11,11 @@ Alterra est une PWA statique en HTML, CSS et JavaScript natif (modules ES), sans
 
 ```text
 Pages (index.html, race.html, versions.html, styles/)
-  statistiques · calendrier mois/jour · formulaires · fiches de course
+  onglets Accueil · Objectifs · Profil · plein écran des formulaires · fiches de course
                      │
                      ▼
 Points d’entrée et fonctionnalités (src/pages/, src/features/)
-  calendrier, statistiques, sauvegarde, fiche de course
+  calendrier, statistiques, objectifs, sauvegarde, fiche de course
                      │
                      ▼
 Repository (src/storage/repository.js)
@@ -28,10 +28,10 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 
 | Fichier                                          | Rôle                                                                                                                       |
 | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `src/pages/home.js`                              | Initialise l’accueil, le service worker, le stockage persistant et la sauvegarde.                                          |
+| `src/pages/home.js`                              | Initialise les onglets, l’accueil, les objectifs, le service worker, le stockage persistant et la sauvegarde.              |
 | `src/pages/race.js`                              | Fiche course : chargement de la fiche et du plan personnel, assemblage des blocs.                                          |
 | `src/features/race-sheet/`                       | Blocs de la fiche : en-tête, profil GPX, ravitos et scénarios, matériel, infos.                                            |
-| `src/features/calendar/calendar.js`              | Calendrier : vue mois/jour, navigation et rafraîchissement, sans état global.                                              |
+| `src/features/calendar/calendar.js`              | Calendrier : vue mois/jour, plein écran partagé des détails et formulaires, rafraîchissement, sans état global.            |
 | `src/features/calendar/month-grid.js`            | Grille du calendrier, générique.                                                                                           |
 | `src/features/calendar/month-picker.js`          | Choix du mois avec le sélecteur natif (`<input type="month">`).                                                            |
 | `src/features/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines.                                                                             |
@@ -46,6 +46,7 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 | `src/storage/race-catalog.js`                    | Chargement du catalogue de courses depuis la base locale.                                                                  |
 | `src/ui/format.js`                               | Formats d’affichage français partagés (dates, nombres, périodes).                                                          |
 | `src/ui/dom.js`                                  | Création d’éléments HTML (`el()`).                                                                                         |
+| `src/ui/tab-bar.js`                              | Barre d’onglets : vue affichée sans rechargement, position conservée par vue.                                              |
 | `styles/`                                        | `tokens.css`, `base.css`, `layout.css`, puis une feuille par composant et fonctionnalité ; chaque page charge les siennes. |
 | `assets/icons/`                                  | Icônes du site et de l’écran d’accueil.                                                                                    |
 | `sw.js`, `manifest.json`                         | Précache hors ligne et manifeste de la PWA, à la racine pour couvrir tout le site.                                         |
@@ -70,15 +71,15 @@ Le dépôt ne contient que le code de l’application : aucune fiche de course, 
 
 Collections IndexedDB (clé `id`, identifiant stable généré par `crypto.randomUUID()` pour les créations) :
 
-| Collection                       | Contenu                                                               | Utilisation              |
-| -------------------------------- | --------------------------------------------------------------------- | ------------------------ |
-| `workouts`                       | Sorties prévues ou réalisées (statut `planned` ou `completed`)        | Calendrier, statistiques |
-| `personalRaces`                  | Courses personnelles (nom, dates)                                     | Calendrier               |
-| `raceCatalog`                    | Fiches de course de référence, GPX embarqué dans `profile.gpxData`    | Calendrier, fiches       |
-| `racePlans`                      | Plan personnel d’une course (objectif, scénarios, nutrition, rappels) | Fiches                   |
-| `activities`                     | Non utilisée, conservée pour compatibilité du format                  | —                        |
-| `nutritionProducts`, `equipment` | Prévues pour l’étape 5                                                | —                        |
-| `settings`                       | Réglages : catalogue initialisé, date de la dernière sauvegarde       | Accueil                  |
+| Collection                       | Contenu                                                               | Utilisation                   |
+| -------------------------------- | --------------------------------------------------------------------- | ----------------------------- |
+| `workouts`                       | Sorties prévues ou réalisées (statut `planned` ou `completed`)        | Calendrier, statistiques      |
+| `personalRaces`                  | Courses personnelles (nom, dates)                                     | Calendrier, objectifs         |
+| `raceCatalog`                    | Fiches de course de référence, GPX embarqué dans `profile.gpxData`    | Calendrier, objectifs, fiches |
+| `racePlans`                      | Plan personnel d’une course (objectif, scénarios, nutrition, rappels) | Fiches                        |
+| `activities`                     | Non utilisée, conservée pour compatibilité du format                  | —                             |
+| `nutritionProducts`, `equipment` | Prévues pour l’étape 10                                               | —                             |
+| `settings`                       | Réglages : catalogue initialisé, date de la dernière sauvegarde       | Profil                        |
 
 Une sortie réalisée est le même enregistrement que la sortie prévue, mis à jour avec les valeurs réelles : le prévu n’est pas conservé après réalisation. Champs d’une sortie : `date`, `endDate` (calculée depuis `time` et `durationMinutes`, absente si la sortie tient sur un jour), `type`, `title`, `status`, `time`, `distanceKm`, `durationMinutes`, `ascentMeters`, `notes`, `createdAt`, `completedAt`, et pour une sortie réalisée `perceivedEffort` (1–10), `heartRateAvg`, `heartRateMax` (bpm) et `weather`. L’état « à vérifier » n’est pas stocké : il est déduit à l’affichage d’une sortie prévue dont la date est passée.
 
@@ -90,7 +91,7 @@ Les dates sont des clés locales `AAAA-MM-JJ`, interprétées dans le fuseau de 
 
 - L’export est un JSON autonome (format 3) : toutes les collections, les réglages, les états `localStorage` et la date de la sauvegarde. Les formats 1 et 2 (collections `plannedSessions` et `raceEvents`) restent acceptés : `migratePersonalData` les convertit à l’import.
 - L’import valide le fichier puis, après confirmation, remplace toute la base en une seule transaction.
-- L’accueil affiche la date de la dernière sauvegarde et la met en avant au-delà de 7 jours. Au démarrage, l’application demande un stockage persistant (`navigator.storage.persist()`).
+- Le Profil affiche la date de la dernière sauvegarde et la met en avant à partir de 7 jours, avec une pastille sur l’onglet. Au démarrage, l’application demande un stockage persistant (`navigator.storage.persist()`).
 - Le schéma IndexedDB a un numéro de version (`DATABASE_VERSION`, 3) pour migrer sans effacer les données. Le passage à la version 3 recopie `plannedSessions` et `raceEvents` vers `workouts` et `personalRaces` dans la transaction de mise à niveau : en cas d’échec, la base reste intacte dans sa version précédente.
 
 Limites :
@@ -100,7 +101,7 @@ Limites :
 - les exports contiennent des données personnelles et doivent être conservés en lieu sûr ;
 - IndexedDB n’est pas chiffré : la protection de l’appareil reste importante.
 
-Le service worker ne met en cache que l’interface ; les données personnelles ne transitent pas par son cache. Son cache porte le numéro de version (`alterra-0.8.16`) : chaque version publiée avec `npm run release` le renouvelle.
+Le service worker ne met en cache que l’interface ; les données personnelles ne transitent pas par son cache. Son cache porte le numéro de version (`alterra-<version>`) : chaque version publiée avec `npm run release` le renouvelle.
 
 ## 4. Évolutions prévues
 
