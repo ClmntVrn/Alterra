@@ -21,17 +21,17 @@ const TEXT_FIELDS = [
 /**
  * @param {Object} options
  * @param {HTMLFormElement} options.form
- * @param {HTMLButtonElement} options.openButton Masqué tant que le formulaire est ouvert.
  * @param {(workout: Object) => Promise<void>} options.save
  * @param {() => Promise<void>} options.onSaved Appelé une fois le formulaire fermé.
+ * @param {() => void} options.onCancel
  */
-export function createWorkoutForm({ form, openButton, save, onSaved }) {
+export function createWorkoutForm({ form, save, onSaved, onCancel }) {
   const fields = form.elements;
   const title = form.querySelector("h3");
   const status = form.querySelector('[role="status"]');
   const computed = form.querySelector(".training-computed");
   const completedFields = form.querySelector(".training-completed-fields");
-  const cancelButton = form.querySelector('.training-form-actions [type="button"]');
+  const cancelButton = form.querySelector(".training-form-cancel");
   let editingWorkout = null;
   let selectedEffort = "";
 
@@ -100,7 +100,6 @@ export function createWorkoutForm({ form, openButton, save, onSaved }) {
     delete status.dataset.state;
     editingWorkout = null;
     selectedEffort = "";
-    openButton.hidden = false;
     computed.textContent = "";
     computed.hidden = true;
     completedFields.hidden = true;
@@ -134,7 +133,6 @@ export function createWorkoutForm({ form, openButton, save, onSaved }) {
     syncCompletedFields();
     updateComputed();
     form.hidden = false;
-    openButton.hidden = true;
     form.querySelector('[name="type"]:checked').focus();
   }
 
@@ -187,7 +185,10 @@ export function createWorkoutForm({ form, openButton, save, onSaved }) {
     return workout;
   }
 
-  cancelButton.addEventListener("click", close);
+  cancelButton.addEventListener("click", () => {
+    close();
+    onCancel();
+  });
   form.addEventListener("input", updateComputed);
   fields.namedItem("completed").addEventListener("change", syncCompletedFields);
   for (const fieldName of ["time", "duration"]) {
@@ -244,10 +245,5 @@ export function createWorkoutForm({ form, openButton, save, onSaved }) {
     }
   });
 
-  return {
-    open,
-    close,
-    /** @param {string} id */
-    isEditing: id => editingWorkout?.id === id
-  };
+  return { open, close };
 }

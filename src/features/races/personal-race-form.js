@@ -20,15 +20,18 @@ function updateDateRangeValidity(form) {
 /**
  * @param {Object} options
  * @param {HTMLFormElement} options.form
- * @param {HTMLButtonElement} options.openButton Masqué tant que le formulaire est ouvert.
  * @param {(race: Object) => Promise<void>} options.save
- * @param {() => Promise<void>} options.onSaved Appelé une fois le formulaire fermé.
+ * @param {(id: string) => Promise<void>} options.remove
+ * @param {() => Promise<void>} options.onSaved Appelé une fois le formulaire fermé, après un
+ *   enregistrement ou une suppression.
+ * @param {() => void} options.onCancel
  */
-export function createPersonalRaceForm({ form, openButton, save, onSaved }) {
+export function createPersonalRaceForm({ form, save, remove, onSaved, onCancel }) {
   const fields = form.elements;
   const title = form.querySelector("h3");
   const status = form.querySelector('[role="status"]');
-  const cancelButton = form.querySelector('.training-form-actions [type="button"]');
+  const cancelButton = form.querySelector(".training-form-cancel");
+  const deleteButton = form.querySelector(".workout-delete-button");
   let editingRace = null;
 
   function close() {
@@ -37,7 +40,7 @@ export function createPersonalRaceForm({ form, openButton, save, onSaved }) {
     status.textContent = "";
     delete status.dataset.state;
     editingRace = null;
-    openButton.hidden = false;
+    deleteButton.hidden = true;
   }
 
   /**
@@ -51,13 +54,34 @@ export function createPersonalRaceForm({ form, openButton, save, onSaved }) {
     fields.namedItem("name").value = race?.name || "";
     fields.namedItem("date").value = race?.date || toDateKey(date);
     fields.namedItem("endDate").value = race?.endDate || race?.date || toDateKey(date);
+    deleteButton.hidden = !race;
     form.hidden = false;
-    openButton.hidden = true;
     updateDateRangeValidity(form);
     fields.namedItem("name").focus();
   }
 
-  cancelButton.addEventListener("click", close);
+  cancelButton.addEventListener("click", () => {
+    close();
+    onCancel();
+  });
+  deleteButton.addEventListener("click", async () => {
+    const race = editingRace;
+    if (!window.confirm(`Supprimer la course « ${race.name} » ? Cette action est définitive.`)) {
+      return;
+    }
+    deleteButton.disabled = true;
+    try {
+      await remove(race.id);
+      close();
+      await onSaved();
+    } catch (error) {
+      console.error("Impossible de supprimer la course.", error);
+      status.textContent = "La suppression a échoué. Réessaie.";
+      status.dataset.state = "error";
+    } finally {
+      deleteButton.disabled = false;
+    }
+  });
   for (const name of ["date", "endDate"]) {
     fields.namedItem(name).addEventListener("input", () => updateDateRangeValidity(form));
   }

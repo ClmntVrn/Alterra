@@ -1,0 +1,60 @@
+/* Écran plein (<dialog>) ouvert par-dessus la page : détail ou formulaire. */
+
+.sheet {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  border: 0;
+  background: var(--color-stone);
+  color: var(--color-text);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.sheet:focus {
+  outline: none;
+}
+
+.sheet::backdrop {
+  background: var(--color-stone);
+}
+
+.sheet-content {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 720px);
+  margin: 0 auto;
+}
+
+.sheet-back {
+  justify-self: start;
+  min-height: 44px;
+  padding: 8px 12px 8px 4px;
+  border: 0;
+  background: none;
+  color: var(--color-slate);
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.sheet-back:hover {
+  color: var(--color-charcoal);
+}
+
+.sheet .training-form {
+  margin-top: 0;
+}
+
+.sheet-content > [hidden] {
+  display: none;
+}
+
+@media (min-width: 560px) {
+  .sheet {
+    padding-right: 22px;
+    padding-left: 22px;
+  }
+}

@@ -7,6 +7,9 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 - L’accueil réunit les statistiques d’activité, le calendrier et les commandes de sauvegarde.
 - Le calendrier utilise les dates locales de l’appareil. Les flèches changent de mois ou de jour ; le titre du mois ouvre le sélecteur de mois et d’année natif du système (roues sur iPhone). Sur un navigateur sans sélecteur de mois natif, seules les flèches changent de mois.
 - Toucher une date ouvre sa journée et ses événements.
+- Dans la journée, une sortie est une carte résumée : type et état, nom, puis les chiffres clés selon le type (trail et vélo : distance, D+, durée ; course à pied : distance, allure, durée ; renforcement : durée). Une case ronde la marque réalisée d’un toucher.
+- Toucher la carte ouvre le détail en plein écran : date et heure, tous les chiffres renseignés (dont ressenti, FC et météo d’une sortie réalisée), notes, puis « Réalisée », « Modifier » et « Supprimer » (sortie prévue seulement). Après une modification, on revient au détail. Les formulaires d’ajout et de modification s’ouvrent aussi en plein écran.
+- Toucher une course de référence ouvre sa fiche ; toucher une course personnelle ouvre sa modification, qui permet aussi de la supprimer.
 - Depuis une journée, on peut créer une sortie/entraînement ou une course personnelle. Un événement sur plusieurs jours apparaît chaque jour couvert, y compris lors d’un changement de mois ou d’année.
 - Une sortie comprend un type (trail, course, renfo ou vélo, choisi d’un toucher), un nom facultatif (à défaut, le nom du type), une date, une heure facultative, une distance, une durée, un D+ et des notes. Elle n’a pas de date de fin à saisir : la fin est déduite de l’heure de début (minuit si absente) et de la durée, et une sortie qui dépasse minuit couvre les jours suivants.
 - Sous la mesure, le formulaire affiche en direct la durée, l’allure moyenne et l’heure de fin (avec la date si elle change de jour).

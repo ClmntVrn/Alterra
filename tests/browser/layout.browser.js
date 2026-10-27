@@ -1,9 +1,10 @@
-// Mise en page mobile : couleur du titre du mois au toucher, champs des formulaires sur petit écran.
+// Mise en page mobile : couleur du titre du mois au toucher, champs des formulaires, cartes et
+// détail plein écran sur petit écran.
 
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { launchBrowser } from "../../tools/browser.js";
-import { openHome, openToday } from "./helpers.js";
+import { openHome, openToday, saveRecords, todayKey } from "./helpers.js";
 
 let browser;
 let page;
@@ -107,6 +108,49 @@ for (const width of [320, 375]) {
     assert.deepEqual(await fieldsFit("raceEventForm"), [], "formulaire de course");
   });
 }
+
+test("à 320 px, la case ronde ne chevauche pas le titre et le détail couvre l’écran", async () => {
+  await page.setViewport(320, 640, { touch: true });
+  await saveRecords(page, "workouts", [
+    {
+      id: "seance-mise-en-page",
+      date: await todayKey(page),
+      type: "trail",
+      title: "Sortie longue avec un nom assez long pour passer à la ligne",
+      status: "planned",
+      distanceKm: 32.5,
+      ascentMeters: 1850,
+      durationMinutes: 285,
+      createdAt: "2026-10-27T08:00:00.000Z"
+    }
+  ]);
+  await openHome(page);
+  await openToday(page);
+  await page.waitFor(() => document.querySelector(".calendar-training-item"));
+  const overlap = await page.evaluate(() => {
+    const card = document.querySelector(".calendar-training-item");
+    const title = card.querySelector(".calendar-item-open").getBoundingClientRect();
+    const check = card.querySelector(".workout-check").getBoundingClientRect();
+    const stats = card.querySelector(".workout-stats").getBoundingClientRect();
+    return {
+      titleRight: title.right,
+      checkLeft: check.left,
+      statsRight: stats.right,
+      cardRight: card.getBoundingClientRect().right
+    };
+  });
+  assert.ok(overlap.titleRight <= overlap.checkLeft, JSON.stringify(overlap));
+  assert.ok(overlap.statsRight <= overlap.cardRight, JSON.stringify(overlap));
+
+  await page.evaluate(() =>
+    document.querySelector(".calendar-training-item .calendar-item-open").click()
+  );
+  const sheet = await page.evaluate(() => {
+    const box = document.getElementById("calendarSheet").getBoundingClientRect();
+    return [box.left, box.top, box.width, box.height, document.documentElement.scrollWidth];
+  });
+  assert.deepEqual(sheet, [0, 0, 320, 640, 320]);
+});
 
 test("aucune erreur JavaScript", () => {
   assert.deepEqual(page.errors, []);

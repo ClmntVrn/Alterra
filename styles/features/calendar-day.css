@@ -1,34 +1,66 @@
-/* Vue jour du calendrier : cartes des événements et boutons de création. */
+/* Vue jour du calendrier : cartes résumées, détail d’une séance et boutons de création. */
 
 .calendar-event-details {
   display: grid;
-  gap: 12px;
-  padding: clamp(18px, 5vw, 26px);
-  border: 1px solid var(--color-accent-line);
-  border-radius: 18px;
-  background:
-    radial-gradient(ellipse at 100% 0%, rgb(var(--rgb-accent-bright) / 14%), transparent 55%),
-    var(--color-accent-soft);
+  gap: 10px;
 }
 
+.calendar-empty {
+  margin: 0;
+  padding: 18px 4px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+/* Carte : toute sa surface ouvre le détail, grâce au bouton du titre étendu à la carte. */
 .calendar-item {
-  padding: 14px;
-  border: 1px solid rgb(var(--rgb-slate) / 18%);
-  border-radius: 14px;
-  background: rgb(var(--rgb-paper) / 78%);
-}
-
-.calendar-training-item {
   position: relative;
-  border-color: rgb(var(--rgb-slate) / 26%);
+  padding: 14px 16px;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: var(--color-paper);
 }
 
-.calendar-training-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 28px;
+.calendar-item:has(.calendar-item-open:hover) {
+  border-color: var(--color-accent-line-strong);
+}
+
+.calendar-item:has(.calendar-item-open:focus-visible) {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.calendar-item h3 {
+  margin: 2px 0 0;
+  color: var(--color-charcoal);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+.calendar-training-item h3 {
+  padding-right: 40px;
+}
+
+.calendar-item-open {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+}
+
+.calendar-item-open::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  content: "";
+}
+
+.calendar-item-open:focus-visible {
+  outline: none;
 }
 
 .calendar-event-category {
@@ -38,80 +70,180 @@
   letter-spacing: 0.12em;
 }
 
-.calendar-event-details h3 {
-  margin: 5px 0 4px;
-  color: var(--color-charcoal);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 24px;
+[data-state="toCheck"] > .calendar-event-category {
+  color: var(--color-warning-text);
 }
 
 .calendar-event-description {
-  margin: 0;
+  margin: 4px 0 0;
   color: var(--color-muted);
   font-size: 13px;
 }
 
-.calendar-training-description,
-.calendar-training-targets {
-  font-size: 12px;
+/* Chiffres d’une séance : libellé discret au-dessus, valeur en gras. */
+.workout-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 10px 0 0;
 }
 
-.calendar-training-targets {
-  margin-top: 2px;
+.workout-stats dt {
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: 650;
 }
 
-.calendar-event-link {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  margin-top: 18px;
-  padding: 9px 14px;
-  border-radius: 11px;
-  background: var(--color-accent-bright);
+.workout-stats dd {
+  margin: 0;
   color: var(--color-charcoal);
-  font-size: 13px;
-  font-weight: 800;
-  text-decoration: none;
-  transition:
-    filter 0.15s ease,
-    transform 0.15s ease;
+  font-size: 18px;
+  font-weight: 750;
+  line-height: 1.3;
 }
 
-.calendar-training-notes {
-  margin-top: 8px;
+.workout-stats.is-full {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 14px 18px;
+  margin-top: 18px;
+}
+
+.workout-stats.is-full dd {
+  font-size: 20px;
+}
+
+/* Case ronde « réalisée » : zone de toucher de 44 px, au-dessus du bouton étendu de la carte. */
+.workout-check {
+  display: inline-grid;
+  position: relative;
+  min-width: 44px;
+  min-height: 44px;
+  place-items: center;
+  cursor: pointer;
+}
+
+.calendar-item .workout-check {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  right: 8px;
+}
+
+.workout-check input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.workout-check-mark {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1.5px solid var(--color-control-line);
+  border-radius: 50%;
+  background: var(--color-paper);
+  color: transparent;
+}
+
+.workout-check-mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+.workout-check input:checked + .workout-check-mark {
+  border-color: var(--color-charcoal);
+  background: var(--color-charcoal);
+  color: var(--color-cream);
+}
+
+.workout-check input:focus-visible + .workout-check-mark {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.workout-check input:disabled {
+  cursor: wait;
+}
+
+/* Détail plein écran d’une séance. */
+.workout-detail {
+  padding: 20px 18px;
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  background: var(--color-paper);
+}
+
+.workout-detail h3 {
+  margin: 4px 0 2px;
+  color: var(--color-charcoal);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.workout-detail-when {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.workout-detail-notes {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-line-soft);
+  color: var(--color-text);
+  font-size: 15px;
   white-space: pre-wrap;
 }
 
-.calendar-delete-button {
-  display: grid;
-  width: 40px;
-  min-width: 40px;
-  height: 40px;
-  min-height: 40px;
-  margin: -6px -6px -12px 0;
-  padding: 0;
-  place-items: center;
-  border: 1px solid transparent;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--color-muted);
-  font-size: 22px;
-  font-weight: 400;
-  line-height: 1;
+.workout-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
 }
 
-.calendar-delete-button:hover {
-  border-color: var(--color-danger-line);
-  background: var(--color-accent-soft);
+.workout-detail-actions .workout-check {
+  display: inline-flex;
+  gap: 4px;
+  padding-right: 8px;
+  color: var(--color-charcoal);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.workout-detail-actions .training-save-button {
+  margin: 0 0 0 auto;
+}
+
+.workout-delete-button {
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 1px solid var(--color-danger-line);
+  border-radius: 11px;
+  background: var(--color-paper);
   color: var(--color-danger);
+  font-size: 13px;
+  font-weight: 750;
 }
 
-.calendar-delete-button:disabled {
+.workout-delete-button[hidden] {
+  display: none;
+}
+
+.workout-delete-button:disabled {
   cursor: wait;
   opacity: 0.65;
 }
 
-.calendar-session-toggle,
+/* Case « Séance réalisée » du formulaire. */
 .training-completed-toggle {
   display: inline-flex;
   min-height: 44px;
@@ -127,17 +259,6 @@
   cursor: pointer;
 }
 
-.calendar-session-toggle {
-  min-height: 36px;
-  gap: 7px;
-  padding: 4px 2px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  font-size: 12px;
-}
-
-.calendar-session-toggle input,
 .training-form .training-completed-toggle input {
   flex: 0 0 20px;
   width: 20px;
@@ -151,79 +272,15 @@
   accent-color: var(--color-charcoal);
 }
 
-.calendar-session-toggle input {
-  flex-basis: 18px;
-  width: 18px;
-  height: 18px;
-  min-height: 18px;
-}
-
-.calendar-session-toggle:hover {
-  background: transparent;
-  color: var(--color-charcoal);
-}
-
 .training-completed-toggle:has(input:checked) {
   border-color: var(--color-accent-line-strong);
   background: var(--color-accent-soft);
   color: var(--color-charcoal);
 }
 
-.calendar-session-toggle:has(input:checked) {
-  border: 0;
-  background: transparent;
-  color: var(--color-charcoal);
-}
-
-.calendar-session-toggle input:focus-visible,
 .training-completed-toggle input:focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 3px;
-}
-
-.calendar-session-toggle input:disabled {
-  cursor: wait;
-}
-
-.calendar-session-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 4px;
-}
-
-.calendar-session-details {
-  display: grid;
-  width: auto;
-  min-width: 40px;
-  height: 40px;
-  padding: 0 8px;
-  place-items: center;
-  border: 1px solid var(--color-line);
-  border-radius: 10px;
-  background: var(--color-surface-soft);
-  color: var(--color-slate);
-}
-
-.calendar-session-details svg {
-  width: 20px;
-  height: 20px;
-}
-
-.calendar-session-details:hover {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-  color: var(--color-charcoal);
-}
-
-.calendar-session-details:focus-visible {
-  outline: 3px solid var(--color-accent);
-  outline-offset: 3px;
-}
-
-.calendar-event-link:hover {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
 }
 
 .calendar-create-section {
@@ -269,12 +326,4 @@
 .calendar-create-button:disabled {
   cursor: not-allowed;
   opacity: 0.78;
-}
-
-.calendar-create-button[hidden] {
-  display: none;
-}
-
-.calendar-training-item[data-state="toCheck"] .calendar-event-category {
-  color: var(--color-warning-text);
 }

@@ -10,6 +10,7 @@ import { capitalize, formatLongDate, formatMonthYear } from "../../ui/format.js"
 import { createPersonalRaceForm } from "../races/personal-race-form.js";
 import { renderPersonalRaceCard, renderRaceCard } from "../races/race-card.js";
 import { renderWorkoutCard } from "../workouts/workout-card.js";
+import { renderWorkoutDetail, WORKOUT_DETAIL_TITLE_ID } from "../workouts/workout-detail.js";
 import { createWorkoutForm } from "../workouts/workout-form.js";
 import { WORKOUT_STATE_LABELS } from "../workouts/workout-labels.js";
 
@@ -51,10 +52,15 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   const backToMonthButton = document.getElementById("backToMonth");
   const addRaceButton = document.getElementById("addRaceButton");
   const addWorkoutButton = document.getElementById("addTrainingButton");
+  const sheet = document.getElementById("calendarSheet");
+  const sheetStatus = document.getElementById("calendarSheetStatus");
+  const workoutDetail = document.getElementById("workoutDetail");
 
   const currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   let sources = { races: [], personalRaces: [], workouts: [] };
   let selectedDate = null;
+  // Séance dont le détail est ouvert en plein écran ; on y revient après sa modification.
+  let detailWorkoutId = null;
 
   const monthPicker = createMonthPicker({
     input: document.getElementById("calendarMonthInput"),
@@ -65,22 +71,94 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   });
   const raceForm = createPersonalRaceForm({
     form: document.getElementById("raceEventForm"),
-    openButton: addRaceButton,
     save: race => repository.save("personalRaces", race),
-    onSaved: refreshEvents
+    remove: id => repository.remove("personalRaces", id),
+    onSaved: async () => {
+      closeSheet();
+      await refreshEvents();
+    },
+    onCancel: closeSheet
   });
   const workoutForm = createWorkoutForm({
     form: document.getElementById("trainingForm"),
-    openButton: addWorkoutButton,
     save: workout => repository.save("workouts", workout),
-    onSaved: refreshEvents
+    onSaved: async () => {
+      if (!detailWorkoutId) closeSheet();
+      await refreshEvents();
+    },
+    onCancel: () => (detailWorkoutId ? showWorkoutDetail(detailWorkoutId) : closeSheet())
   });
 
   function showError(message, error) {
     console.error(message, error);
-    hint.textContent = message;
-    hint.dataset.state = "error";
-    hint.hidden = false;
+    // L’écran plein recouvre le calendrier : le message s’affiche là où l’action a eu lieu.
+    const target = sheet.open ? sheetStatus : hint;
+    target.textContent = message;
+    target.dataset.state = "error";
+    target.hidden = false;
+  }
+
+  /** @param {string} titleId Titre qui nomme le contenu affiché. */
+  function openSheet(titleId) {
+    sheet.setAttribute("aria-labelledby", titleId);
+    sheetStatus.textContent = "";
+    sheetStatus.hidden = true;
+    if (!sheet.open) sheet.showModal();
+    // La fenêtre prend le focus plutôt que « Retour » ; un formulaire le donne ensuite à son champ.
+    sheet.focus();
+    sheet.scrollTop = 0;
+  }
+
+  function resetSheet() {
+    detailWorkoutId = null;
+    workoutDetail.hidden = true;
+    workoutDetail.replaceChildren();
+    raceForm.close();
+    workoutForm.close();
+  }
+
+  function closeSheet() {
+    resetSheet();
+    if (sheet.open) sheet.close();
+  }
+
+  function showWorkoutDetail(id) {
+    const event = sources.workouts.find(workout => workout.id === id);
+    if (!event) {
+      closeSheet();
+      return;
+    }
+    raceForm.close();
+    workoutForm.close();
+    detailWorkoutId = id;
+    workoutDetail.replaceChildren(
+      renderWorkoutDetail(event, {
+        onEdit: () => {
+          workoutDetail.hidden = true;
+          openSheet("trainingFormTitle");
+          workoutForm.open(selectedDate, event);
+        },
+        onDelete: async () => {
+          await repository.remove("workouts", id);
+          closeSheet();
+          await refreshEvents();
+        },
+        onSetCompleted: completed => setCompleted(event, completed),
+        onError: showError
+      })
+    );
+    workoutDetail.hidden = false;
+    openSheet(WORKOUT_DETAIL_TITLE_ID);
+  }
+
+  async function setCompleted(event, completed) {
+    const { eventType, ...workout } = event;
+    await repository.save("workouts", {
+      ...workout,
+      status: completed ? "completed" : "planned",
+      completedAt: completed ? new Date().toISOString() : null
+    });
+    await refreshEvents();
   }
 
   async function refreshEvents() {
@@ -96,6 +174,7 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
     hint.hidden = true;
     renderMonth();
     if (selectedDate) showDay(selectedDate);
+    if (detailWorkoutId) showWorkoutDetail(detailWorkoutId);
   }
 
   function renderMonth() {
@@ -118,38 +197,15 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   function renderEventCard(event) {
     if (event.eventType === "race") return renderRaceCard(event);
     if (event.eventType === "personalRace") {
-      return renderPersonalRaceCard(event, {
-        onEdit: () => {
-          workoutForm.close();
-          raceForm.open(selectedDate, event);
-        },
-        onDelete: async () => {
-          await repository.remove("personalRaces", event.id);
-          await refreshEvents();
-        },
-        onError: showError
+      return renderPersonalRaceCard(event, () => {
+        resetSheet();
+        openSheet("raceEventFormTitle");
+        raceForm.open(selectedDate, event);
       });
     }
     return renderWorkoutCard(event, {
-      onDelete: async () => {
-        await repository.remove("workouts", event.id);
-        await refreshEvents();
-      },
-      onSetCompleted: async completed => {
-        const { eventType, ...workout } = event;
-        await repository.save("workouts", {
-          ...workout,
-          status: completed ? "completed" : "planned",
-          completedAt: completed ? new Date().toISOString() : null
-        });
-        await refreshEvents();
-      },
-      isEditing: () => workoutForm.isEditing(event.id),
-      onOpenDetails: () => {
-        raceForm.close();
-        workoutForm.open(selectedDate, event);
-      },
-      onCloseDetails: workoutForm.close,
+      onOpen: () => showWorkoutDetail(event.id),
+      onSetCompleted: completed => setCompleted(event, completed),
       onError: showError
     });
   }
@@ -171,10 +227,8 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   }
 
   function showMonth() {
-    raceForm.close();
     setView("month");
     selectedDate = null;
-    workoutForm.close();
     renderMonth();
   }
 
@@ -193,17 +247,12 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
     dayEvents.replaceChildren(
       ...(events.length
         ? events.map(renderEventCard)
-        : [
-            el("span", { className: "calendar-event-category", text: "JOURNÉE" }),
-            el("h3", { text: "Aucun événement prévu" })
-          ])
+        : [el("p", { className: "calendar-empty", text: "Aucun événement prévu" })])
     );
   }
 
   function moveSelectedDay(offset) {
     if (!selectedDate) return;
-    workoutForm.close();
-    raceForm.close();
     showDay(addDays(selectedDate, offset));
   }
 
@@ -219,14 +268,22 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   nextDayButton.addEventListener("click", () => moveSelectedDay(1));
   addRaceButton.addEventListener("click", () => {
     if (!selectedDate) return;
-    workoutForm.close();
+    resetSheet();
+    openSheet("raceEventFormTitle");
     raceForm.open(selectedDate);
   });
   addWorkoutButton.addEventListener("click", () => {
     if (!selectedDate) return;
-    raceForm.close();
+    resetSheet();
+    openSheet("trainingFormTitle");
     workoutForm.open(selectedDate);
   });
+  document.getElementById("calendarSheetBack").addEventListener("click", () => {
+    if (detailWorkoutId && workoutDetail.hidden) showWorkoutDetail(detailWorkoutId);
+    else closeSheet();
+  });
+  // Échap ferme la fenêtre sans passer par closeSheet.
+  sheet.addEventListener("close", resetSheet);
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && !calendarGrid.hidden) renderMonth();
   });

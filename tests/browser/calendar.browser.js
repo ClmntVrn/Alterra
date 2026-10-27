@@ -1,4 +1,5 @@
-// Calendrier de l’accueil : saisie d’une séance, statistiques, cartes, courses personnelles et navigation.
+// Calendrier de l’accueil : saisie d’une séance, statistiques, cartes, détail plein écran,
+// courses personnelles et navigation.
 
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
@@ -37,6 +38,15 @@ function fill(name, value) {
 const computed = () => page.evaluate(() => document.getElementById("trainingComputed").textContent);
 const text = selector =>
   page.evaluate(selector => document.querySelector(selector)?.textContent ?? null, selector);
+const texts = selector =>
+  page.evaluate(
+    selector => [...document.querySelectorAll(selector)].map(element => element.textContent),
+    selector
+  );
+const click = selector =>
+  page.evaluate(selector => document.querySelector(selector).click(), selector);
+const isHidden = id => page.evaluate(id => document.getElementById(id).hidden, id);
+const sheetIsOpen = () => page.evaluate(() => document.getElementById("calendarSheet").open);
 const lastPointDistance = () =>
   page.evaluate(
     () =>
@@ -95,6 +105,7 @@ test("une séance réalisée est comptée une seule fois dans les statistiques",
     form.requestSubmit();
   });
   await page.waitFor(() => document.querySelector(".calendar-training-item"));
+  assert.equal(await sheetIsOpen(), false, "l’écran plein se ferme après l’ajout");
   await page.waitFor(() => document.getElementById("activityDistance").textContent === "10 km");
   assert.equal(await lastPointDistance(), "10 km");
   for (let click = 0; click < 3; click += 1) {
@@ -105,52 +116,84 @@ test("une séance réalisée est comptée une seule fois dans les statistiques",
     );
   }
   assert.equal(await lastPointDistance(), "10 km", "pas de double comptage après sélection");
+});
+
+test("la carte d’une séance se limite au type, à l’état et aux chiffres clés", async () => {
+  assert.equal(await text(".calendar-training-item .calendar-event-category"), "RÉALISÉ");
+  assert.equal(await text(".calendar-training-item h3"), "Trail");
+  assert.deepEqual(await texts(".calendar-training-item .workout-stats dd"), [
+    "10 km",
+    "200 m",
+    "1 h"
+  ]);
   assert.equal(
-    await text(".calendar-training-item .calendar-training-targets"),
-    "10 km · 1 h · 200 m D+ · 6:00 min/km"
+    await page.evaluate(() => document.querySelector(".calendar-training-item p")),
+    null
   );
 });
 
-test("une séance s’ouvre, se remet à faire puis se supprime", async () => {
-  const detailsButton = ".calendar-training-item .calendar-session-details";
-  await page.evaluate(selector => document.querySelector(selector).click(), detailsButton);
-  assert.deepEqual(
-    await page.evaluate(
-      selector => [
-        document.getElementById("trainingFormTitle").textContent,
-        document.querySelector(selector).getAttribute("aria-expanded"),
-        document.getElementById("addTrainingButton").hidden
-      ],
-      detailsButton
-    ),
-    ["Modifier · Trail", "true", true]
+test("le détail s’ouvre en plein écran, se modifie et y revient", async () => {
+  await click(".calendar-training-item .calendar-item-open");
+  assert.equal(await sheetIsOpen(), true);
+  assert.equal(await text("#workoutDetailTitle"), "Trail");
+  assert.deepEqual(await texts("#workoutDetail .workout-stats dd"), [
+    "10 km",
+    "200 m",
+    "1 h",
+    "6:00 /km"
+  ]);
+  assert.equal(
+    await page.evaluate(() => document.querySelector("#workoutDetail .workout-delete-button")),
+    null,
+    "une séance réalisée ne se supprime pas"
   );
-  await page.evaluate(selector => document.querySelector(selector).click(), detailsButton);
-  assert.equal(await page.evaluate(() => document.getElementById("trainingForm").hidden), true);
 
-  await page.evaluate(() =>
-    document.querySelector(".calendar-training-item .calendar-session-toggle input").click()
+  await click("#workoutDetail .training-save-button");
+  assert.equal(await text("#trainingFormTitle"), "Modifier · Trail");
+  assert.equal(await isHidden("workoutDetail"), true);
+  await click("#cancelTrainingButton");
+  assert.deepEqual(
+    [await isHidden("workoutDetail"), await isHidden("trainingForm")],
+    [false, true],
+    "Annuler revient au détail"
   );
+
+  await click("#workoutDetail .training-save-button");
+  await fill("distanceKm", "12");
+  await page.evaluate(() => document.getElementById("trainingForm").requestSubmit());
+  await page.waitFor(
+    () => document.querySelector("#workoutDetail .workout-stats dd")?.textContent === "12 km"
+  );
+  assert.equal(await sheetIsOpen(), true, "retour au détail après l’enregistrement");
+  await click("#calendarSheetBack");
+  assert.equal(await sheetIsOpen(), false);
+  assert.equal(await text(".calendar-training-item .workout-stats dd"), "12 km");
+});
+
+test("la case ronde remet la séance à faire, puis le détail la supprime", async () => {
+  await click(".calendar-training-item .workout-check input");
   await page.waitFor(
     () => document.querySelector(".calendar-training-item")?.dataset.state === "planned"
   );
   await page.waitFor(() => document.getElementById("activityDistance").textContent === "0 km");
+  assert.equal(await text(".calendar-training-item .calendar-event-category"), "PRÉVU");
 
-  await page.evaluate(() =>
-    document.querySelector(".calendar-training-item .calendar-delete-button").click()
-  );
+  await click(".calendar-training-item .calendar-item-open");
+  await click("#workoutDetail .workout-delete-button");
   await page.waitFor(() => !document.querySelector(".calendar-training-item"));
-  assert.equal(await text("#calendarEventDetails h3"), "Aucun événement prévu");
+  assert.equal(await sheetIsOpen(), false);
+  assert.equal(await text("#calendarEventDetails .calendar-empty"), "Aucun événement prévu");
 });
 
 test("une course personnelle s’ajoute sur deux jours, se modifie et se supprime", async () => {
-  await page.evaluate(() => document.getElementById("addRaceButton").click());
+  await click("#addRaceButton");
   assert.deepEqual(
     await page.evaluate(() => [
       document.getElementById("raceEventFormTitle").textContent,
-      document.activeElement.name
+      document.activeElement.name,
+      document.querySelector("#raceEventForm .workout-delete-button").hidden
     ]),
-    ["Nouvelle course", "name"]
+    ["Nouvelle course", "name", true]
   );
   await page.evaluate(() => {
     const form = document.getElementById("raceEventForm");
@@ -165,15 +208,13 @@ test("une course personnelle s’ajoute sur deux jours, se modifie et se supprim
   const raceTitle = "#calendarEventDetails .calendar-race-item h3";
   await page.waitFor(selector => document.querySelector(selector), {}, raceTitle);
   assert.equal(await text(raceTitle), "Trail des Crêtes");
+  assert.equal(await sheetIsOpen(), false);
 
-  await page.evaluate(() => document.getElementById("nextDay").click());
+  await click("#nextDay");
   assert.equal(await text(raceTitle), "Trail des Crêtes", "présente le deuxième jour");
 
-  await page.evaluate(() =>
-    document
-      .querySelector("#calendarEventDetails .calendar-race-item .calendar-session-details")
-      .click()
-  );
+  await click("#calendarEventDetails .calendar-race-item .calendar-item-open");
+  assert.equal(await sheetIsOpen(), true);
   assert.equal(await text("#raceEventFormTitle"), "Modifier · Trail des Crêtes");
   await page.evaluate(() => {
     const form = document.getElementById("raceEventForm");
@@ -188,13 +229,11 @@ test("une course personnelle s’ajoute sur deux jours, se modifie et se supprim
   const [saved] = (await readDatabase(page)).data.personalRaces;
   assert.equal("eventType" in saved, false, "aucun champ d’affichage enregistré");
 
-  await page.evaluate(() =>
-    document
-      .querySelector("#calendarEventDetails .calendar-race-item .calendar-delete-button")
-      .click()
-  );
+  await click("#calendarEventDetails .calendar-race-item .calendar-item-open");
+  await click("#raceEventForm .workout-delete-button");
   await page.waitFor(() => !document.querySelector("#calendarEventDetails .calendar-race-item"));
-  await page.evaluate(() => document.getElementById("previousDay").click());
+  assert.equal(await sheetIsOpen(), false);
+  await click("#previousDay");
 });
 
 test("la navigation passe de la vue jour à la vue mois", async () => {

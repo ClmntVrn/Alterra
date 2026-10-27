@@ -12,3 +12,12 @@ export const WORKOUT_TYPE_LABELS = Object.freeze({
 });
 
 export const DEFAULT_WORKOUT_TITLE = "Entraînement";
+
+export const WORKOUT_WEATHER_LABELS = Object.freeze({
+  sunny: "Ensoleillé",
+  cloudy: "Nuageux",
+  rain: "Pluie",
+  snow: "Neige",
+  wind: "Vent",
+  storm: "Orage"
+});
