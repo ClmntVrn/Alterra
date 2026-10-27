@@ -57,6 +57,7 @@ test("l’en-tête et tous les blocs de la fiche s’affichent", async () => {
     "Barrière max. 12:00"
   ]);
   assert.deepEqual(await texts("#raceContent h2"), [
+    "Refuge B",
     "Profil de la course",
     "En course · ravitos",
     "Nutrition",
@@ -114,6 +115,59 @@ test("un scénario change les temps et horaires de passage", async () => {
   );
 });
 
+/** Contenu visible du bloc « En course ». */
+const live = () =>
+  page.evaluate(() => {
+    const section = document.querySelector(".live-section");
+    const visible = selector => {
+      const element = section.querySelector(selector);
+      return element.hidden ? null : element.textContent;
+    };
+    return {
+      label: visible(".live-label"),
+      next: visible(".live-next"),
+      stats: [...section.querySelectorAll(".live-stats dt")].map(
+        term => `${term.textContent} ${term.nextElementSibling.textContent}`
+      ),
+      remaining: visible(".live-remaining"),
+      reach: visible(".live-reach"),
+      undo: visible(".live-undo")
+    };
+  });
+
+test("le bloc En course montre le prochain ravito et le coche d’un toucher", async () => {
+  const before = await live();
+  assert.deepEqual(
+    before.stats.map(stat => stat.split(" ")[0]),
+    ["Distance", "D+", "D−", "Passage"]
+  );
+  assert.deepEqual(
+    { ...before, stats: [before.stats[0], before.stats[3]] },
+    {
+      label: "PROCHAIN RAVITO",
+      next: "Refuge B",
+      stats: ["Distance 13 km", "Passage 11:00"],
+      remaining: "Arrivée dans 28 km",
+      reach: "Ravito atteint",
+      undo: "Annuler"
+    },
+    "scénario Prudent choisi au test précédent"
+  );
+
+  await page.evaluate(() => document.querySelector(".live-reach").click());
+  assert.equal(await isChecked("r2"), true);
+  assert.match(await progress(), /^Refuge B · /, "le profil suit");
+  const atRefuge = await live();
+  assert.deepEqual(
+    [atRefuge.label, atRefuge.next, atRefuge.stats[0], atRefuge.remaining, atRefuge.reach],
+    ["VERS L’ARRIVÉE", "Arrivée", "Distance 15 km", null, "Arrivée atteinte"]
+  );
+
+  await page.evaluate(() => document.querySelector(".live-undo").click());
+  assert.equal(await isChecked("r2"), false);
+  assert.equal((await live()).next, "Refuge B");
+});
+
 test("toucher un repère coche le ravito et fait avancer la progression", async () => {
   await page.evaluate(() =>
     document.querySelector('[data-profile-stop="r2"]').dispatchEvent(new MouseEvent("click"))
@@ -138,6 +192,11 @@ test("toucher un repère coche le ravito et fait avancer la progression", async 
       .dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }))
   );
   assert.match(await progress(), /^Arrivée · /, "le clavier coche aussi un repère");
+  const finished = await live();
+  assert.deepEqual(
+    [finished.label, finished.next, finished.stats, finished.reach, finished.undo],
+    ["COURSE TERMINÉE", "Arrivée", [], null, "Annuler"]
+  );
 });
 
 test("la progression s’arrête au premier ravito non coché, puis se réinitialise", async () => {

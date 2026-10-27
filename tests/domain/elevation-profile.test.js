@@ -5,6 +5,7 @@ import {
   buildElevationProfile,
   computeElevationStep,
   computeProgress,
+  measureClimb,
   measureTrack
 } from "../../src/domain/elevation-profile.js";
 
@@ -77,4 +78,20 @@ test("computeProgress s’arrête au premier ravito non coché", () => {
   assert.equal(progress.marker.id, "a");
   assert.ok(Math.abs(progress.remainingKm - (profile.distanceKm - 10)) < 1e-9);
   assert.equal(progress.points.at(-1)[0], progress.marker.x, "le tracé s’arrête sur le ravito");
+});
+
+test("measureClimb cumule montées et descentes entre deux distances", () => {
+  const { points } = measureTrack(track);
+  assert.deepEqual(measureClimb(points, 0, 33.36), { ascentMeters: 1150, descentMeters: 250 });
+  assert.deepEqual(measureClimb(points, 0, 11.12), { ascentMeters: 450, descentMeters: 0 });
+  // À mi-chemin du deuxième segment : 1 450 → 1 325 m.
+  assert.deepEqual(measureClimb(points, 11.12, 16.68), { ascentMeters: 0, descentMeters: 125 });
+});
+
+test("measureClimb ignore les petites variations d’altitude du GPS", () => {
+  const noisy = [1000, 1003, 999, 1002, 1010].map((elevation, index) => ({
+    elevation,
+    distanceKm: index
+  }));
+  assert.deepEqual(measureClimb(noisy, 0, 4), { ascentMeters: 10, descentMeters: 0 });
 });

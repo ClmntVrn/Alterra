@@ -296,3 +296,89 @@
     padding-left: 5px;
   }
 }
+
+/* Bloc « En course » : lisible d’un coup d’œil, en mouvement et en plein soleil. */
+.live-section {
+  border: 2px solid var(--color-accent-bright);
+}
+
+.live-label {
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+
+.section .live-next {
+  margin: 2px 0 0;
+  font-size: 30px;
+  line-height: 1.15;
+}
+
+.live-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  gap: 10px;
+  margin: 14px 0 0;
+}
+
+.live-stats dt {
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.live-stats dd {
+  margin: 0;
+  color: var(--color-charcoal);
+  font-size: 22px;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.live-remaining {
+  margin: 12px 0 0;
+  color: var(--color-slate);
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.live-remaining[hidden] {
+  display: none;
+}
+
+.live-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.live-reach,
+.live-undo {
+  min-height: 56px;
+  border-radius: 14px;
+  font-weight: 850;
+}
+
+.live-reach {
+  flex: 1;
+  border: 0;
+  background: var(--color-accent-bright);
+  color: var(--color-charcoal);
+  font-size: 18px;
+}
+
+.live-undo {
+  padding: 0 16px;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-slate);
+  font-size: 14px;
+}
+
+.live-reach[hidden],
+.live-undo[hidden] {
+  display: none;
+}

@@ -12,6 +12,7 @@ import {
   renderSources
 } from "../features/race-sheet/info-sections.js";
 import { renderRaceHeader } from "../features/race-sheet/race-header.js";
+import { createLiveSection } from "../features/race-sheet/race-live.js";
 import { createPersonalDataStore } from "../storage/personal-data.js";
 import { loadRaceCatalog } from "../storage/race-catalog.js";
 import { el } from "../ui/dom.js";
@@ -28,11 +29,19 @@ function renderRace(race, personalPlan = null, storageError = null) {
   document.title = `${displayRace.name} · Alterra`;
 
   const elevation = displayRace.profile?.gpx ? createElevationSection(displayRace) : null;
+  let live = null;
   const checkpoints = displayRace.checkpoints?.length
-    ? createCheckpointsSection(displayRace, { onChange: () => elevation?.update() })
+    ? createCheckpointsSection(displayRace, {
+        onChange: () => {
+          elevation?.update();
+          live?.update();
+        }
+      })
     : null;
+  live = checkpoints ? createLiveSection(displayRace, checkpoints) : null;
 
   content.replaceChildren(renderRaceHeader(displayRace));
+  if (live) content.append(live.element);
   if (elevation) content.append(elevation.element);
   if (checkpoints) content.append(checkpoints.element);
   if (displayRace.nutrition) content.append(renderNutrition(displayRace.nutrition));
@@ -51,10 +60,12 @@ function renderRace(race, personalPlan = null, storageError = null) {
   const planStatus = renderPersonalPlanStatus(personalPlan, storageError);
   if (planStatus) content.append(planStatus);
 
-  elevation?.load({
-    isChecked: id => checkpoints?.isChecked(id) ?? false,
-    toggle: id => checkpoints?.toggle(id)
-  });
+  elevation
+    ?.load({
+      isChecked: id => checkpoints?.isChecked(id) ?? false,
+      toggle: id => checkpoints?.toggle(id)
+    })
+    .then(profile => live?.setProfile(profile));
 }
 
 function showError(message, error) {

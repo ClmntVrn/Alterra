@@ -125,7 +125,8 @@ function drawMarker(marker, checkpoint, onToggle) {
 
 /**
  * @param {Object} race Fiche avec plan personnel appliqué ; `profile.gpx` est présent.
- * @returns {{ element: HTMLElement, load: (checkpoints: { isChecked: (id: string) => boolean, toggle: (id: string) => void }) => Promise<void>, update: () => void }}
+ * @returns {{ element: HTMLElement, load: (checkpoints: { isChecked: (id: string) => boolean, toggle: (id: string) => void }) => Promise<Object | null>, update: () => void }}
+ *   load renvoie le profil calculé, ou null si la trace est illisible.
  */
 export function createElevationSection(race) {
   const chart = svg("svg", {
@@ -245,9 +246,11 @@ export function createElevationSection(race) {
       }
       const profile = buildElevationProfile(parseGpxTrackpoints(gpxText), race.checkpoints || []);
       draw(profile, checkpoints);
+      return profile;
     } catch (error) {
       console.error("Impossible de charger ou de lire la trace GPX.", error);
       progress.textContent = "Profil d’altitude indisponible.";
+      return null;
     }
   }
 

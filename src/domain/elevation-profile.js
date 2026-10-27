@@ -6,6 +6,8 @@ export const PLOT = Object.freeze({ left: 52, right: 884, top: 26, bottom: 213 }
 const EARTH_RADIUS_KM = 6371;
 const ELEVATION_ROUNDING = 200;
 const MAX_SAMPLES = 250;
+// Variation d’altitude en dessous de laquelle le dénivelé n’avance pas : filtre le bruit du GPS.
+const CLIMB_THRESHOLD_METERS = 5;
 
 const toRadians = degrees => (degrees * Math.PI) / 180;
 
@@ -40,6 +42,50 @@ export function measureTrack(trackpoints) {
 }
 
 /**
+ * Altitude interpolée à une distance de la trace.
+ * @param {Array<{ elevation: number, distanceKm: number }>} points Trace mesurée.
+ */
+function elevationAt(points, km) {
+  let nextIndex = points.findIndex(point => point.distanceKm >= km);
+  if (nextIndex < 0) return points[points.length - 1].elevation;
+  if (nextIndex < 1) nextIndex = 1;
+  const previous = points[nextIndex - 1];
+  const next = points[nextIndex];
+  const segment = next.distanceKm - previous.distanceKm;
+  const ratio = segment > 0 ? (km - previous.distanceKm) / segment : 0;
+  return previous.elevation + ratio * (next.elevation - previous.elevation);
+}
+
+/**
+ * Dénivelés positif et négatif entre deux distances de la trace, en mètres entiers.
+ * @param {Array<{ elevation: number, distanceKm: number }>} points Trace mesurée.
+ * @param {number} fromKm
+ * @param {number} toKm
+ */
+export function measureClimb(points, fromKm, toKm) {
+  const elevations = [
+    elevationAt(points, fromKm),
+    ...points
+      .filter(point => point.distanceKm > fromKm && point.distanceKm < toKm)
+      .map(point => point.elevation),
+    elevationAt(points, toKm)
+  ];
+  let reference = elevations[0];
+  let ascent = 0;
+  let descent = 0;
+  for (const elevation of elevations.slice(1)) {
+    if (elevation - reference >= CLIMB_THRESHOLD_METERS) {
+      ascent += elevation - reference;
+      reference = elevation;
+    } else if (reference - elevation >= CLIMB_THRESHOLD_METERS) {
+      descent += reference - elevation;
+      reference = elevation;
+    }
+  }
+  return { ascentMeters: Math.round(ascent), descentMeters: Math.round(descent) };
+}
+
+/**
  * Points du profil et repères (départ, ravitos, arrivée) placés sur la trace.
  * @param {Array<{ latitude: number, longitude: number, elevation: number }>} trackpoints
  * @param {Array<{ id: string, km?: number }>} [checkpoints]
@@ -54,13 +100,7 @@ export function buildElevationProfile(trackpoints, checkpoints = []) {
 
   const pointAt = targetKm => {
     const target = Math.max(0, Math.min(distanceKm, targetKm));
-    let nextIndex = points.findIndex(point => point.distanceKm >= target);
-    if (nextIndex < 1) nextIndex = 1;
-    const previous = points[nextIndex - 1];
-    const next = points[nextIndex];
-    const segment = next.distanceKm - previous.distanceKm;
-    const ratio = segment > 0 ? (target - previous.distanceKm) / segment : 0;
-    const elevation = previous.elevation + ratio * (next.elevation - previous.elevation);
+    const elevation = elevationAt(points, target);
     return {
       km: target,
       elevation,
@@ -86,7 +126,7 @@ export function buildElevationProfile(trackpoints, checkpoints = []) {
     markers.push({ id: "finish", ...pointAt(distanceKm) });
   }
 
-  return { distanceKm, minElevation, maxElevation, samples, markers };
+  return { distanceKm, minElevation, maxElevation, samples, markers, points };
 }
 
 /** Pas « rond » (1, 2, 2,5, 5 ou 10 × 10ⁿ) pour environ quatre graduations d’altitude. */

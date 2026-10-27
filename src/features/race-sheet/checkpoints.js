@@ -81,12 +81,14 @@ function renderCheckpointCard(checkpoint) {
 /**
  * @param {Object} race Fiche avec plan personnel appliqué.
  * @param {Object} options
- * @param {() => void} options.onChange Appelé quand un ravito est coché ou décoché.
+ * @param {() => void} options.onChange Appelé quand un ravito est coché ou décoché, ou quand le
+ *   scénario change.
  */
 export function createCheckpointsSection(race, { onChange }) {
   const scenarios = race.scenarios || [];
   const defaultIndex = race.defaultScenario ?? 0;
   const storageKey = `alterra-${race.id}-checkpoints`;
+  let scenarioIndex = 0;
   const section = el("section", { className: "section" }, [
     el("h2", { text: race.checkpointTitle || "En course · ravitos" })
   ]);
@@ -119,7 +121,8 @@ export function createCheckpointsSection(race, { onChange }) {
   });
   section.append(list, reset);
 
-  function setScenario(index) {
+  function setScenario(index, notify = true) {
+    scenarioIndex = index;
     [...selector.children].forEach((button, buttonIndex) => {
       const active = buttonIndex === index;
       button.classList.toggle("active", active);
@@ -133,6 +136,7 @@ export function createCheckpointsSection(race, { onChange }) {
       const clock = element.dataset.clocks.split("|")[index];
       if (clock) element.textContent = clock;
     }
+    if (notify) onChange();
   }
 
   function syncCards() {
@@ -155,7 +159,7 @@ export function createCheckpointsSection(race, { onChange }) {
   [...selector.children].forEach((button, index) =>
     button.addEventListener("click", () => setScenario(index))
   );
-  if (scenarios.length) setScenario(Math.min(defaultIndex, scenarios.length - 1));
+  if (scenarios.length) setScenario(Math.min(defaultIndex, scenarios.length - 1), false);
 
   const savedIds = readCheckedIds(storageKey);
   for (const [id, checkbox] of checkboxes) {
@@ -174,6 +178,7 @@ export function createCheckpointsSection(race, { onChange }) {
     element: section,
     /** @param {string} id */
     isChecked: id => Boolean(find(id)?.checked),
+    getScenarioIndex: () => scenarioIndex,
     /** Coche ou décoche un ravito comme le ferait un toucher sur sa case. */
     toggle(id) {
       const checkbox = find(id);
