@@ -1,6 +1,6 @@
 {
   "name": "alterra",
-  "version": "0.8.19",
+  "version": "0.8.20",
   "private": true,
   "description": "PWA mobile de préparation au trail et à la montagne.",
   "type": "module",
