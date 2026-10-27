@@ -78,7 +78,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 
 ### Étape 5 — Vue jour simplifiée
 
-**Statut :** réalisée en 0.8.17 — à vérifier sur iPhone
+**Statut :** terminée — 27 octobre 2026 (0.8.17)
 
 But : comprendre une journée d’un coup d’œil, sans blocs empilés ni détails inutiles.
 
@@ -86,7 +86,7 @@ But : comprendre une journée d’un coup d’œil, sans blocs empilés ni déta
 - [x] Carte résumée : type et état, nom, chiffres clés selon le type, comme sur Strava (trail et vélo : km, D+, durée ; course à pied : km, allure, durée ; renforcement : durée) ; case ronde discrète pour marquer « réalisée » (décisions du 27 octobre 2026).
 - [x] Toucher la carte ouvre le détail en plein écran : tous les chiffres, notes, « Réalisée », « Modifier », « Supprimer ». Les formulaires s’ouvrent aussi en plein écran.
 - [x] Cartes de course : toucher ouvre la fiche (course de référence) ou la modification, avec suppression (course personnelle).
-- [ ] À vérifier sur iPhone : lecture de la journée, ouverture et retour du plein écran, case ronde.
+- [x] Vérifié sur iPhone le 27 octobre 2026.
 
 **Validation :** sur iPhone, une journée avec plusieurs sorties se lit sans défiler ni chercher ; tout reste accessible depuis le détail.
 
