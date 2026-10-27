@@ -11,6 +11,7 @@ const FILES = [
   "./styles/layout.css",
   "./styles/components/forms.css",
   "./styles/components/sheet.css",
+  "./styles/components/tab-bar.css",
   "./styles/features/statistics.css",
   "./styles/features/backup.css",
   "./styles/features/calendar.css",
@@ -55,6 +56,7 @@ const FILES = [
   "./src/storage/personal-data.js",
   "./src/storage/race-catalog.js",
   "./src/ui/dom.js",
+  "./src/ui/tab-bar.js",
   "./src/ui/format.js"
 ];
 

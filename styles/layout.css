@@ -40,6 +40,15 @@
   letter-spacing: 0.08em;
 }
 
+/* Titre d’une vue de l’accueil (Profil…). */
+.view-title {
+  margin: 0 4px 4px;
+  color: var(--color-charcoal);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+}
+
 .app > .app-footer {
   display: flex;
   flex-wrap: wrap;

@@ -103,7 +103,7 @@ export function applyRelease(files, version, items, date) {
       files["index.html"],
       /(Version <strong>)[^<]*(<\/strong>)/,
       `$1${version}$2`,
-      "le numéro de version en bas de index.html"
+      "le numéro de version du Profil de index.html"
     ),
     "versions.html": versions,
     "sw.js": replaceOnce(

@@ -18,12 +18,12 @@ Documentation de référence, à lire avant une évolution fonctionnelle :
 ## Structure technique
 
 - HTML, CSS et JavaScript natif en modules ES. Pas de framework, de bundler ni de dépendance sans besoin concret.
-- Pages à la racine (`index.html`, `race.html`, `versions.html`), avec `sw.js` et `manifest.json` qui doivent y rester.
+- Pages à la racine (`index.html`, `race.html`, `versions.html`), avec `sw.js` et `manifest.json` qui doivent y rester. `index.html` porte la barre d’onglets (Accueil · Objectifs · Stats · IA · Profil) et une vue par onglet disponible, affichée sans rechargement (`src/ui/tab-bar.js`) ; la fiche course reste une page à part, sans barre.
 - `src/pages/` : points d'entrée des pages (`home.js` pour l'accueil, `race.js` pour la fiche).
 - `src/features/<fonctionnalité>/` : `calendar/` (vues mois/jour), `workouts/` (carte et formulaire de séance), `races/` (cartes et formulaire de course personnelle), `race-sheet/` (blocs de la fiche course), `statistics/`. Génériques, sans donnée propre à une course. Chaque module reçoit ses éléments et ses callbacks ; pas d'état global modifiable.
 - `src/domain/` : règles pures, sans DOM ni stockage, couvertes par les tests (`tests/`). `backup-format.js` porte le format de sauvegarde versionné (`PERSONAL_DATA_FORMAT_VERSION`) et sa validation.
 - `src/storage/` : `repository.js` (interface stable) et `indexeddb.js` (adaptateur). Les écrans passent par le repository, jamais directement par IndexedDB. `personal-data.js` gère l'export/restauration, y compris les clés `localStorage` préfixées `alterra-`.
-- `src/ui/` : `format.js` (formats d'affichage français partagés) et `dom.js` (`el()` pour créer des éléments).
+- `src/ui/` : `format.js` (formats d'affichage français partagés), `dom.js` (`el()` pour créer des éléments) et `tab-bar.js` (onglets).
 - `race.html` + `src/pages/race.js` : fiche de course générique. Les fiches et leurs GPX (`profile.gpxData`) vivent dans la collection `raceCatalog` de la base locale et dans les sauvegardes, jamais dans le dépôt.
 - `styles/` : `tokens.css` (variables), `base.css`, `layout.css`, `components/` et `features/` (un fichier par fonctionnalité). Chaque page charge par des `<link>` les seules feuilles qu'elle utilise, de la plus générale à la plus spécifique ; réutiliser les variables et composants existants. Icônes dans `assets/icons/`.
 - Les blocs d'une fiche (scénarios, ravitos, nutrition, rappels, matériel, sources) sont facultatifs : ne pas coder de contenu propre à une course dans le moteur de rendu. Les identifiants des repères du profil correspondent à ceux des ravitos.
@@ -41,7 +41,7 @@ Documentation de référence, à lire avant une évolution fonctionnelle :
 Quand une modification change les ressources livrées :
 
 1. Ajouter toute nouvelle ressource à la liste `FILES` de `sw.js` (un test le vérifie).
-2. Lancer `npm run release -- 0.8.17 "Ligne d'historique." "Autre ligne."` : numéro dans `package.json`, `package-lock.json` et en bas de `index.html`, entrée datée dans `versions.html`, `CACHE_NAME` de `sw.js` dérivé de la version, puis `npm run check`. Ni commit ni push. Un test vérifie que la version est la même partout.
+2. Lancer `npm run release -- 0.8.17 "Ligne d'historique." "Autre ligne."` : numéro dans `package.json`, `package-lock.json` et dans le Profil de `index.html`, entrée datée dans `versions.html`, `CACHE_NAME` de `sw.js` dérivé de la version, puis `npm run check`. Ni commit ni push. Un test vérifie que la version est la même partout.
 3. Mettre à jour les cases et statuts de `docs/roadmap.md`, et `docs/specification.md` si le comportement change.
 
 ## Façon de travailler

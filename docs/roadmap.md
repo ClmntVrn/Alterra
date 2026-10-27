@@ -109,12 +109,15 @@ Décisions du 27 octobre 2026 : fiche unique réorganisée, sans mode course (po
 
 ### Étape 7 — Navigation en bas d’écran
 
-**Statut :** à faire
+**Statut :** réalisée en 0.8.20 — à vérifier sur iPhone
 
-- Barre d’onglets toujours visible en bas, adaptée à l’iPhone (zone de sécurité, PWA plein écran) : Accueil (calendrier), Objectifs, IA, Profil, et éventuellement KPI.
-- Profil : réglages, sauvegarde/restauration, puis plus tard équipement et nutrition (étape 10).
-- Statistiques déplacées dans l’onglet KPI si on le retient, sinon laissées sur l’accueil.
-- À trancher : onglet KPI séparé ou non ; onglet IA visible dès maintenant (« bientôt ») ou ajouté seulement à l’étape 15 ; une page HTML par onglet (choix le plus simple) ou une seule page avec des vues.
+Décisions du 27 octobre 2026 : une seule page avec des vues ; l’accueil garde statistiques et calendrier ; onglet Stats séparé, grisé jusqu’à l’étape 11 (graphique et totaux par année, mois…) ; Objectifs et IA visibles en grisé pour se représenter l’application (IA pourra être retiré en attendant l’étape 15) ; Profil simple et rapide.
+
+- [x] Barre d’onglets fixe en bas, tenant compte de la barre d’accueil de l’iPhone : Accueil · Objectifs · Stats · IA · Profil ; onglet actif en orange et `aria-current` ; onglets à venir grisés avec « Bientôt ».
+- [x] Vues sans rechargement ni entrée d’historique, position conservée ; `#profil` ouvre le Profil.
+- [x] Profil : sauvegarde (déplacée depuis l’accueil) et version avec l’historique ; pastille sur l’onglet quand une sauvegarde est à faire.
+- [x] Fiche course sans barre d’onglets.
+- [ ] À vérifier sur iPhone : barre au-dessus de la barre d’accueil en appli installée, haut de l’écran (encoche), pastille du Profil.
 
 **Validation :** chaque onglet s’ouvre d’un toucher, y compris hors ligne, sans perte de position sur l’accueil ; la barre ne masque aucun contenu.
 

@@ -1,0 +1,85 @@
+/* Barre d’onglets fixée en bas de l’écran, au-dessus de la barre d’accueil de l’iPhone. */
+
+:root {
+  --tab-bar-height: 62px;
+}
+
+/* La page garde de quoi défiler jusqu’au dernier contenu sans qu’il passe sous la barre. */
+body:has(.tab-bar) {
+  padding-bottom: calc(var(--tab-bar-height) + 20px + env(safe-area-inset-bottom));
+}
+
+.tab-bar {
+  position: fixed;
+  z-index: 10;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: var(--tab-bar-height);
+  padding: 4px max(4px, calc((100% - 720px) / 2)) env(safe-area-inset-bottom);
+  border-top: 1px solid var(--color-line);
+  background: rgb(var(--rgb-paper) / 94%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.tab {
+  display: flex;
+  min-height: 54px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--color-slate);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+}
+
+.tab svg {
+  width: 24px;
+  height: 24px;
+}
+
+.tab[aria-current="page"] {
+  color: var(--color-accent);
+}
+
+.tab[aria-current="page"] > span:not(.tab-icon) {
+  font-weight: 850;
+}
+
+/* Onglet pas encore disponible : grisé, avec « Bientôt » écrit. */
+.tab.is-soon {
+  color: var(--color-control-line);
+  cursor: default;
+}
+
+.tab small {
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.tab-icon {
+  position: relative;
+  display: grid;
+}
+
+.tab-badge {
+  position: absolute;
+  top: -1px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-paper);
+  border-radius: 50%;
+  background: var(--color-accent-bright);
+}
+
+.tab-badge[hidden] {
+  display: none;
+}

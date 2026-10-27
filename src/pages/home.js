@@ -4,6 +4,7 @@ import { createPersonalDataStore } from "../storage/personal-data.js";
 import { loadRaceCatalog } from "../storage/race-catalog.js";
 import { daysBetween } from "../domain/dates.js";
 import { formatDaysAgo } from "../ui/format.js";
+import { initializeTabBar } from "../ui/tab-bar.js";
 
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
@@ -26,6 +27,8 @@ const importButton = document.getElementById("importPersonalData");
 const importInput = document.getElementById("personalDataFile");
 const status = document.getElementById("personalDataStatus");
 const lastBackup = document.getElementById("personalDataLastBackup");
+const profileBadges = ["profileBadge", "profileBadgeText"].map(id => document.getElementById(id));
+initializeTabBar(document.querySelector(".tab-bar"));
 const personalData = createPersonalDataStore();
 let raceCatalogPromise = loadRaceCatalog(personalData);
 const updateActivityStatistics = initializeActivityStatistics(
@@ -55,6 +58,8 @@ async function showLastBackup() {
     lastBackup.dataset.state = days >= BACKUP_REMINDER_DAYS ? "stale" : "recent";
   }
   lastBackup.hidden = false;
+  // Le rappel est dans Profil : une pastille sur l’onglet le signale depuis les autres vues.
+  for (const badge of profileBadges) badge.hidden = lastBackup.dataset.state !== "stale";
 }
 
 function refreshLastBackup() {

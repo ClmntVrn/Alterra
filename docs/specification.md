@@ -2,9 +2,16 @@
 
 Alterra est une application web statique, mobile-first, de préparation au trail et à la montagne. Elle fonctionne sans compte ni synchronisation serveur ; les données personnelles restent dans le navigateur.
 
+## Navigation
+
+- Une barre d’onglets reste visible en bas de l’application : Accueil · Objectifs · Stats · IA · Profil. Objectifs, Stats et IA sont grisés avec « Bientôt » tant qu’ils ne sont pas disponibles.
+- Changer d’onglet ne recharge pas la page et n’ajoute pas d’entrée d’historique ; chaque vue garde sa position (journée ou mois affiché, défilement). Toucher l’onglet affiché remonte en haut. L’adresse `index.html#profil` ouvre directement le Profil.
+- Le Profil contient la sauvegarde (date de la dernière, export, restauration) et la version de l’application avec son historique. Une pastille orange sur l’onglet Profil signale une sauvegarde de plus de 7 jours ou absente.
+- La fiche course est une page à part, sans barre d’onglets.
+
 ## Accueil et calendrier
 
-- L’accueil réunit les statistiques d’activité, le calendrier et les commandes de sauvegarde.
+- L’accueil réunit les statistiques d’activité et le calendrier.
 - Le calendrier utilise les dates locales de l’appareil. Les flèches changent de mois ou de jour ; le titre du mois ouvre le sélecteur de mois et d’année natif du système (roues sur iPhone). Sur un navigateur sans sélecteur de mois natif, seules les flèches changent de mois.
 - Toucher une date ouvre sa journée et ses événements.
 - Dans la journée, une sortie est une carte résumée : type et état, nom, puis les chiffres clés selon le type (trail et vélo : distance, D+, durée ; course à pied : distance, allure, durée ; renforcement : durée). Une case ronde la marque réalisée d’un toucher.

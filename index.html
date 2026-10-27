@@ -2,7 +2,7 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#20262b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="./styles/layout.css" />
     <link rel="stylesheet" href="./styles/components/forms.css" />
     <link rel="stylesheet" href="./styles/components/sheet.css" />
+    <link rel="stylesheet" href="./styles/components/tab-bar.css" />
     <link rel="stylesheet" href="./styles/features/statistics.css" />
     <link rel="stylesheet" href="./styles/features/backup.css" />
     <link rel="stylesheet" href="./styles/features/calendar.css" />
@@ -34,469 +35,586 @@
         </div>
       </header>
 
-      <section class="home-hero">
-        <section
-          class="activity-statistics"
-          id="activityStatistics"
-          aria-label="Statistiques d’activité"
-        >
-          <div class="activity-filter-viewport" id="activityFilterViewport">
+      <div class="app-view" id="viewHome">
+        <section class="home-hero">
+          <section
+            class="activity-statistics"
+            id="activityStatistics"
+            aria-label="Statistiques d’activité"
+          >
+            <div class="activity-filter-viewport" id="activityFilterViewport">
+              <div
+                class="activity-filter-group"
+                id="activityCategories"
+                role="group"
+                aria-label="Filtrer par activité"
+              >
+                <button
+                  class="activity-filter"
+                  type="button"
+                  data-category="combined"
+                  aria-pressed="true"
+                >
+                  Trail + course à pied
+                </button>
+                <button
+                  class="activity-filter"
+                  type="button"
+                  data-category="trail"
+                  aria-pressed="false"
+                >
+                  Trail
+                </button>
+                <button
+                  class="activity-filter"
+                  type="button"
+                  data-category="running"
+                  aria-pressed="false"
+                >
+                  Course à pied
+                </button>
+                <button
+                  class="activity-filter"
+                  type="button"
+                  data-category="cycling"
+                  aria-pressed="false"
+                >
+                  Vélo
+                </button>
+              </div>
+            </div>
+            <section class="activity-week-details" aria-labelledby="activitySelectedWeek">
+              <h2 class="activity-week-title" id="activitySelectedWeek" aria-live="polite"></h2>
+              <div class="activity-kpis">
+                <div class="activity-kpi">
+                  <span>Distance</span>
+                  <strong id="activityDistance">0 km</strong>
+                </div>
+                <div class="activity-kpi">
+                  <span>Temps</span>
+                  <strong id="activityDuration">0 min</strong>
+                </div>
+                <div class="activity-kpi">
+                  <span>Dénivelé</span>
+                  <strong id="activityAscent">0 m</strong>
+                </div>
+              </div>
+            </section>
             <div
-              class="activity-filter-group"
-              id="activityCategories"
+              class="activity-chart-controls"
+              id="activityMetrics"
               role="group"
-              aria-label="Filtrer par activité"
+              aria-label="Indicateur du graphique"
             >
               <button
-                class="activity-filter"
+                class="activity-metric"
                 type="button"
-                data-category="combined"
+                data-metric="distance"
                 aria-pressed="true"
               >
-                Trail + course à pied
+                Distance
               </button>
               <button
-                class="activity-filter"
+                class="activity-metric"
                 type="button"
-                data-category="trail"
+                data-metric="duration"
                 aria-pressed="false"
               >
-                Trail
+                Temps
               </button>
               <button
-                class="activity-filter"
+                class="activity-metric"
                 type="button"
-                data-category="running"
+                data-metric="ascent"
                 aria-pressed="false"
               >
-                Course à pied
+                D+
               </button>
               <button
-                class="activity-filter"
+                class="activity-metric"
                 type="button"
-                data-category="cycling"
+                data-metric="effort"
                 aria-pressed="false"
               >
-                Vélo
+                Km-effort
+              </button>
+            </div>
+            <div class="activity-chart" id="activityChart"></div>
+          </section>
+        </section>
+
+        <section class="calendar-section" aria-labelledby="calendarTitle">
+          <div class="calendar-heading">
+            <div>
+              <h2 id="calendarTitle" aria-live="polite">
+                <label class="calendar-month-picker-toggle" id="calendarMonthPickerToggle">
+                  <span id="calendarTitleText">Octobre 2026</span>
+                  <input
+                    class="calendar-month-input"
+                    id="calendarMonthInput"
+                    type="month"
+                    aria-label="Choisir le mois et l’année"
+                    title="Choisir le mois et l’année"
+                  />
+                </label>
+                <span id="calendarDayTitle" hidden></span>
+              </h2>
+            </div>
+            <div class="calendar-navigation" aria-label="Navigation du calendrier">
+              <button
+                class="calendar-nav calendar-day-nav"
+                id="previousDay"
+                type="button"
+                aria-label="Jour précédent"
+                hidden
+              >
+                ←
+              </button>
+              <button
+                class="calendar-nav calendar-day-nav"
+                id="nextDay"
+                type="button"
+                aria-label="Jour suivant"
+                hidden
+              >
+                →
+              </button>
+              <span class="calendar-nav-separator" aria-hidden="true"></span>
+              <button
+                class="calendar-nav calendar-back"
+                id="backToMonth"
+                type="button"
+                aria-label="Afficher le calendrier mensuel"
+                title="Afficher le calendrier mensuel"
+                hidden
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect>
+                  <path d="M7.5 3.5v3M16.5 3.5v3M3.5 9.5h17"></path>
+                  <path d="M8 13h2M14 13h2M8 16.5h2"></path>
+                </svg>
+              </button>
+              <button
+                class="calendar-nav"
+                id="previousMonth"
+                type="button"
+                aria-label="Mois précédent"
+              >
+                ←
+              </button>
+              <button class="calendar-nav" id="nextMonth" type="button" aria-label="Mois suivant">
+                →
               </button>
             </div>
           </div>
-          <section class="activity-week-details" aria-labelledby="activitySelectedWeek">
-            <h2 class="activity-week-title" id="activitySelectedWeek" aria-live="polite"></h2>
-            <div class="activity-kpis">
-              <div class="activity-kpi">
-                <span>Distance</span>
-                <strong id="activityDistance">0 km</strong>
-              </div>
-              <div class="activity-kpi">
-                <span>Temps</span>
-                <strong id="activityDuration">0 min</strong>
-              </div>
-              <div class="activity-kpi">
-                <span>Dénivelé</span>
-                <strong id="activityAscent">0 m</strong>
-              </div>
+          <div class="calendar-grid" role="grid" aria-labelledby="calendarTitle">
+            <div class="calendar-weekdays" role="row">
+              <div class="calendar-weekday" role="columnheader" aria-label="Lundi">Lun</div>
+              <div class="calendar-weekday" role="columnheader" aria-label="Mardi">Mar</div>
+              <div class="calendar-weekday" role="columnheader" aria-label="Mercredi">Mer</div>
+              <div class="calendar-weekday" role="columnheader" aria-label="Jeudi">Jeu</div>
+              <div class="calendar-weekday" role="columnheader" aria-label="Vendredi">Ven</div>
+              <div class="calendar-weekday" role="columnheader" aria-label="Samedi">Sam</div>
+              <div class="calendar-weekday" role="columnheader" aria-label="Dimanche">Dim</div>
+            </div>
+            <div class="calendar-days" id="calendarDays" role="rowgroup"></div>
+          </div>
+          <div
+            class="calendar-event-details"
+            id="calendarEventDetails"
+            hidden
+            aria-live="polite"
+          ></div>
+          <section
+            class="calendar-create-section"
+            id="calendarCreateSection"
+            aria-label="Ajouter un événement"
+            hidden
+          >
+            <div class="calendar-create-actions">
+              <button class="calendar-create-button" id="addRaceButton" type="button">
+                ＋ Ajouter une course
+              </button>
+              <button class="calendar-create-button" id="addTrainingButton" type="button">
+                ＋ Ajouter un entraînement
+              </button>
             </div>
           </section>
-          <div
-            class="activity-chart-controls"
-            id="activityMetrics"
-            role="group"
-            aria-label="Indicateur du graphique"
-          >
-            <button
-              class="activity-metric"
-              type="button"
-              data-metric="distance"
-              aria-pressed="true"
-            >
-              Distance
-            </button>
-            <button
-              class="activity-metric"
-              type="button"
-              data-metric="duration"
-              aria-pressed="false"
-            >
-              Temps
-            </button>
-            <button class="activity-metric" type="button" data-metric="ascent" aria-pressed="false">
-              D+
-            </button>
-            <button class="activity-metric" type="button" data-metric="effort" aria-pressed="false">
-              Km-effort
-            </button>
-          </div>
-          <div class="activity-chart" id="activityChart"></div>
-        </section>
-      </section>
-
-      <section class="calendar-section" aria-labelledby="calendarTitle">
-        <div class="calendar-heading">
-          <div>
-            <h2 id="calendarTitle" aria-live="polite">
-              <label class="calendar-month-picker-toggle" id="calendarMonthPickerToggle">
-                <span id="calendarTitleText">Octobre 2026</span>
-                <input
-                  class="calendar-month-input"
-                  id="calendarMonthInput"
-                  type="month"
-                  aria-label="Choisir le mois et l’année"
-                  title="Choisir le mois et l’année"
-                />
-              </label>
-              <span id="calendarDayTitle" hidden></span>
-            </h2>
-          </div>
-          <div class="calendar-navigation" aria-label="Navigation du calendrier">
-            <button
-              class="calendar-nav calendar-day-nav"
-              id="previousDay"
-              type="button"
-              aria-label="Jour précédent"
-              hidden
-            >
-              ←
-            </button>
-            <button
-              class="calendar-nav calendar-day-nav"
-              id="nextDay"
-              type="button"
-              aria-label="Jour suivant"
-              hidden
-            >
-              →
-            </button>
-            <span class="calendar-nav-separator" aria-hidden="true"></span>
-            <button
-              class="calendar-nav calendar-back"
-              id="backToMonth"
-              type="button"
-              aria-label="Afficher le calendrier mensuel"
-              title="Afficher le calendrier mensuel"
-              hidden
-            >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.8"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect>
-                <path d="M7.5 3.5v3M16.5 3.5v3M3.5 9.5h17"></path>
-                <path d="M8 13h2M14 13h2M8 16.5h2"></path>
-              </svg>
-            </button>
-            <button
-              class="calendar-nav"
-              id="previousMonth"
-              type="button"
-              aria-label="Mois précédent"
-            >
-              ←
-            </button>
-            <button class="calendar-nav" id="nextMonth" type="button" aria-label="Mois suivant">
-              →
-            </button>
-          </div>
-        </div>
-        <div class="calendar-grid" role="grid" aria-labelledby="calendarTitle">
-          <div class="calendar-weekdays" role="row">
-            <div class="calendar-weekday" role="columnheader" aria-label="Lundi">Lun</div>
-            <div class="calendar-weekday" role="columnheader" aria-label="Mardi">Mar</div>
-            <div class="calendar-weekday" role="columnheader" aria-label="Mercredi">Mer</div>
-            <div class="calendar-weekday" role="columnheader" aria-label="Jeudi">Jeu</div>
-            <div class="calendar-weekday" role="columnheader" aria-label="Vendredi">Ven</div>
-            <div class="calendar-weekday" role="columnheader" aria-label="Samedi">Sam</div>
-            <div class="calendar-weekday" role="columnheader" aria-label="Dimanche">Dim</div>
-          </div>
-          <div class="calendar-days" id="calendarDays" role="rowgroup"></div>
-        </div>
-        <div
-          class="calendar-event-details"
-          id="calendarEventDetails"
-          hidden
-          aria-live="polite"
-        ></div>
-        <section
-          class="calendar-create-section"
-          id="calendarCreateSection"
-          aria-label="Ajouter un événement"
-          hidden
-        >
-          <div class="calendar-create-actions">
-            <button class="calendar-create-button" id="addRaceButton" type="button">
-              ＋ Ajouter une course
-            </button>
-            <button class="calendar-create-button" id="addTrainingButton" type="button">
-              ＋ Ajouter un entraînement
-            </button>
-          </div>
-        </section>
-        <dialog class="sheet" id="calendarSheet" tabindex="-1">
-          <div class="sheet-content">
-            <button class="sheet-back" id="calendarSheetBack" type="button">← Retour</button>
-            <div id="workoutDetail" hidden></div>
-            <form class="training-form calendar-race-form" id="raceEventForm" hidden>
-              <h3 id="raceEventFormTitle">Nouvelle course</h3>
-              <label>
-                Nom de la course
-                <input name="name" type="text" maxlength="100" required />
-              </label>
-              <div class="calendar-date-range">
+          <dialog class="sheet" id="calendarSheet" tabindex="-1">
+            <div class="sheet-content">
+              <button class="sheet-back" id="calendarSheetBack" type="button">← Retour</button>
+              <div id="workoutDetail" hidden></div>
+              <form class="training-form calendar-race-form" id="raceEventForm" hidden>
+                <h3 id="raceEventFormTitle">Nouvelle course</h3>
                 <label>
-                  Du
-                  <input name="date" type="date" required />
+                  Nom de la course
+                  <input name="name" type="text" maxlength="100" required />
                 </label>
-                <label>
-                  Au
-                  <input name="endDate" type="date" required />
-                </label>
-              </div>
-              <div class="training-form-actions">
-                <button class="workout-delete-button" type="button" hidden>Supprimer</button>
-                <button
-                  class="calendar-create-button training-form-cancel"
-                  id="cancelRaceEventButton"
-                  type="button"
-                >
-                  Annuler
-                </button>
-                <button class="training-save-button" type="submit">Enregistrer</button>
-              </div>
-              <p
-                class="training-form-status"
-                id="raceEventFormStatus"
-                role="status"
-                aria-live="polite"
-              ></p>
-            </form>
-            <form class="training-form" id="trainingForm" hidden>
-              <h3 id="trainingFormTitle">Nouvel entraînement</h3>
-              <fieldset class="training-choice">
-                <legend>Type</legend>
-                <div class="training-choice-options training-type-options">
-                  <label class="training-chip"
-                    ><input name="type" type="radio" value="trail" checked /><span
-                      >Trail</span
-                    ></label
-                  >
-                  <label class="training-chip"
-                    ><input name="type" type="radio" value="running" /><span>Course</span></label
-                  >
-                  <label class="training-chip"
-                    ><input name="type" type="radio" value="strength" /><span>Renfo</span></label
-                  >
-                  <label class="training-chip"
-                    ><input name="type" type="radio" value="cycling" /><span>Vélo</span></label
-                  >
+                <div class="calendar-date-range">
+                  <label>
+                    Du
+                    <input name="date" type="date" required />
+                  </label>
+                  <label>
+                    Au
+                    <input name="endDate" type="date" required />
+                  </label>
                 </div>
-              </fieldset>
-              <label>
-                Nom (facultatif)
-                <input name="title" type="text" maxlength="100" placeholder="Ex. Sortie longue" />
-              </label>
-              <div class="training-form-row training-date-row">
-                <label>
-                  Date
-                  <input name="date" type="date" required />
-                </label>
-                <label>
-                  Heure
-                  <input
-                    name="time"
-                    type="text"
-                    inputmode="numeric"
-                    maxlength="5"
-                    value="09:00"
-                    placeholder="09:00"
-                    autocomplete="off"
-                  />
-                </label>
-              </div>
-              <div class="training-form-measures">
-                <label>
-                  Distance (km)
-                  <input
-                    name="distanceKm"
-                    type="text"
-                    inputmode="decimal"
-                    maxlength="7"
-                    placeholder="12,5"
-                    autocomplete="off"
-                  />
-                </label>
-                <label>
-                  Durée (h:mm)
-                  <input
-                    name="duration"
-                    type="text"
-                    inputmode="numeric"
-                    maxlength="7"
-                    placeholder="1:30"
-                    autocomplete="off"
-                  />
-                </label>
-                <label>
-                  D+ (m)
-                  <input
-                    name="ascentMeters"
-                    type="number"
-                    min="0"
-                    max="100000"
-                    step="1"
-                    inputmode="numeric"
-                    placeholder="600"
-                  />
-                </label>
-              </div>
-              <p class="training-computed" id="trainingComputed" aria-live="polite" hidden></p>
-              <label class="training-completed-toggle">
-                <input name="completed" type="checkbox" />
-                <span>Séance réalisée</span>
-              </label>
-              <div class="training-completed-fields" id="trainingCompletedFields" hidden>
+                <div class="training-form-actions">
+                  <button class="workout-delete-button" type="button" hidden>Supprimer</button>
+                  <button
+                    class="calendar-create-button training-form-cancel"
+                    id="cancelRaceEventButton"
+                    type="button"
+                  >
+                    Annuler
+                  </button>
+                  <button class="training-save-button" type="submit">Enregistrer</button>
+                </div>
+                <p
+                  class="training-form-status"
+                  id="raceEventFormStatus"
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </form>
+              <form class="training-form" id="trainingForm" hidden>
+                <h3 id="trainingFormTitle">Nouvel entraînement</h3>
                 <fieldset class="training-choice">
-                  <legend>
-                    Ressenti <span class="training-choice-hint">1 très facile · 10 maximal</span>
-                  </legend>
-                  <div class="training-choice-options training-effort-options">
+                  <legend>Type</legend>
+                  <div class="training-choice-options training-type-options">
                     <label class="training-chip"
-                      ><input name="perceivedEffort" type="radio" value="1" /><span>1</span></label
-                    >
-                    <label class="training-chip"
-                      ><input name="perceivedEffort" type="radio" value="2" /><span>2</span></label
-                    >
-                    <label class="training-chip"
-                      ><input name="perceivedEffort" type="radio" value="3" /><span>3</span></label
-                    >
-                    <label class="training-chip"
-                      ><input name="perceivedEffort" type="radio" value="4" /><span>4</span></label
-                    >
-                    <label class="training-chip"
-                      ><input name="perceivedEffort" type="radio" value="5" /><span>5</span></label
-                    >
-                    <label class="training-chip"
-                      ><input name="perceivedEffort" type="radio" value="6" /><span>6</span></label
-                    >
-                    <label class="training-chip"
-                      ><input name="perceivedEffort" type="radio" value="7" /><span>7</span></label
-                    >
-                    <label class="training-chip"
-                      ><input name="perceivedEffort" type="radio" value="8" /><span>8</span></label
-                    >
-                    <label class="training-chip"
-                      ><input name="perceivedEffort" type="radio" value="9" /><span>9</span></label
-                    >
-                    <label class="training-chip"
-                      ><input name="perceivedEffort" type="radio" value="10" /><span
-                        >10</span
+                      ><input name="type" type="radio" value="trail" checked /><span
+                        >Trail</span
                       ></label
+                    >
+                    <label class="training-chip"
+                      ><input name="type" type="radio" value="running" /><span>Course</span></label
+                    >
+                    <label class="training-chip"
+                      ><input name="type" type="radio" value="strength" /><span>Renfo</span></label
+                    >
+                    <label class="training-chip"
+                      ><input name="type" type="radio" value="cycling" /><span>Vélo</span></label
                     >
                   </div>
                 </fieldset>
-                <div class="training-form-row">
+                <label>
+                  Nom (facultatif)
+                  <input name="title" type="text" maxlength="100" placeholder="Ex. Sortie longue" />
+                </label>
+                <div class="training-form-row training-date-row">
                   <label>
-                    FC moyenne (bpm)
-                    <input
-                      name="heartRateAvg"
-                      type="number"
-                      min="30"
-                      max="250"
-                      step="1"
-                      inputmode="numeric"
-                      placeholder="145"
-                    />
+                    Date
+                    <input name="date" type="date" required />
                   </label>
                   <label>
-                    FC max (bpm)
+                    Heure
                     <input
-                      name="heartRateMax"
-                      type="number"
-                      min="30"
-                      max="250"
-                      step="1"
+                      name="time"
+                      type="text"
                       inputmode="numeric"
-                      placeholder="172"
+                      maxlength="5"
+                      value="09:00"
+                      placeholder="09:00"
+                      autocomplete="off"
                     />
                   </label>
                 </div>
-                <label>
-                  Météo
-                  <select name="weather">
-                    <option value="">Non renseignée</option>
-                    <option value="sunny">Ensoleillé</option>
-                    <option value="cloudy">Nuageux</option>
-                    <option value="rain">Pluie</option>
-                    <option value="snow">Neige</option>
-                    <option value="wind">Vent</option>
-                    <option value="storm">Orage</option>
-                  </select>
+                <div class="training-form-measures">
+                  <label>
+                    Distance (km)
+                    <input
+                      name="distanceKm"
+                      type="text"
+                      inputmode="decimal"
+                      maxlength="7"
+                      placeholder="12,5"
+                      autocomplete="off"
+                    />
+                  </label>
+                  <label>
+                    Durée (h:mm)
+                    <input
+                      name="duration"
+                      type="text"
+                      inputmode="numeric"
+                      maxlength="7"
+                      placeholder="1:30"
+                      autocomplete="off"
+                    />
+                  </label>
+                  <label>
+                    D+ (m)
+                    <input
+                      name="ascentMeters"
+                      type="number"
+                      min="0"
+                      max="100000"
+                      step="1"
+                      inputmode="numeric"
+                      placeholder="600"
+                    />
+                  </label>
+                </div>
+                <p class="training-computed" id="trainingComputed" aria-live="polite" hidden></p>
+                <label class="training-completed-toggle">
+                  <input name="completed" type="checkbox" />
+                  <span>Séance réalisée</span>
                 </label>
-              </div>
-              <label>
-                Notes (facultatif)
-                <textarea name="notes" rows="3" maxlength="1000"></textarea>
-              </label>
-              <div class="training-form-actions">
-                <button
-                  class="calendar-create-button training-form-cancel"
-                  id="cancelTrainingButton"
-                  type="button"
-                >
-                  Annuler
-                </button>
-                <button class="training-save-button" type="submit">Enregistrer</button>
-              </div>
+                <div class="training-completed-fields" id="trainingCompletedFields" hidden>
+                  <fieldset class="training-choice">
+                    <legend>
+                      Ressenti <span class="training-choice-hint">1 très facile · 10 maximal</span>
+                    </legend>
+                    <div class="training-choice-options training-effort-options">
+                      <label class="training-chip"
+                        ><input name="perceivedEffort" type="radio" value="1" /><span
+                          >1</span
+                        ></label
+                      >
+                      <label class="training-chip"
+                        ><input name="perceivedEffort" type="radio" value="2" /><span
+                          >2</span
+                        ></label
+                      >
+                      <label class="training-chip"
+                        ><input name="perceivedEffort" type="radio" value="3" /><span
+                          >3</span
+                        ></label
+                      >
+                      <label class="training-chip"
+                        ><input name="perceivedEffort" type="radio" value="4" /><span
+                          >4</span
+                        ></label
+                      >
+                      <label class="training-chip"
+                        ><input name="perceivedEffort" type="radio" value="5" /><span
+                          >5</span
+                        ></label
+                      >
+                      <label class="training-chip"
+                        ><input name="perceivedEffort" type="radio" value="6" /><span
+                          >6</span
+                        ></label
+                      >
+                      <label class="training-chip"
+                        ><input name="perceivedEffort" type="radio" value="7" /><span
+                          >7</span
+                        ></label
+                      >
+                      <label class="training-chip"
+                        ><input name="perceivedEffort" type="radio" value="8" /><span
+                          >8</span
+                        ></label
+                      >
+                      <label class="training-chip"
+                        ><input name="perceivedEffort" type="radio" value="9" /><span
+                          >9</span
+                        ></label
+                      >
+                      <label class="training-chip"
+                        ><input name="perceivedEffort" type="radio" value="10" /><span
+                          >10</span
+                        ></label
+                      >
+                    </div>
+                  </fieldset>
+                  <div class="training-form-row">
+                    <label>
+                      FC moyenne (bpm)
+                      <input
+                        name="heartRateAvg"
+                        type="number"
+                        min="30"
+                        max="250"
+                        step="1"
+                        inputmode="numeric"
+                        placeholder="145"
+                      />
+                    </label>
+                    <label>
+                      FC max (bpm)
+                      <input
+                        name="heartRateMax"
+                        type="number"
+                        min="30"
+                        max="250"
+                        step="1"
+                        inputmode="numeric"
+                        placeholder="172"
+                      />
+                    </label>
+                  </div>
+                  <label>
+                    Météo
+                    <select name="weather">
+                      <option value="">Non renseignée</option>
+                      <option value="sunny">Ensoleillé</option>
+                      <option value="cloudy">Nuageux</option>
+                      <option value="rain">Pluie</option>
+                      <option value="snow">Neige</option>
+                      <option value="wind">Vent</option>
+                      <option value="storm">Orage</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Notes (facultatif)
+                  <textarea name="notes" rows="3" maxlength="1000"></textarea>
+                </label>
+                <div class="training-form-actions">
+                  <button
+                    class="calendar-create-button training-form-cancel"
+                    id="cancelTrainingButton"
+                    type="button"
+                  >
+                    Annuler
+                  </button>
+                  <button class="training-save-button" type="submit">Enregistrer</button>
+                </div>
+                <p
+                  class="training-form-status"
+                  id="trainingFormStatus"
+                  role="status"
+                  aria-live="polite"
+                ></p>
+              </form>
               <p
                 class="training-form-status"
-                id="trainingFormStatus"
+                id="calendarSheetStatus"
                 role="status"
                 aria-live="polite"
+                hidden
               ></p>
-            </form>
-            <p
-              class="training-form-status"
-              id="calendarSheetStatus"
-              role="status"
-              aria-live="polite"
-              hidden
-            ></p>
+            </div>
+          </dialog>
+          <p class="calendar-hint" id="calendarHint" hidden></p>
+        </section>
+      </div>
+
+      <div class="app-view" id="viewProfile" hidden>
+        <h1 class="view-title" id="profileTitle">Profil</h1>
+
+        <section class="personal-data-tools" aria-labelledby="personalDataTitle">
+          <h2 id="personalDataTitle">Sauvegarde</h2>
+          <p>
+            La sauvegarde complète inclut tes courses, leurs traces et tes données personnelles.
+            Elle n’est pas synchronisée automatiquement ; garde le fichier en lieu sûr.
+          </p>
+          <p id="personalDataLastBackup" class="personal-data-last-backup" hidden></p>
+          <div class="personal-data-actions">
+            <button id="exportPersonalData" type="button">Exporter la base complète</button>
+            <button id="importPersonalData" type="button">Importer une base</button>
+            <input id="personalDataFile" type="file" accept="application/json,.json" hidden />
           </div>
-        </dialog>
-        <p class="calendar-hint" id="calendarHint" hidden></p>
-      </section>
+          <p
+            id="personalDataStatus"
+            class="personal-data-status"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </section>
 
-      <section class="personal-data-tools" aria-labelledby="personalDataTitle">
-        <h2 id="personalDataTitle">Ta base Alterra sur cet appareil</h2>
-        <p>
-          La sauvegarde complète inclut tes courses, leurs traces et tes données personnelles. Elle
-          n’est pas synchronisée automatiquement ; garde le fichier en lieu sûr.
-        </p>
-        <p id="personalDataLastBackup" class="personal-data-last-backup" hidden></p>
-        <div class="personal-data-actions">
-          <button id="exportPersonalData" type="button">Exporter la base complète</button>
-          <button id="importPersonalData" type="button">Importer une base</button>
-          <input id="personalDataFile" type="file" accept="application/json,.json" hidden />
-        </div>
-        <p
-          id="personalDataStatus"
-          class="personal-data-status"
-          role="status"
-          aria-live="polite"
-        ></p>
-      </section>
+        <section class="personal-data-tools" aria-labelledby="applicationTitle">
+          <h2 id="applicationTitle">Application</h2>
+          <p class="app-version">
+            <span>Version <strong>0.8.19</strong></span>
+            <a href="./versions.html">Historique des versions</a>
+          </p>
+        </section>
+      </div>
 
-      <footer class="app-footer">
-        <span>ALTERRA · IMAGINÉ POUR LES SENTIERS</span>
-        <span class="app-version">
-          <span>Version <strong>0.8.19</strong></span>
-          <a href="./versions.html" aria-label="Détails et historique des versions">Détails</a>
+      <nav class="tab-bar" aria-label="Navigation principale">
+        <a class="tab" href="#accueil" data-view="viewHome">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m3 10 9-7 9 7"></path>
+            <path d="M5.5 9v11h13V9M9.5 20v-6h5v6"></path>
+          </svg>
+          <span>Accueil</span>
+        </a>
+        <span class="tab is-soon" aria-disabled="true">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M5 21V4M5 4h11l-2 4 2 4H5"></path>
+          </svg>
+          <span>Objectifs</span>
+          <small>Bientôt</small>
         </span>
-      </footer>
+        <span class="tab is-soon" aria-disabled="true">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path>
+          </svg>
+          <span>Stats</span>
+          <small>Bientôt</small>
+        </span>
+        <span class="tab is-soon" aria-disabled="true">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8Z"></path>
+            <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8Z"></path>
+          </svg>
+          <span>IA</span>
+          <small>Bientôt</small>
+        </span>
+        <a class="tab" href="#profil" data-view="viewProfile">
+          <span class="tab-icon">
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path>
+            </svg>
+            <span class="tab-badge" id="profileBadge" hidden></span>
+          </span>
+          <span>Profil</span>
+          <span class="visually-hidden" id="profileBadgeText" hidden>, sauvegarde à faire</span>
+        </a>
+      </nav>
     </main>
 
     <script type="module" src="./src/pages/home.js"></script>

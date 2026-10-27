@@ -1,4 +1,4 @@
-/* Sauvegarde et restauration des données. */
+/* Profil : sauvegarde et restauration des données, version de l’application. */
 
 .personal-data-tools {
   margin-top: 16px;
@@ -61,4 +61,13 @@
 
 .personal-data-status:empty {
   display: none;
+}
+
+.personal-data-tools .app-version {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 0;
+  color: var(--color-charcoal);
+  font-size: 14px;
 }
