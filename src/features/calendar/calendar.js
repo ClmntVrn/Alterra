@@ -282,8 +282,11 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
     if (detailWorkoutId && workoutDetail.hidden) showWorkoutDetail(detailWorkoutId);
     else closeSheet();
   });
-  // Échap ferme la fenêtre sans passer par closeSheet.
-  sheet.addEventListener("close", resetSheet);
+  // Échap ferme la fenêtre sans passer par closeSheet. L’événement arrive après coup : si la
+  // fenêtre a été rouverte entre-temps, il ne doit pas vider ce qu’elle affiche.
+  sheet.addEventListener("close", () => {
+    if (!sheet.open) resetSheet();
+  });
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && !calendarGrid.hidden) renderMonth();
   });

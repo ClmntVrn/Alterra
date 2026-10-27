@@ -88,7 +88,7 @@ export function createPersonalRaceForm({ form, save, remove, onSaved, onCancel }
   form.addEventListener("submit", async event => {
     event.preventDefault();
     updateDateRangeValidity(form);
-    if (!form.reportValidity()) return;
+    if (form.hidden || !form.reportValidity()) return;
     const formData = new FormData(form);
     const race = {
       ...(editingRace || {}),

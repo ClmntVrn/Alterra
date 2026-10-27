@@ -213,6 +213,21 @@ test("une course personnelle s’ajoute sur deux jours, se modifie et se supprim
   await click("#nextDay");
   assert.equal(await text(raceTitle), "Trail des Crêtes", "présente le deuxième jour");
 
+  // L’événement « close » arrive après coup : rouvrir aussitôt ne doit pas vider le formulaire.
+  const reopened = await page.evaluate(async () => {
+    const openRace = () =>
+      document
+        .querySelector("#calendarEventDetails .calendar-race-item .calendar-item-open")
+        .click();
+    openRace();
+    document.getElementById("calendarSheetBack").click();
+    openRace();
+    await new Promise(resolve => setTimeout(resolve, 50));
+    const form = document.getElementById("raceEventForm");
+    return [form.hidden, form.elements.namedItem("name").value];
+  });
+  assert.deepEqual(reopened, [false, "Trail des Crêtes"]);
+
   await click("#calendarEventDetails .calendar-race-item .calendar-item-open");
   assert.equal(await sheetIsOpen(), true);
   assert.equal(await text("#raceEventFormTitle"), "Modifier · Trail des Crêtes");
