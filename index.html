@@ -29,12 +29,11 @@
   <body class="page-home">
     <main class="app">
       <div class="app-view" id="viewHome">
-        <header class="app-header">
-          <img class="logo" src="./assets/icons/icon.svg" alt="" />
-          <div>
-            <div class="brand">ALTERRA</div>
-            <div class="subtitle">COACHING TRAIL &amp; MONTAGNE</div>
-          </div>
+        <header class="view-header">
+          <a class="view-home" href="#accueil" aria-label="Accueil" title="Accueil">
+            <img class="logo" src="./assets/icons/icon.svg" alt="" />
+          </a>
+          <h1 class="view-title">Alterra</h1>
         </header>
 
         <section class="home-hero">
@@ -312,7 +311,7 @@
         <section class="personal-data-tools" aria-labelledby="applicationTitle">
           <h2 id="applicationTitle">Application</h2>
           <p class="app-version">
-            <span>Version <strong>0.8.22</strong></span>
+            <span>Version <strong>0.8.23</strong></span>
             <a href="./versions.html">Historique des versions</a>
           </p>
         </section>
@@ -321,7 +320,25 @@
       <!-- Plein écran partagé : détail et formulaires, ouverts depuis l’Accueil ou les Objectifs. -->
       <dialog class="sheet" id="calendarSheet" tabindex="-1">
         <div class="sheet-content">
-          <button class="sheet-back" id="calendarSheetBack" type="button">← Retour</button>
+          <button
+            class="home-button sheet-back"
+            id="calendarSheetBack"
+            type="button"
+            aria-label="Retour"
+            title="Retour"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 12H5M11 6l-6 6 6 6"></path>
+            </svg>
+          </button>
           <div id="workoutDetail" hidden></div>
           <form class="training-form calendar-race-form" id="raceEventForm" hidden>
             <h3 id="raceEventFormTitle">Nouvelle course</h3>

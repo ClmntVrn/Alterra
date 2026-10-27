@@ -7,7 +7,8 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 - Une barre d’onglets reste visible en bas de l’application : Accueil · Objectifs · Stats · IA · Profil. Stats et IA sont grisés avec « Bientôt » tant qu’ils ne sont pas disponibles.
 - Changer d’onglet ne recharge pas la page et n’ajoute pas d’entrée d’historique ; chaque vue garde sa position (journée ou mois affiché, défilement). Toucher l’onglet affiché remonte en haut. L’adresse `index.html#profil` ouvre directement le Profil.
 - Le Profil contient la sauvegarde (date de la dernière, export, restauration) et la version de l’application avec son historique. Une pastille orange sur l’onglet Profil signale une sauvegarde de plus de 7 jours ou absente.
-- Hors accueil, l’en-tête d’un onglet tient sur une ligne : logo Alterra (retour à l’accueil d’un toucher), titre et, s’il y a lieu, un bouton d’action rond à droite.
+- L’en-tête d’un onglet tient sur une ligne : logo Alterra (retour à l’accueil d’un toucher), titre (« Alterra » sur l’accueil) et, s’il y a lieu, un bouton d’action rond à droite.
+- Partout, le retour à l’écran précédent est un bouton rond avec une flèche, en haut à gauche (plein écran, fiche course, historique des versions).
 - La fiche course est une page à part, sans barre d’onglets ; le bouton retour (flèche, en haut à gauche) ramène à l’écran d’où elle a été ouverte (Objectifs ou calendrier), ou à l’accueil si elle a été ouverte directement.
 
 ## Objectifs

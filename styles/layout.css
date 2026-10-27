@@ -5,13 +5,6 @@
   padding: 20px 0 36px;
 }
 
-.app-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0 4px 26px;
-}
-
 .logo {
   width: 46px;
   height: 46px;
@@ -24,14 +17,6 @@
   letter-spacing: 0.16em;
 }
 
-.subtitle {
-  margin-top: 3px;
-  color: var(--color-muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-}
-
 .app > footer,
 .footer {
   margin: 24px 4px 4px;
@@ -41,12 +26,16 @@
 }
 
 /* Titre d’une vue de l’accueil (Profil…). */
-/* En-tête des onglets autres que l’accueil : logo (retour à l’accueil), titre, action. */
+/* En-tête des onglets : logo (retour à l’accueil), titre, action éventuelle. */
 .view-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin: 0 4px 6px;
+}
+
+.view-header + .home-hero {
+  margin-top: 14px;
 }
 
 .view-home {

@@ -130,7 +130,7 @@ Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à 
 - [x] Onglet Objectifs actif : prochaine course mise en avant (compte à rebours en grand, date, distance et D+ connus), puis les autres courses à venir ; courses passées repliées.
 - [x] Une fiche de référence ouvre sa page ; une course personnelle s’ouvre en plein écran pour être modifiée ou supprimée ; le bouton ＋ la crée à la date du jour.
 - [x] Aucune nouvelle donnée : les courses existantes sont reprises, la sauvegarde ne change pas.
-- [x] Retours du 27 octobre (0.8.22) : cartes réorganisées (compte à rebours à droite, chiffres clés, pastille de date), en-tête d’une ligne avec logo (retour à l’accueil) et bouton ＋, bouton retour (flèche) sur la fiche course vers l’écran précédent.
+- [x] Retours du 27 octobre (0.8.22) : cartes réorganisées (compte à rebours à droite, chiffres clés, pastille de date), en-tête d’une ligne avec logo (retour à l’accueil) et bouton ＋, bouton retour (flèche) sur la fiche course vers l’écran précédent. En 0.8.23 : même bouton retour rond partout (plein écran, historique), accueil titré « Alterra » sans phrase d’accroche.
 - [ ] À vérifier sur iPhone : lecture du compte à rebours, ajout et modification depuis l’onglet.
 - [ ] Plus tard : autres objectifs datés (fin de programme, test…), avec un nom, une date et une note, visibles aussi au calendrier par un repère discret.
 

@@ -29,19 +29,10 @@
   margin: 0 auto;
 }
 
+/* Bouton retour rond, le même que sur la fiche course. */
 .sheet-back {
   justify-self: start;
-  min-height: 44px;
-  padding: 8px 12px 8px 4px;
-  border: 0;
-  background: none;
-  color: var(--color-slate);
-  font-size: 15px;
-  font-weight: 750;
-}
-
-.sheet-back:hover {
-  color: var(--color-charcoal);
+  padding: 0;
 }
 
 .sheet .training-form {
