@@ -18,6 +18,14 @@ import { loadRaceCatalog } from "../storage/race-catalog.js";
 import { el } from "../ui/dom.js";
 
 const content = document.getElementById("raceContent");
+
+// Retour à l’écran d’où vient la fiche (Objectifs, journée du calendrier) ; à défaut, l’accueil.
+document.getElementById("raceBack").addEventListener("click", event => {
+  const fromApp = document.referrer.startsWith(location.origin) && history.length > 1;
+  if (!fromApp) return;
+  event.preventDefault();
+  history.back();
+});
 const raceId = new URLSearchParams(location.search).get("id");
 const personalData = createPersonalDataStore();
 

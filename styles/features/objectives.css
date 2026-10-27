@@ -14,6 +14,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
+  padding: 12px 14px;
   box-shadow: var(--shadow-card);
 }
 
@@ -23,46 +24,84 @@
 }
 
 .objective-card h3 {
+  margin: 0;
   font-size: 19px;
 }
 
-.objective-figures {
-  margin: 2px 0 0;
+.objective-card .calendar-event-description {
+  margin-top: 2px;
+}
+
+/* Pastille de date façon calendrier. */
+.objective-date {
+  display: grid;
+  width: 48px;
+  flex: none;
+  place-items: center;
+  padding: 6px 0 5px;
+  border-radius: 11px;
+  background: var(--color-surface);
   color: var(--color-slate);
-  font-size: 13px;
-  font-weight: 700;
+  line-height: 1.05;
+}
+
+.objective-date strong {
+  color: var(--color-charcoal);
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.objective-date span {
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
 }
 
 .objective-countdown {
   flex: none;
   color: var(--color-charcoal);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 850;
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
 
-/* Prochaine course : la carte la plus visible, compte à rebours en grand et en orange. */
+/* Prochaine course : la carte la plus visible, compte à rebours en grand à droite du nom. */
 .objective-card.is-next {
-  padding: 18px;
+  display: block;
+  padding: 16px 18px;
   border: 2px solid var(--color-accent-line-strong);
   background: var(--color-accent-soft);
 }
 
+.objective-next-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.objective-next-heading > div {
+  min-width: 0;
+}
+
 .objective-card.is-next h2 {
-  margin: 2px 0 2px;
+  margin: 2px 0 0;
   color: var(--color-charcoal);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 26px;
+  font-size: 25px;
   line-height: 1.2;
 }
 
 .objective-card.is-next .objective-countdown {
-  display: block;
-  margin-top: 2px;
   color: var(--color-accent);
-  font-size: 40px;
-  line-height: 1.1;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.objective-card.is-next .workout-stats {
+  padding-top: 10px;
+  border-top: 1px solid var(--color-accent-line);
 }
 
 .objectives-past {
@@ -99,8 +138,4 @@
   margin-top: 8px;
   box-shadow: none;
   opacity: 0.8;
-}
-
-.objectives-add {
-  margin-top: 14px;
 }

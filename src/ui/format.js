@@ -11,6 +11,7 @@ const longDateFormatter = new Intl.DateTimeFormat(LOCALE, {
 });
 const dayMonthFormatter = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "long" });
 const shortDayMonthFormatter = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "short" });
+const shortMonthFormatter = new Intl.DateTimeFormat(LOCALE, { month: "short" });
 const weekdayDateFormatter = new Intl.DateTimeFormat(LOCALE, {
   weekday: "short",
   day: "numeric",
@@ -24,6 +25,8 @@ const relativeDayFormatter = new Intl.RelativeTimeFormat(LOCALE, { numeric: "aut
 export const formatLongDate = date => longDateFormatter.format(date);
 /** 26 oct. */
 export const formatShortDayMonth = date => shortDayMonthFormatter.format(date);
+/** oct. */
+export const formatShortMonth = date => shortMonthFormatter.format(date);
 /** lun. 26 oct. */
 export const formatWeekdayDate = date => weekdayDateFormatter.format(date);
 /** octobre 2026 */
@@ -52,15 +55,15 @@ export function formatDateRange(startKey, endKey) {
 }
 
 /**
- * Compte à rebours avant un départ : « J-23 », « Aujourd’hui », « En cours » une fois parti.
+ * Compte à rebours avant un départ : « J-23 », « Jour J », « En cours » une fois parti.
  * @returns {{ text: string, label: string }} Texte affiché et version lue par un lecteur d’écran.
  */
 export function formatCountdown(daysLeft) {
   if (daysLeft > 0) {
     return { text: `J-${daysLeft}`, label: daysLeft === 1 ? "demain" : `dans ${daysLeft} jours` };
   }
-  const text = daysLeft === 0 ? "Aujourd’hui" : "En cours";
-  return { text, label: text.toLocaleLowerCase(LOCALE) };
+  const text = daysLeft === 0 ? "Jour J" : "En cours";
+  return { text, label: daysLeft === 0 ? "aujourd’hui" : "en cours" };
 }
 
 /** Première lettre en majuscule, selon les règles du français. */

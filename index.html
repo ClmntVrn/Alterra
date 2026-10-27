@@ -28,15 +28,15 @@
 
   <body class="page-home">
     <main class="app">
-      <header>
-        <img class="logo" src="./assets/icons/icon.svg" alt="" />
-        <div>
-          <div class="brand">ALTERRA</div>
-          <div class="subtitle">COACHING TRAIL &amp; MONTAGNE</div>
-        </div>
-      </header>
-
       <div class="app-view" id="viewHome">
+        <header class="app-header">
+          <img class="logo" src="./assets/icons/icon.svg" alt="" />
+          <div>
+            <div class="brand">ALTERRA</div>
+            <div class="subtitle">COACHING TRAIL &amp; MONTAGNE</div>
+          </div>
+        </header>
+
         <section class="home-hero">
           <section
             class="activity-statistics"
@@ -254,15 +254,40 @@
       </div>
 
       <div class="app-view" id="viewObjectives" hidden>
-        <h1 class="view-title">Objectifs</h1>
+        <header class="view-header">
+          <a class="view-home" href="#accueil" aria-label="Accueil" title="Accueil">
+            <img class="logo" src="./assets/icons/icon.svg" alt="" />
+          </a>
+          <h1 class="view-title">Objectifs</h1>
+          <button
+            class="view-action"
+            id="addObjectiveRace"
+            type="button"
+            aria-label="Ajouter une course"
+            title="Ajouter une course"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+            >
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+          </button>
+        </header>
         <div class="objectives-list" id="objectivesList"></div>
-        <button class="calendar-create-button objectives-add" id="addObjectiveRace" type="button">
-          ＋ Ajouter une course
-        </button>
       </div>
 
       <div class="app-view" id="viewProfile" hidden>
-        <h1 class="view-title" id="profileTitle">Profil</h1>
+        <header class="view-header">
+          <a class="view-home" href="#accueil" aria-label="Accueil" title="Accueil">
+            <img class="logo" src="./assets/icons/icon.svg" alt="" />
+          </a>
+          <h1 class="view-title" id="profileTitle">Profil</h1>
+        </header>
 
         <section class="personal-data-tools" aria-labelledby="personalDataTitle">
           <h2 id="personalDataTitle">Sauvegarde</h2>

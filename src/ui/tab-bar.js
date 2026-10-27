@@ -1,7 +1,8 @@
 // Barre d’onglets : affiche la vue choisie sans rechargement et garde la position de chaque vue.
 
 /**
- * Chaque onglet actif est un lien `#nom` portant `data-view`, l’identifiant de sa vue.
+ * Chaque onglet actif est un lien `#nom` portant `data-view`, l’identifiant de sa vue. Un autre
+ * lien de la page vers la même ancre (logo d’un en-tête) se comporte comme l’onglet.
  * @param {HTMLElement} bar
  */
 export function initializeTabBar(bar) {
@@ -23,8 +24,9 @@ export function initializeTabBar(bar) {
     window.scrollTo({ top: scrollPositions.get(tab) ?? 0, behavior: "instant" });
   }
 
-  bar.addEventListener("click", event => {
-    const tab = event.target.closest("a[data-view]");
+  document.addEventListener("click", event => {
+    const href = event.target.closest('a[href^="#"]')?.getAttribute("href");
+    const tab = tabs.find(item => item.getAttribute("href") === href);
     if (!tab) return;
     event.preventDefault();
     // Toucher l’onglet affiché remonte en haut de sa vue, comme sur iPhone.

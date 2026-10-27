@@ -123,13 +123,14 @@ Décisions du 27 octobre 2026 : une seule page avec des vues ; l’accueil garde
 
 ### Étape 8 — Objectifs
 
-**Statut :** réalisée en 0.8.21 — à vérifier sur iPhone
+**Statut :** réalisée en 0.8.21, retouchée en 0.8.22 — à vérifier sur iPhone
 
 Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à rebours en jours (« J-23 ») ; les autres objectifs datés sont reportés.
 
 - [x] Onglet Objectifs actif : prochaine course mise en avant (compte à rebours en grand, date, distance et D+ connus), puis les autres courses à venir ; courses passées repliées.
-- [x] Une fiche de référence ouvre sa page ; une course personnelle s’ouvre en plein écran pour être modifiée ou supprimée ; « Ajouter une course » la crée à la date du jour.
+- [x] Une fiche de référence ouvre sa page ; une course personnelle s’ouvre en plein écran pour être modifiée ou supprimée ; le bouton ＋ la crée à la date du jour.
 - [x] Aucune nouvelle donnée : les courses existantes sont reprises, la sauvegarde ne change pas.
+- [x] Retours du 27 octobre (0.8.22) : cartes réorganisées (compte à rebours à droite, chiffres clés, pastille de date), en-tête d’une ligne avec logo (retour à l’accueil) et bouton ＋, « ← Retour » sur la fiche course vers l’écran précédent.
 - [ ] À vérifier sur iPhone : lecture du compte à rebours, ajout et modification depuis l’onglet.
 - [ ] Plus tard : autres objectifs datés (fin de programme, test…), avec un nom, une date et une note, visibles aussi au calendrier par un repère discret.
 
@@ -144,7 +145,8 @@ Aujourd’hui une fiche de course n’arrive que par restauration d’une sauveg
 - Créer et modifier une fiche depuis le téléphone : nom, dates, lieu, distance, D+, import du fichier GPX, liste des ravitos (nom, km).
 - Les blocs facultatifs (nutrition, rappels, matériel, sources) restent ajoutables plus tard ; aucune valeur inventée.
 - Lien entre la course et l’onglet Objectifs ; ajout possible au calendrier.
-- À trancher : faut-il fusionner course personnelle (`personalRace`) et fiche (`raceSheet`) pour l’utilisateur, ou garder une course simple et une fiche facultative ; champs obligatoires.
+- Décidé le 27 octobre 2026 : une seule notion de course pour l’utilisateur, la course du calendrier est sa fiche (fusion de `personalRace` et `raceSheet`).
+- À trancher : champs obligatoires ; conversion des courses et fiches déjà enregistrées.
 
 **Validation :** une course créée sur iPhone avec son GPX affiche une fiche complète utilisable hors ligne et figure dans la sauvegarde.
 

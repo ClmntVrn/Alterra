@@ -32,16 +32,29 @@ const openObjectives = async () => {
   await page.waitFor(() => !document.getElementById("viewObjectives").hidden);
 };
 
-/** Cartes affichées : titre, texte rendu du compte à rebours, chiffres. */
+/**
+ * Cartes affichées : titre, compte à rebours rendu, chiffres (« libellé : valeur », sauf la date de
+ * la prochaine course, relative au jour du test) ou ligne de détail, pastille de date.
+ */
 const cards = (selector = "#objectivesList > .objective-card") =>
   page.evaluate(
     selector =>
-      [...document.querySelectorAll(selector)].map(card => ({
-        name: card.querySelector(".calendar-item-open").textContent,
-        countdown: card.querySelector(".objective-countdown [aria-hidden]")?.textContent ?? null,
-        figures: card.querySelector(".objective-figures")?.textContent.replace(/\s/g, " ") ?? null,
-        next: card.classList.contains("is-next")
-      })),
+      [...document.querySelectorAll(selector)].map(card => {
+        const stats = [...card.querySelectorAll(".workout-stats > div")].map(item => {
+          const label = item.querySelector("dt").textContent;
+          return label === "Date" ? label : `${label} : ${item.querySelector("dd").textContent}`;
+        });
+        const description = card.querySelector(".calendar-event-description")?.textContent;
+        return {
+          name: card.querySelector(".calendar-item-open").textContent,
+          countdown: card.querySelector(".objective-countdown [aria-hidden]")?.textContent ?? null,
+          details: stats.length
+            ? stats.map(text => text.replace(/\s/g, " "))
+            : (description ?? null),
+          dateTile: Boolean(card.querySelector("time.objective-date")),
+          next: card.classList.contains("is-next")
+        };
+      }),
     selector
   );
 
@@ -58,9 +71,9 @@ test("sans course, l’onglet Objectifs l’indique et propose d’en ajouter un
     await page.evaluate(() => [
       document.querySelector("#objectivesList .calendar-empty")?.textContent,
       document.querySelector("#objectivesList .objectives-past"),
-      document.getElementById("addObjectiveRace").textContent.trim()
+      document.querySelector(".view-header #addObjectiveRace").getAttribute("aria-label")
     ]),
-    ["Aucune course à venir.", null, "＋ Ajouter une course"]
+    ["Aucune course à venir.", null, "Ajouter une course"]
   );
 });
 
@@ -73,8 +86,14 @@ test("la prochaine course est mise en avant, puis les autres ; les passées sont
   await openHome(page);
   await openObjectives();
   assert.deepEqual(await cards(), [
-    { name: "Ultra de test", countdown: "J-10", figures: "40 km · 2 000 m D+", next: true },
-    { name: "Course de printemps", countdown: "J-30", figures: null, next: false }
+    {
+      name: "Ultra de test",
+      countdown: "J-10",
+      details: ["Date", "Distance : 40 km", "D+ : 2 000 m"],
+      dateTile: false,
+      next: true
+    },
+    { name: "Course de printemps", countdown: "J-30", details: null, dateTile: true, next: false }
   ]);
   assert.deepEqual(
     await page.evaluate(() => {
@@ -88,9 +107,12 @@ test("la prochaine course est mise en avant, puis les autres ; les passées sont
     }),
     ["./race.html?id=fiche-test", "J-10, dans 10 jours", false, "Courses passées (1)"]
   );
-  assert.deepEqual(await cards(".objectives-past > .objective-card"), [
-    { name: "Course passée", countdown: null, figures: null, next: false }
-  ]);
+  // Une course passée rappelle sa date complète, avec l’année.
+  const [pastCard] = await cards(".objectives-past > .objective-card");
+  assert.deepEqual(
+    { ...pastCard, details: /\d{4}$/.test(pastCard.details) },
+    { name: "Course passée", countdown: null, details: true, dateTile: true, next: false }
+  );
 });
 
 test("une course personnelle s’ouvre en plein écran depuis les Objectifs et s’y modifie", async () => {
@@ -137,10 +159,50 @@ test("« Ajouter une course » crée une course à la date du jour, mise en avan
   );
   assert.deepEqual((await cards())[0], {
     name: "Course du jour",
-    countdown: "Aujourd’hui",
-    figures: null,
+    countdown: "Jour J",
+    details: ["Date"],
+    dateTile: false,
     next: true
   });
+});
+
+test("le logo de l’en-tête ramène à l’accueil sans entrée d’historique", async () => {
+  const historyLength = await page.evaluate(() => history.length);
+  await page.evaluate(() => document.querySelector("#viewObjectives .view-home").click());
+  assert.deepEqual(
+    await page.evaluate(() => [
+      document.getElementById("viewHome").hidden,
+      location.hash,
+      history.length
+    ]),
+    [false, "#accueil", historyLength]
+  );
+  await openObjectives();
+});
+
+/** Attend une condition pendant un changement de page, quand l’ancienne page peut disparaître. */
+async function waitAcrossNavigation(fn) {
+  const deadline = Date.now() + 10000;
+  for (;;) {
+    if (await page.evaluate(fn).catch(() => false)) return;
+    if (Date.now() > deadline) throw new Error("La navigation n’a pas abouti.");
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+}
+
+test("« Retour » de la fiche ramène à l’onglet Objectifs", async () => {
+  await page.evaluate(() =>
+    document.querySelector('.objective-card a[href="./race.html?id=fiche-test"]').click()
+  );
+  await waitAcrossNavigation(() => document.querySelector(".hero h1")?.textContent);
+  await page.evaluate(() => document.getElementById("raceBack").click());
+  await waitAcrossNavigation(
+    () =>
+      location.pathname.endsWith("/index.html") &&
+      document.getElementById("viewObjectives")?.hidden === false &&
+      document.querySelector("#objectivesList .objective-card")
+  );
+  assert.equal(await page.evaluate(() => location.hash), "#objectifs");
 });
 
 test("le repli des courses passées reste ouvert après une mise à jour", async () => {

@@ -7,13 +7,14 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 - Une barre d’onglets reste visible en bas de l’application : Accueil · Objectifs · Stats · IA · Profil. Stats et IA sont grisés avec « Bientôt » tant qu’ils ne sont pas disponibles.
 - Changer d’onglet ne recharge pas la page et n’ajoute pas d’entrée d’historique ; chaque vue garde sa position (journée ou mois affiché, défilement). Toucher l’onglet affiché remonte en haut. L’adresse `index.html#profil` ouvre directement le Profil.
 - Le Profil contient la sauvegarde (date de la dernière, export, restauration) et la version de l’application avec son historique. Une pastille orange sur l’onglet Profil signale une sauvegarde de plus de 7 jours ou absente.
-- La fiche course est une page à part, sans barre d’onglets.
+- Hors accueil, l’en-tête d’un onglet tient sur une ligne : logo Alterra (retour à l’accueil d’un toucher), titre et, s’il y a lieu, un bouton d’action rond à droite.
+- La fiche course est une page à part, sans barre d’onglets ; « ← Retour » ramène à l’écran d’où elle a été ouverte (Objectifs ou calendrier), ou à l’accueil si elle a été ouverte directement.
 
 ## Objectifs
 
-- L’onglet Objectifs liste les courses de référence et les courses personnelles. La prochaine est mise en avant : compte à rebours en jours (« J-23 », « Aujourd’hui », « En cours » pendant une course sur plusieurs jours), nom, dates, distance et D+ s’ils sont connus. Les autres courses à venir suivent, de la plus proche à la plus lointaine, avec leur compte à rebours.
+- L’onglet Objectifs liste les courses de référence et les courses personnelles. La prochaine est mise en avant : nom et compte à rebours en grand (« J-23 », « Jour J », « En cours » pendant une course sur plusieurs jours), puis date, distance et D+ s’ils sont connus. Les autres courses à venir suivent, de la plus proche à la plus lointaine, en cartes d’une ligne : pastille de date, nom (avec la période d’une course sur plusieurs jours, distance et D+ connus) et compte à rebours.
 - Une course reste à venir jusqu’à son dernier jour inclus ; les courses passées sont repliées en bas, de la plus récente à la plus ancienne.
-- Toucher une course de référence ouvre sa fiche ; toucher une course personnelle ouvre sa modification en plein écran, qui permet aussi de la supprimer. « Ajouter une course » crée une course personnelle, à la date du jour par défaut.
+- Toucher une course de référence ouvre sa fiche ; toucher une course personnelle ouvre sa modification en plein écran, qui permet aussi de la supprimer. Le bouton ＋ de l’en-tête crée une course personnelle, à la date du jour par défaut.
 - Le compte à rebours suit la date du jour au retour au premier plan.
 
 ## Accueil et calendrier

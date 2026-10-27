@@ -32,6 +32,6 @@ test("formatDaysAgo et capitalize", () => {
 test("formatCountdown compte les jours avant le départ, puis le jour J et la course en cours", () => {
   assert.deepEqual(formatCountdown(23), { text: "J-23", label: "dans 23 jours" });
   assert.deepEqual(formatCountdown(1), { text: "J-1", label: "demain" });
-  assert.deepEqual(formatCountdown(0), { text: "Aujourd’hui", label: "aujourd’hui" });
+  assert.deepEqual(formatCountdown(0), { text: "Jour J", label: "aujourd’hui" });
   assert.deepEqual(formatCountdown(-1), { text: "En cours", label: "en cours" });
 });
