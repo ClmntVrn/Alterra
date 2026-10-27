@@ -37,7 +37,8 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 | `src/features/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines.                                                                             |
 | `src/features/workouts/`                         | Carte et formulaire d’une séance, libellés des types et états.                                                             |
 | `src/features/races/`                            | Cartes des courses et formulaire d’une course personnelle.                                                                 |
-| `src/domain/`                                    | Règles pures, sans DOM ni stockage : dates, durées, séances, statistiques, calendrier.                                     |
+| `src/features/objectives/`                       | Onglet Objectifs : prochaine course, courses à venir avec compte à rebours, courses passées.                               |
+| `src/domain/`                                    | Règles pures, sans DOM ni stockage : dates, durées, séances, statistiques, calendrier, objectifs.                          |
 | `src/domain/backup-format.js`                    | Format de sauvegarde versionné et validation.                                                                              |
 | `src/domain/race-plan.js`                        | Application du plan personnel à la fiche de référence.                                                                     |
 | `src/domain/elevation-profile.js`                | Distances de la trace, points du profil, graduations et progression.                                                       |

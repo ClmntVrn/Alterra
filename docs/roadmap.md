@@ -123,13 +123,17 @@ Décisions du 27 octobre 2026 : une seule page avec des vues ; l’accueil garde
 
 ### Étape 8 — Objectifs
 
-**Statut :** à faire
+**Statut :** réalisée en 0.8.21 — à vérifier sur iPhone
 
-- Onglet Objectifs : courses à venir (personnelles et fiches de référence) avec compte à rebours, accès direct à la fiche ; courses passées repliées.
-- Autres objectifs datés, par exemple la fin d’un programme d’entraînement.
-- À trancher : types d’objectifs à prévoir au départ en plus des courses ; ce qui est affiché pour un objectif (date, compte à rebours, note).
+Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à rebours en jours (« J-23 ») ; les autres objectifs datés sont reportés.
 
-**Validation :** les objectifs sont créés, modifiés, supprimés sur le téléphone et inclus dans la sauvegarde.
+- [x] Onglet Objectifs actif : prochaine course mise en avant (compte à rebours en grand, date, distance et D+ connus), puis les autres courses à venir ; courses passées repliées.
+- [x] Une fiche de référence ouvre sa page ; une course personnelle s’ouvre en plein écran pour être modifiée ou supprimée ; « Ajouter une course » la crée à la date du jour.
+- [x] Aucune nouvelle donnée : les courses existantes sont reprises, la sauvegarde ne change pas.
+- [ ] À vérifier sur iPhone : lecture du compte à rebours, ajout et modification depuis l’onglet.
+- [ ] Plus tard : autres objectifs datés (fin de programme, test…), avec un nom, une date et une note, visibles aussi au calendrier par un repère discret.
+
+**Validation :** depuis l’onglet, on voit d’un coup d’œil le nombre de jours avant la prochaine course, et on ajoute, modifie ou supprime une course sur le téléphone.
 
 ### Étape 9 — Ajout d’une course depuis l’application
 

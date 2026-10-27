@@ -45,7 +45,7 @@ test("l’accueil s’ouvre par défaut avec les statistiques et le calendrier",
   );
 });
 
-test("Objectifs, Stats et IA sont grisés et annoncés indisponibles", async () => {
+test("Stats et IA sont grisés et annoncés indisponibles", async () => {
   assert.deepEqual(
     await page.evaluate(() =>
       [...document.querySelectorAll(".tab.is-soon")].map(tab => [
@@ -55,7 +55,6 @@ test("Objectifs, Stats et IA sont grisés et annoncés indisponibles", async () 
       ])
     ),
     [
-      ["SPAN", "true", "Objectifs Bientôt"],
       ["SPAN", "true", "Stats Bientôt"],
       ["SPAN", "true", "IA Bientôt"]
     ]

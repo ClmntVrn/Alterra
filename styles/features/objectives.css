@@ -1,0 +1,106 @@
+/* Onglet Objectifs : cartes de courses avec compte à rebours, courses passées repliées. */
+
+.objectives-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.objectives-list > * {
+  min-width: 0;
+}
+
+.objective-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--shadow-card);
+}
+
+.objective-card-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.objective-card h3 {
+  font-size: 19px;
+}
+
+.objective-figures {
+  margin: 2px 0 0;
+  color: var(--color-slate);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.objective-countdown {
+  flex: none;
+  color: var(--color-charcoal);
+  font-size: 20px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+/* Prochaine course : la carte la plus visible, compte à rebours en grand et en orange. */
+.objective-card.is-next {
+  padding: 18px;
+  border: 2px solid var(--color-accent-line-strong);
+  background: var(--color-accent-soft);
+}
+
+.objective-card.is-next h2 {
+  margin: 2px 0 2px;
+  color: var(--color-charcoal);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 26px;
+  line-height: 1.2;
+}
+
+.objective-card.is-next .objective-countdown {
+  display: block;
+  margin-top: 2px;
+  color: var(--color-accent);
+  font-size: 40px;
+  line-height: 1.1;
+}
+
+.objectives-past {
+  margin-top: 6px;
+}
+
+.objectives-past summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+  list-style: none;
+}
+
+.objectives-past summary::-webkit-details-marker {
+  display: none;
+}
+
+.objectives-past-chevron {
+  font-size: 18px;
+  transition: transform 0.15s ease;
+}
+
+.objectives-past[open] .objectives-past-chevron {
+  transform: rotate(180deg);
+}
+
+.objectives-past > .objective-card {
+  margin-top: 8px;
+  box-shadow: none;
+  opacity: 0.8;
+}
+
+.objectives-add {
+  margin-top: 14px;
+}

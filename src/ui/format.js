@@ -51,6 +51,18 @@ export function formatDateRange(startKey, endKey) {
   return `${startText} – ${formatLongDate(end)}`;
 }
 
+/**
+ * Compte à rebours avant un départ : « J-23 », « Aujourd’hui », « En cours » une fois parti.
+ * @returns {{ text: string, label: string }} Texte affiché et version lue par un lecteur d’écran.
+ */
+export function formatCountdown(daysLeft) {
+  if (daysLeft > 0) {
+    return { text: `J-${daysLeft}`, label: daysLeft === 1 ? "demain" : `dans ${daysLeft} jours` };
+  }
+  const text = daysLeft === 0 ? "Aujourd’hui" : "En cours";
+  return { text, label: text.toLocaleLowerCase(LOCALE) };
+}
+
 /** Première lettre en majuscule, selon les règles du français. */
 export function capitalize(text) {
   return text.charAt(0).toLocaleUpperCase(LOCALE) + text.slice(1);

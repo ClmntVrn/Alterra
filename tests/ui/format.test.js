@@ -1,6 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { capitalize, formatDateRange, formatDaysAgo, formatNumber } from "../../src/ui/format.js";
+import {
+  capitalize,
+  formatCountdown,
+  formatDateRange,
+  formatDaysAgo,
+  formatNumber
+} from "../../src/ui/format.js";
 
 test("formatDateRange n’affiche l’année qu’une fois dans la même année", () => {
   assert.equal(formatDateRange("2026-10-26"), "26 octobre 2026");
@@ -21,4 +27,11 @@ test("formatDaysAgo et capitalize", () => {
   assert.equal(formatDaysAgo(1), "hier");
   assert.equal(formatDaysAgo(3), "il y a 3 jours");
   assert.equal(capitalize("octobre 2026"), "Octobre 2026");
+});
+
+test("formatCountdown compte les jours avant le départ, puis le jour J et la course en cours", () => {
+  assert.deepEqual(formatCountdown(23), { text: "J-23", label: "dans 23 jours" });
+  assert.deepEqual(formatCountdown(1), { text: "J-1", label: "demain" });
+  assert.deepEqual(formatCountdown(0), { text: "Aujourd’hui", label: "aujourd’hui" });
+  assert.deepEqual(formatCountdown(-1), { text: "En cours", label: "en cours" });
 });

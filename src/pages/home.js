@@ -1,4 +1,5 @@
 import { initializeCalendar } from "../features/calendar/calendar.js";
+import { createObjectivesView } from "../features/objectives/objectives.js";
 import { initializeActivityStatistics } from "../features/statistics/activity-statistics.js";
 import { createPersonalDataStore } from "../storage/personal-data.js";
 import { loadRaceCatalog } from "../storage/race-catalog.js";
@@ -35,11 +36,17 @@ const updateActivityStatistics = initializeActivityStatistics(
   document.getElementById("activityStatistics"),
   personalData.repository
 );
-const refreshCalendar = initializeCalendar(
-  raceCatalogPromise,
-  personalData.repository,
-  updateActivityStatistics
-);
+const renderObjectives = createObjectivesView({
+  container: document.getElementById("objectivesList"),
+  onEditPersonalRace: race => calendar.openPersonalRace(race)
+});
+const calendar = initializeCalendar(raceCatalogPromise, personalData.repository, sources => {
+  updateActivityStatistics(sources.workouts);
+  renderObjectives(sources);
+});
+document
+  .getElementById("addObjectiveRace")
+  .addEventListener("click", () => calendar.openPersonalRace());
 
 function showPersonalDataStatus(message, isError = false) {
   status.textContent = message;
@@ -113,7 +120,8 @@ importInput.addEventListener("change", async () => {
     }
     await personalData.restore(data);
     raceCatalogPromise = loadRaceCatalog(personalData);
-    await refreshCalendar(await raceCatalogPromise);
+    await raceCatalogPromise;
+    await calendar.refresh();
     refreshLastBackup();
     showPersonalDataStatus("Base complète restaurée sur cet appareil.");
   } catch (error) {

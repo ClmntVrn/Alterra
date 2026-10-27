@@ -11,7 +11,7 @@
 
 - Le projet est un site statique en HTML, CSS et JavaScript natif ; ne pas ajouter de framework ou de dépendance sans besoin concret.
 - Les styles sont dans `styles/` : `tokens.css` (variables), `base.css`, `layout.css`, puis `components/` et `features/`. Chaque page charge les feuilles dont elle a besoin. Réutiliser les variables et composants existants plutôt que dupliquer les styles ; aucune couleur écrite en dur hors de `tokens.css`.
-- `index.html` contient la barre d’onglets et ses vues : Accueil (statistiques et calendrier, avec accès aux fiches de course) et Profil (sauvegarde, version).
+- `index.html` contient la barre d’onglets et ses vues : Accueil (statistiques et calendrier, avec accès aux fiches de course), Objectifs (courses à venir avec compte à rebours) et Profil (sauvegarde, version). Le plein écran des détails et formulaires est partagé entre les vues.
 - `race.html` et `src/pages/race.js` forment la fiche générique ; les fiches de course et GPX vivent dans la base locale et les sauvegardes, pas dans le dépôt.
 - Le code est rangé dans `src/` : `pages/` (points d'entrée), `features/` (fonctionnalités), `domain/` (règles pures, testées), `storage/` (repository et IndexedDB), `ui/` (formats partagés). Les icônes sont dans `assets/icons/`.
 - Les détails, scénarios, ravitos, nutrition, rappels, matériel et références GPX sont des données optionnelles par course. Ne pas coder de contenu propre à une course dans le moteur de rendu.

@@ -14,6 +14,8 @@ import { renderWorkoutDetail, WORKOUT_DETAIL_TITLE_ID } from "../workouts/workou
 import { createWorkoutForm } from "../workouts/workout-form.js";
 import { WORKOUT_STATE_LABELS } from "../workouts/workout-labels.js";
 
+/** @typedef {import("../../domain/calendar.js").CalendarSources} CalendarSources */
+
 function getEventLabel(event, todayKey) {
   if (event.eventType === "race" || event.eventType === "personalRace") {
     return `Course : ${event.name}`;
@@ -32,10 +34,13 @@ function getEventMarkerClass(event, todayKey) {
 /**
  * @param {Promise<unknown>} racesPromise Chargement du catalogue, attendu avant la lecture.
  * @param {Object} repository
- * @param {(workouts: Array<Object>) => void} [onWorkoutsUpdated]
- * @returns {() => Promise<void>} Recharge les événements depuis la base.
+ * @param {(sources: CalendarSources) => void} [onEventsUpdated] Reçoit les courses et séances
+ *   relues après chaque changement.
+ * @returns {{ refresh: () => Promise<void>, openPersonalRace: (race?: Object) => void }}
+ *   `refresh` recharge les événements depuis la base ; `openPersonalRace` ouvre en plein écran
+ *   la modification d’une course personnelle, ou sa création à la date du jour.
  */
-export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated = () => {}) {
+export function initializeCalendar(racesPromise, repository, onEventsUpdated = () => {}) {
   const heading = document.querySelector(".calendar-heading");
   const calendarGrid = document.querySelector(".calendar-grid");
   const calendarDays = document.getElementById("calendarDays");
@@ -167,8 +172,8 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
       repository.list("personalRaces"),
       repository.list("workouts")
     ]);
-    onWorkoutsUpdated(workouts);
     sources = { races, personalRaces, workouts };
+    onEventsUpdated(sources);
     hint.textContent = "";
     delete hint.dataset.state;
     hint.hidden = true;
@@ -194,14 +199,17 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
     });
   }
 
+  /** @param {Object | null} [race] Course à modifier ; sans elle, création. */
+  function openPersonalRace(race = null, date = new Date()) {
+    resetSheet();
+    openSheet("raceEventFormTitle");
+    raceForm.open(date, race);
+  }
+
   function renderEventCard(event) {
     if (event.eventType === "race") return renderRaceCard(event);
     if (event.eventType === "personalRace") {
-      return renderPersonalRaceCard(event, () => {
-        resetSheet();
-        openSheet("raceEventFormTitle");
-        raceForm.open(selectedDate, event);
-      });
+      return renderPersonalRaceCard(event, () => openPersonalRace(event, selectedDate));
     }
     return renderWorkoutCard(event, {
       onOpen: () => showWorkoutDetail(event.id),
@@ -267,10 +275,7 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
   previousDayButton.addEventListener("click", () => moveSelectedDay(-1));
   nextDayButton.addEventListener("click", () => moveSelectedDay(1));
   addRaceButton.addEventListener("click", () => {
-    if (!selectedDate) return;
-    resetSheet();
-    openSheet("raceEventFormTitle");
-    raceForm.open(selectedDate);
+    if (selectedDate) openPersonalRace(null, selectedDate);
   });
   addWorkoutButton.addEventListener("click", () => {
     if (!selectedDate) return;
@@ -297,5 +302,8 @@ export function initializeCalendar(racesPromise, repository, onWorkoutsUpdated =
     .then(() => refreshEvents())
     .catch(error => showError("Impossible de charger le calendrier. Réessaie.", error));
 
-  return refreshEvents;
+  return {
+    refresh: refreshEvents,
+    openPersonalRace: race => openPersonalRace(race)
+  };
 }
