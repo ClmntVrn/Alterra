@@ -1,15 +1,18 @@
-// Profil d’altitude d’une fiche : lecture du GPX, tracé SVG et progression en course.
+// Profil d’altitude d’une fiche : lecture du GPX, tracé SVG à la taille de l’écran et progression.
 
 import {
-  PLOT,
   buildElevationProfile,
-  computeElevationStep,
+  computeAxisStep,
   computeProgress
 } from "../../domain/elevation-profile.js";
 import { el } from "../../ui/dom.js";
 import { formatNumber } from "../../ui/format.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
+// Marges du tracé en pixels : graduations d’altitude à gauche, de km en bas, noms au-dessus.
+const MARGIN = Object.freeze({ left: 46, right: 12, top: 30, bottom: 26 });
+// Toucher autour d’un repère : rayon de la zone active, plus large que le point dessiné.
+const STOP_HIT_RADIUS = 18;
 
 function svg(name, attributes = {}, text) {
   const node = document.createElementNS(SVG_NS, name);
@@ -35,40 +38,53 @@ export function parseGpxTrackpoints(gpxText) {
   });
 }
 
-const formatKm = km =>
-  km
-    .toFixed(2)
-    .replace(/\.?0+$/, "")
-    .replace(".", ",");
+/** Taille du graphique : toute la largeur disponible, une hauteur lisible sur téléphone. */
+function measureChart(chart) {
+  const width = Math.max(240, Math.round(chart.getBoundingClientRect().width));
+  const height = Math.round(Math.min(300, Math.max(210, width * 0.62)));
+  return {
+    width,
+    height,
+    plot: {
+      left: MARGIN.left,
+      right: width - MARGIN.right,
+      top: MARGIN.top,
+      bottom: height - MARGIN.bottom
+    }
+  };
+}
 
 function drawGrid(profile) {
+  const { plot } = profile;
   const grid = svg("g", { class: "elevation-grid" });
   const elevationRange = profile.maxElevation - profile.minElevation;
-  const elevationStep = computeElevationStep(elevationRange);
+  const elevationStep = computeAxisStep(elevationRange);
   for (
     let elevation = profile.minElevation;
     elevation <= profile.maxElevation;
     elevation += elevationStep
   ) {
     const y =
-      PLOT.top + ((profile.maxElevation - elevation) / elevationRange) * (PLOT.bottom - PLOT.top);
+      plot.top + ((profile.maxElevation - elevation) / elevationRange) * (plot.bottom - plot.top);
     grid.append(
-      svg("line", { x1: PLOT.left, y1: y, x2: PLOT.right, y2: y }),
-      svg("text", { x: PLOT.left - 8, y: y + 4, "text-anchor": "end" }, `${elevation} m`)
+      svg("line", { x1: plot.left, y1: y, x2: plot.right, y2: y }),
+      svg("text", { x: plot.left - 6, y: y + 4, "text-anchor": "end" }, `${elevation}`)
     );
   }
-  for (let km = 0; km <= Math.floor(profile.distanceKm / 10) * 10; km += 10) {
-    const x = PLOT.left + (km / profile.distanceKm) * (PLOT.right - PLOT.left);
+  const kmStep = computeAxisStep(profile.distanceKm);
+  // La dernière graduation laisse la place au total, aligné à droite.
+  for (let km = 0; km <= profile.distanceKm - kmStep / 2; km += kmStep) {
+    const x = plot.left + (km / profile.distanceKm) * (plot.right - plot.left);
     grid.append(
-      svg("line", { x1: x, y1: PLOT.bottom, x2: x, y2: PLOT.bottom + 5 }),
-      svg("text", { x, y: PLOT.bottom + 18, "text-anchor": "middle" }, `${km}`)
+      svg("line", { x1: x, y1: plot.bottom, x2: x, y2: plot.bottom + 5 }),
+      svg("text", { x, y: plot.bottom + 18, "text-anchor": "middle" }, formatNumber(km))
     );
   }
   grid.append(
     svg(
       "text",
-      { x: PLOT.right, y: PLOT.bottom + 18, "text-anchor": "end" },
-      `${profile.distanceKm.toFixed(1).replace(".", ",")} km`
+      { x: plot.right, y: plot.bottom + 18, "text-anchor": "end" },
+      `${formatNumber(profile.distanceKm)} km`
     )
   );
   return grid;
@@ -82,9 +98,13 @@ function drawMarker(marker, checkpoint, onToggle) {
         ? "Arrivée"
         : checkpoint?.name || marker.id;
   const interactive = marker.id !== "start" && Boolean(checkpoint);
+  const stop = svg("g", {
+    class: "elevation-stop",
+    transform: `translate(${marker.x} ${marker.y})`
+  });
   const circle = svg("circle", {
     class: "elevation-stop-dot",
-    r: 5,
+    r: 6,
     "data-profile-stop": marker.id,
     tabindex: interactive ? 0 : -1,
     role: interactive ? "button" : "img",
@@ -96,6 +116,9 @@ function drawMarker(marker, checkpoint, onToggle) {
           : name
   });
   if (interactive) {
+    const hit = svg("circle", { class: "elevation-stop-hit", r: STOP_HIT_RADIUS });
+    hit.addEventListener("click", onToggle);
+    stop.append(hit);
     circle.setAttribute("aria-pressed", "false");
     circle.addEventListener("click", onToggle);
     circle.addEventListener("keydown", event => {
@@ -110,17 +133,45 @@ function drawMarker(marker, checkpoint, onToggle) {
     {
       class: "elevation-stop-label",
       x: 0,
-      y: marker.y < 53 ? 15 : -11,
-      "text-anchor": marker.id === "start" ? "start" : marker.id === "finish" ? "end" : "middle"
+      y: -12,
+      "text-anchor": marker.id === "start" ? "start" : marker.id === "finish" ? "end" : "middle",
+      "aria-hidden": "true"
     },
     name
   );
-  const stop = svg("g", {
-    class: "elevation-stop",
-    transform: `translate(${marker.x} ${marker.y})`
-  });
   stop.append(circle, label);
   return stop;
+}
+
+/**
+ * Évite que les noms des repères se chevauchent : un nom gênant passe sous son point,
+ * puis disparaît s’il gêne encore (le point reste).
+ */
+function separateLabels(labels, plot) {
+  const placed = [];
+  const overlaps = box =>
+    placed.some(
+      other =>
+        box.x < other.x + other.width + 4 &&
+        other.x < box.x + box.width + 4 &&
+        box.y < other.y + other.height &&
+        other.y < box.y + box.height
+    );
+  for (const label of labels) {
+    const box = label.getBBox();
+    const matrix = label.getCTM();
+    const toChart = b => ({ ...b, x: b.x + (matrix?.e ?? 0), y: b.y + (matrix?.f ?? 0) });
+    let chartBox = toChart(box);
+    if (chartBox.y < plot.top - MARGIN.top || overlaps(chartBox)) {
+      label.setAttribute("y", 22);
+      chartBox = toChart(label.getBBox());
+    }
+    if (overlaps(chartBox)) {
+      label.setAttribute("visibility", "hidden");
+      continue;
+    }
+    placed.push(chartBox);
+  }
 }
 
 /**
@@ -131,42 +182,25 @@ function drawMarker(marker, checkpoint, onToggle) {
 export function createElevationSection(race) {
   const chart = svg("svg", {
     class: "elevation-chart",
-    viewBox: "0 0 900 285",
     role: "img",
     "aria-labelledby": "elevationTitle elevationDescription"
   });
-  chart.append(
-    svg("title", { id: "elevationTitle" }, `Profil d’altitude ${race.name}`),
-    svg(
-      "desc",
-      { id: "elevationDescription" },
-      "Profil de la trace GPX avec le départ, les ravitaillements et l’arrivée. Les points atteints sont colorés en orange."
-    )
+  const title = svg("title", { id: "elevationTitle" }, `Profil d’altitude ${race.name}`);
+  const description = svg(
+    "desc",
+    { id: "elevationDescription" },
+    "Profil de la trace GPX avec le départ, les ravitaillements et l’arrivée. La partie parcourue est en orange."
   );
-  const progress = el("p", {
-    className: "elevation-progress",
+  chart.append(title, description);
+  const status = el("p", {
+    className: "elevation-status",
     text: "Chargement du profil…",
-    attrs: { id: "elevationProgress", "aria-live": "polite" }
+    attrs: { role: "status" }
   });
   const element = el("section", { className: "section elevation-section" }, [
-    el("div", { className: "elevation-heading" }, [
-      el("div", {}, [
-        el("h2", { text: "Profil de la course" }),
-        el("p", { className: "elevation-caption", text: race.profile.caption })
-      ]),
-      el("span", {
-        className: "elevation-ascent",
-        text: `${formatNumber(race.ascentMeters)} m D+`
-      })
-    ]),
+    el("h2", { text: "Profil de la course" }),
     chart,
-    progress,
-    el("p", {
-      className: "elevation-hint",
-      text: race.checkpoints?.length
-        ? "Coche les ravitos dans « En course » pour actualiser ta progression sur le profil. Tu peux aussi toucher un repère."
-        : "Profil d’altitude du parcours."
-    })
+    status
   ]);
 
   const checkpointById = new Map(
@@ -175,21 +209,34 @@ export function createElevationSection(race) {
   const checkpointIds = new Set(checkpointById.keys());
   let update = () => {};
 
-  function draw(profile, { isChecked, toggle }) {
-    const first = profile.samples[0];
-    const last = profile.samples[profile.samples.length - 1];
+  function draw(trackpoints, { isChecked, toggle }) {
+    const { width, height, plot } = measureChart(chart);
+    const profile = buildElevationProfile(trackpoints, race.checkpoints || [], plot);
+    chart.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    chart.replaceChildren(title, description);
+
     const samplePoints = profile.samples.map(point => point.join(",")).join(" ");
-    const completed = svg("polyline", {
-      class: "elevation-completed",
-      id: "profileCompleted",
-      points: ""
+    const underCurve = points =>
+      [
+        `${points[0][0]},${plot.bottom}`,
+        ...points.map(point => point.join(",")),
+        `${points.at(-1)[0]},${plot.bottom}`
+      ].join(" ");
+    const completedArea = svg("polygon", { class: "elevation-completed-area", points: "" });
+    const completed = svg("polyline", { class: "elevation-completed", points: "" });
+    const position = svg("line", {
+      class: "elevation-position",
+      x1: 0,
+      x2: 0,
+      y1: plot.top - 6,
+      y2: plot.bottom,
+      visibility: "hidden"
     });
     const current = svg("circle", {
       class: "elevation-current",
-      id: "profileCurrent",
       cx: "0",
       cy: "0",
-      r: "7",
+      r: "8",
       visibility: "hidden"
     });
     const markersLayer = svg("g", { class: "elevation-markers" });
@@ -199,32 +246,34 @@ export function createElevationSection(race) {
       );
     }
     chart.append(
-      svg("polygon", {
-        class: "elevation-area",
-        points: [`${first[0]},${PLOT.bottom}`, samplePoints, `${last[0]},${PLOT.bottom}`].join(" ")
-      }),
+      svg("polygon", { class: "elevation-area", points: underCurve(profile.samples) }),
+      completedArea,
       drawGrid(profile),
       svg("polyline", { class: "elevation-line", points: samplePoints }),
       completed,
+      position,
       svg("path", {
         class: "elevation-axis",
-        d: `M ${PLOT.left} ${PLOT.top} V ${PLOT.bottom} H ${PLOT.right}`
+        d: `M ${plot.left} ${plot.top} V ${plot.bottom} H ${plot.right}`
       }),
       markersLayer,
       current
     );
+    separateLabels([...markersLayer.querySelectorAll(".elevation-stop-label")], plot);
 
     update = () => {
       const state = computeProgress(profile, checkpointIds, isChecked);
       if (!state) return;
-      const { marker, points, remainingKm } = state;
+      const { marker, points } = state;
+      chart.dataset.reached = marker.id;
       completed.setAttribute("points", points.map(point => point.join(",")).join(" "));
+      completedArea.setAttribute("points", points.length > 1 ? underCurve(points) : "");
+      const visibility = marker.km > 0 ? "visible" : "hidden";
+      for (const node of [current, position]) node.setAttribute("visibility", visibility);
       current.setAttribute("cx", marker.x);
       current.setAttribute("cy", marker.y);
-      current.setAttribute("visibility", marker.km > 0 ? "visible" : "hidden");
-      const name =
-        marker.id === "start" ? "Départ" : checkpointById.get(marker.id)?.name || "Arrivée";
-      progress.textContent = `${name} · KM ${formatKm(marker.km)} · ${remainingKm.toFixed(1).replace(".", ",")} km restants`;
+      position.setAttribute("x1", marker.x);
+      position.setAttribute("x2", marker.x);
       for (const stop of profile.markers) {
         if (stop.id === "start") continue;
         const dot = chart.querySelector(`[data-profile-stop="${CSS.escape(stop.id)}"]`);
@@ -234,6 +283,7 @@ export function createElevationSection(race) {
       }
     };
     update();
+    return profile;
   }
 
   async function load(checkpoints) {
@@ -244,12 +294,21 @@ export function createElevationSection(race) {
         if (!response.ok) throw new Error(`GPX indisponible (${response.status}).`);
         gpxText = await response.text();
       }
-      const profile = buildElevationProfile(parseGpxTrackpoints(gpxText), race.checkpoints || []);
-      draw(profile, checkpoints);
+      const trackpoints = parseGpxTrackpoints(gpxText);
+      const profile = draw(trackpoints, checkpoints);
+      status.hidden = true;
+      // Rotation de l’écran ou fenêtre redimensionnée : le tracé suit la nouvelle largeur.
+      let drawnWidth = chart.getBoundingClientRect().width;
+      new ResizeObserver(() => {
+        const width = chart.getBoundingClientRect().width;
+        if (Math.abs(width - drawnWidth) < 1) return;
+        drawnWidth = width;
+        draw(trackpoints, checkpoints);
+      }).observe(element);
       return profile;
     } catch (error) {
       console.error("Impossible de charger ou de lire la trace GPX.", error);
-      progress.textContent = "Profil d’altitude indisponible.";
+      status.textContent = "Profil d’altitude indisponible.";
       return null;
     }
   }

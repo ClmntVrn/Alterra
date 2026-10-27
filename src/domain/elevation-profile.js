@@ -1,6 +1,6 @@
-// Profil d’altitude d’une trace GPX, en coordonnées du graphique SVG (viewBox 900 × 285).
+// Profil d’altitude d’une trace GPX, en coordonnées du graphique SVG.
 
-/** Zone de tracé du graphique. */
+/** Zone de tracé par défaut ; la fiche la calcule selon la largeur de l’écran. */
 export const PLOT = Object.freeze({ left: 52, right: 884, top: 26, bottom: 213 });
 
 const EARTH_RADIUS_KM = 6371;
@@ -89,8 +89,9 @@ export function measureClimb(points, fromKm, toKm) {
  * Points du profil et repères (départ, ravitos, arrivée) placés sur la trace.
  * @param {Array<{ latitude: number, longitude: number, elevation: number }>} trackpoints
  * @param {Array<{ id: string, km?: number }>} [checkpoints]
+ * @param {{ left: number, right: number, top: number, bottom: number }} [plot] Zone de tracé.
  */
-export function buildElevationProfile(trackpoints, checkpoints = []) {
+export function buildElevationProfile(trackpoints, checkpoints = [], plot = PLOT) {
   const { points, distanceKm } = measureTrack(trackpoints);
   const elevations = points.map(point => point.elevation);
   const minElevation =
@@ -104,10 +105,10 @@ export function buildElevationProfile(trackpoints, checkpoints = []) {
     return {
       km: target,
       elevation,
-      x: PLOT.left + (target / distanceKm) * (PLOT.right - PLOT.left),
+      x: plot.left + (target / distanceKm) * (plot.right - plot.left),
       y:
-        PLOT.bottom -
-        ((elevation - minElevation) / (maxElevation - minElevation)) * (PLOT.bottom - PLOT.top)
+        plot.bottom -
+        ((elevation - minElevation) / (maxElevation - minElevation)) * (plot.bottom - plot.top)
     };
   };
 
@@ -126,12 +127,12 @@ export function buildElevationProfile(trackpoints, checkpoints = []) {
     markers.push({ id: "finish", ...pointAt(distanceKm) });
   }
 
-  return { distanceKm, minElevation, maxElevation, samples, markers, points };
+  return { distanceKm, minElevation, maxElevation, samples, markers, points, plot };
 }
 
-/** Pas « rond » (1, 2, 2,5, 5 ou 10 × 10ⁿ) pour environ quatre graduations d’altitude. */
-export function computeElevationStep(elevationRange) {
-  const rawStep = elevationRange / 4;
+/** Pas « rond » (1, 2, 2,5, 5 ou 10 × 10ⁿ) pour environ quatre graduations d’altitude ou de km. */
+export function computeAxisStep(range) {
+  const rawStep = range / 4;
   const magnitude = 10 ** Math.floor(Math.log10(rawStep));
   const normalizedStep = rawStep / magnitude;
   const factor =

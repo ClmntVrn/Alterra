@@ -1,43 +1,29 @@
-/* Profil d’altitude de la fiche course. */
+/* Profil d’altitude de la fiche course, dessiné à la taille réelle de l’écran. */
 
 .elevation-section {
   padding: 16px 14px 12px;
 }
 
-.elevation-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.elevation-heading h2 {
-  margin-bottom: 3px;
-}
-
-.elevation-caption,
-.elevation-hint {
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 11px;
-}
-
-.elevation-ascent {
-  flex-shrink: 0;
-  padding: 6px 8px;
-  border: 1px solid var(--color-line);
-  border-radius: 999px;
-  color: var(--color-charcoal);
-  font-size: 10px;
-  font-weight: 800;
+.elevation-section h2 {
+  margin-bottom: 4px;
 }
 
 .elevation-chart {
   display: block;
   width: 100%;
   height: auto;
-  margin-top: 8px;
   overflow: visible;
+}
+
+.elevation-status {
+  margin: 6px 0 0;
+  color: var(--color-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.elevation-status[hidden] {
+  display: none;
 }
 
 .elevation-grid line {
@@ -50,6 +36,7 @@
   fill: var(--color-muted);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 .elevation-axis {
@@ -62,11 +49,16 @@
   fill: var(--color-track);
 }
 
+/* Partie parcourue : remplie en orange sous la courbe. */
+.elevation-completed-area {
+  fill: rgb(var(--rgb-accent-bright) / 38%);
+}
+
 .elevation-line {
   fill: none;
   stroke: var(--color-slate);
   stroke-linejoin: round;
-  stroke-width: 2.5;
+  stroke-width: 2;
 }
 
 .elevation-completed {
@@ -75,6 +67,17 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 4;
+}
+
+.elevation-position {
+  stroke: var(--color-charcoal);
+  stroke-dasharray: 4 4;
+  stroke-width: 1.5;
+}
+
+.elevation-stop-hit {
+  fill: transparent;
+  cursor: pointer;
 }
 
 .elevation-stop-dot {
@@ -99,28 +102,18 @@
 .elevation-stop-label {
   fill: var(--color-charcoal);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 750;
   paint-order: stroke;
   stroke: var(--color-paper);
   stroke-linejoin: round;
   stroke-width: 3px;
+  pointer-events: none;
 }
 
 .elevation-current {
   fill: var(--color-accent-bright);
-  stroke: var(--color-paper);
-  stroke-width: 2;
-}
-
-.elevation-progress {
-  margin: -3px 0 3px;
-  color: var(--color-charcoal);
-  font-size: 12px;
-  font-weight: 800;
-  text-align: center;
-}
-
-.elevation-hint {
-  text-align: center;
+  stroke: var(--color-charcoal);
+  stroke-width: 2.5;
+  pointer-events: none;
 }

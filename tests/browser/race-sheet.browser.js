@@ -32,7 +32,9 @@ const texts = selector =>
     selector
   );
 const text = async selector => (await texts(selector))[0] ?? null;
-const progress = () => text("#elevationProgress");
+/** Repère atteint sur le profil. */
+const reached = () =>
+  page.evaluate(() => document.querySelector(".elevation-chart").dataset.reached ?? null);
 const isChecked = id =>
   page.evaluate(id => document.querySelector(`.checkpoint[data-id="${id}"] input`).checked, id);
 
@@ -92,7 +94,21 @@ test("le profil place les repères des ravitos et reprend la progression enregis
     ),
     ["r1"]
   );
-  assert.match(await progress(), /^Col A · KM 12 · [\d,]+ km restants$/);
+  assert.equal(await reached(), "r1");
+  assert.deepEqual(
+    await page.evaluate(() => {
+      const chart = document.querySelector(".elevation-chart");
+      const viewBox = chart.viewBox.baseVal;
+      return [
+        Math.round(viewBox.width) === Math.round(chart.getBoundingClientRect().width),
+        Boolean(document.querySelector(".elevation-completed-area").getAttribute("points")),
+        document.querySelector(".elevation-position").getAttribute("visibility")
+      ];
+    }),
+    [true, true, "visible"],
+    "tracé à la taille de l’écran, partie parcourue remplie, position marquée"
+  );
+  assert.deepEqual(await texts(".elevation-section p:not([hidden])"), [], "aucun texte d’aide");
 });
 
 test("un scénario change les temps et horaires de passage", async () => {
@@ -156,7 +172,7 @@ test("le bloc En course montre le prochain ravito et le coche d’un toucher", a
 
   await page.evaluate(() => document.querySelector(".live-reach").click());
   assert.equal(await isChecked("r2"), true);
-  assert.match(await progress(), /^Refuge B · /, "le profil suit");
+  assert.equal(await reached(), "r2", "le profil suit");
   const atRefuge = await live();
   assert.deepEqual(
     [atRefuge.label, atRefuge.next, atRefuge.stats[0], atRefuge.remaining, atRefuge.reach],
@@ -184,14 +200,14 @@ test("toucher un repère coche le ravito et fait avancer la progression", async 
     }),
     [true, "true", ["r1", "r2"]]
   );
-  assert.match(await progress(), /^Refuge B · KM 25 · /);
+  assert.equal(await reached(), "r2");
 
   await page.evaluate(() =>
     document
       .querySelector('[data-profile-stop="finish"]')
       .dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }))
   );
-  assert.match(await progress(), /^Arrivée · /, "le clavier coche aussi un repère");
+  assert.equal(await reached(), "finish", "le clavier coche aussi un repère");
   const finished = await live();
   assert.deepEqual(
     [finished.label, finished.next, finished.stats, finished.reach, finished.undo],
@@ -201,9 +217,11 @@ test("toucher un repère coche le ravito et fait avancer la progression", async 
 
 test("la progression s’arrête au premier ravito non coché, puis se réinitialise", async () => {
   await page.evaluate(() => document.querySelector('.checkpoint[data-id="r1"] input').click());
-  assert.match(await progress(), /^Départ · /);
+  assert.equal(await reached(), "start");
   assert.equal(
-    await page.evaluate(() => document.getElementById("profileCurrent").getAttribute("visibility")),
+    await page.evaluate(() =>
+      document.querySelector(".elevation-current").getAttribute("visibility")
+    ),
     "hidden"
   );
   await page.evaluate(() => document.getElementById("resetCheckpoints").click());

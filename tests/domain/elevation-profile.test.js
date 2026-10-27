@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   PLOT,
   buildElevationProfile,
-  computeElevationStep,
+  computeAxisStep,
   computeProgress,
   measureClimb,
   measureTrack
@@ -55,11 +55,11 @@ test("buildElevationProfile réutilise le repère d’arrivée de la fiche", () 
   assert.equal(finish[0].km, profile.distanceKm);
 });
 
-test("computeElevationStep choisit un pas rond", () => {
-  assert.equal(computeElevationStep(1000), 250);
-  assert.equal(computeElevationStep(800), 200);
-  assert.equal(computeElevationStep(1400), 500);
-  assert.equal(computeElevationStep(3000), 1000);
+test("computeAxisStep choisit un pas rond", () => {
+  assert.equal(computeAxisStep(1000), 250);
+  assert.equal(computeAxisStep(800), 200);
+  assert.equal(computeAxisStep(1400), 500);
+  assert.equal(computeAxisStep(3000), 1000);
 });
 
 test("computeProgress s’arrête au premier ravito non coché", () => {
@@ -94,4 +94,12 @@ test("measureClimb ignore les petites variations d’altitude du GPS", () => {
     distanceKm: index
   }));
   assert.deepEqual(measureClimb(noisy, 0, 4), { ascentMeters: 10, descentMeters: 0 });
+});
+
+test("buildElevationProfile place la trace dans la zone de tracé demandée", () => {
+  const plot = { left: 46, right: 378, top: 30, bottom: 216 };
+  const profile = buildElevationProfile(track, [], plot);
+  const [start, finish] = profile.markers;
+  assert.deepEqual([start.x, start.y, finish.x], [46, 216, 378]);
+  assert.equal(profile.plot, plot);
 });
