@@ -19,6 +19,14 @@
   border: 1px solid var(--color-line);
   border-radius: 14px;
   background: var(--color-paper);
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+
+/* Au toucher, c’est toute la carte qui réagit, pas seulement le texte du titre. */
+.calendar-item:has(.calendar-item-open:active) {
+  background: var(--color-surface-soft);
 }
 
 .calendar-item:has(.calendar-item-open:hover) {
@@ -50,6 +58,8 @@
   font: inherit;
   text-align: left;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 .calendar-item-open::after {
