@@ -2,6 +2,7 @@
 
 import { listObjectives } from "../../domain/objectives.js";
 import { parseDateKey, toDateKey } from "../../domain/dates.js";
+import { formatDuration } from "../../domain/durations.js";
 import { el } from "../../ui/dom.js";
 import {
   formatCountdown,
@@ -38,6 +39,38 @@ function listRaceFigures(race) {
   ].filter(([, value]) => value);
 }
 
+/** Chiffres relevés à l’arrivée : distance, temps et D+. */
+function formatResult({ distanceKm, durationMinutes, ascentMeters }) {
+  return [
+    `${formatNumber(distanceKm)} km`,
+    formatDuration(durationMinutes),
+    Number.isFinite(ascentMeters) ? `${formatNumber(ascentMeters)} m D+` : ""
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+/** « Valider » une course faite, ou « Terminée » pour revoir son résultat. */
+function renderResultButton(race, onEditResult) {
+  const isDone = Boolean(race.result);
+  const button = el(
+    "button",
+    {
+      className: `objective-result-button${isDone ? " is-done" : ""}`,
+      attrs: { type: "button", "aria-haspopup": "dialog" }
+    },
+    [
+      el("span", { text: isDone ? "✓ Terminée" : "Valider", attrs: { "aria-hidden": "true" } }),
+      el("span", {
+        className: "visually-hidden",
+        text: isDone ? `Résultat de ${race.name}` : `Valider ${race.name}`
+      })
+    ]
+  );
+  button.addEventListener("click", () => onEditResult(race));
+  return button;
+}
+
 /** 6 nov. ou 12 avr. – 13 avr. : l’année se lit dans le compte à rebours. */
 function formatShortRange(race) {
   const start = formatShortDayMonth(parseDateKey(race.date));
@@ -63,8 +96,11 @@ function renderOpen(race, onEdit) {
   return button;
 }
 
-/** Prochaine course : compte à rebours en grand à droite, chiffres clés en dessous. */
-function renderNextCard(race, onEdit) {
+/**
+ * Prochaine course : compte à rebours en grand à droite, chiffres clés en dessous. Dès le départ,
+ * elle peut être validée.
+ */
+function renderNextCard(race, { onEdit, onEditResult }) {
   const stats = [["Date", formatShortRange(race)], ...listRaceFigures(race)];
   return el("article", { className: "calendar-item objective-card is-next" }, [
     el("div", { className: "objective-next-heading" }, [
@@ -80,21 +116,25 @@ function renderNextCard(race, onEdit) {
       stats.map(([label, value]) =>
         el("div", {}, [el("dt", { text: label }), el("dd", { text: value })])
       )
-    )
+    ),
+    race.daysLeft <= 0 ? renderResultButton(race, onEditResult) : ""
   ]);
 }
 
 /**
  * Autre course : pastille de date, nom et chiffres, compte à rebours à droite. Une course passée
- * ou sur plusieurs jours rappelle sa période complète.
+ * ou sur plusieurs jours rappelle sa période complète ; une course passée se valide à droite, et
+ * affiche alors son résultat.
  */
-function renderCompactCard(race, { isPast, onEdit }) {
+function renderCompactCard(race, { isPast, onEdit, onEditResult }) {
   const isMultiDay = race.endDate && race.endDate !== race.date;
   const details = [
     isPast || isMultiDay ? formatDateRange(race.date, race.endDate) : "",
-    listRaceFigures(race)
-      .map(([label, value]) => (label === "D+" ? `${value} D+` : value))
-      .join(" · ")
+    race.result
+      ? formatResult(race.result)
+      : listRaceFigures(race)
+          .map(([label, value]) => (label === "D+" ? `${value} D+` : value))
+          .join(" · ")
   ]
     .filter(Boolean)
     .join(" · ");
@@ -104,7 +144,7 @@ function renderCompactCard(race, { isPast, onEdit }) {
       el("h3", {}, [renderOpen(race, onEdit)]),
       details ? el("p", { className: "calendar-event-description", text: details }) : ""
     ]),
-    isPast ? "" : renderCountdown(race.daysLeft)
+    isPast ? renderResultButton(race, onEditResult) : renderCountdown(race.daysLeft)
   ]);
 }
 
@@ -112,10 +152,11 @@ function renderCompactCard(race, { isPast, onEdit }) {
  * @param {Object} options
  * @param {HTMLElement} options.container Zone de la liste.
  * @param {(race: Object) => void} options.onEditPersonalRace
+ * @param {(race: Object) => void} options.onEditResult Saisie du résultat d’une course faite.
  * @returns {(sources: { races: Array<Object>, personalRaces: Array<Object> }) => void}
  *   Affiche les objectifs ; rappelé à chaque changement des courses.
  */
-export function createObjectivesView({ container, onEditPersonalRace: onEdit }) {
+export function createObjectivesView({ container, onEditPersonalRace: onEdit, onEditResult }) {
   let sources = null;
 
   function render(nextSources = sources) {
@@ -124,8 +165,8 @@ export function createObjectivesView({ container, onEditPersonalRace: onEdit }) 
     const { upcoming, past } = listObjectives(sources, toDateKey(new Date()));
     const children = upcoming.length
       ? [
-          renderNextCard(upcoming[0], onEdit),
-          ...upcoming.slice(1).map(race => renderCompactCard(race, { onEdit }))
+          renderNextCard(upcoming[0], { onEdit, onEditResult }),
+          ...upcoming.slice(1).map(race => renderCompactCard(race, { onEdit, onEditResult }))
         ]
       : [el("p", { className: "calendar-empty", text: "Aucune course à venir." })];
     if (past.length) {
@@ -139,7 +180,7 @@ export function createObjectivesView({ container, onEditPersonalRace: onEdit }) 
               attrs: { "aria-hidden": "true" }
             })
           ]),
-          ...past.map(race => renderCompactCard(race, { isPast: true, onEdit }))
+          ...past.map(race => renderCompactCard(race, { isPast: true, onEdit, onEditResult }))
         ])
       );
     }

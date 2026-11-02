@@ -22,7 +22,7 @@ const categories = Object.freeze({
   cycling: { label: "Vélo", types: ["cycling"] }
 });
 
-export function initializeActivityStatistics(container, repository) {
+export function initializeActivityStatistics(container) {
   const categoriesElement = container.querySelector("#activityCategories");
   const categoriesViewport = container.querySelector("#activityFilterViewport");
   const metricsElement = container.querySelector("#activityMetrics");
@@ -131,16 +131,6 @@ export function initializeActivityStatistics(container, repository) {
   }
 
   render();
-  repository
-    .list("workouts")
-    .then(updateSessions)
-    .catch(error => {
-      console.error("Impossible de charger les statistiques d’entraînement.", error);
-      chart.replaceChildren();
-      chart.setAttribute("role", "status");
-      chart.textContent =
-        "Impossible de charger les statistiques. Vérifie le stockage de cet appareil.";
-    });
 
   return updateSessions;
 

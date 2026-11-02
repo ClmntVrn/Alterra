@@ -8,6 +8,7 @@ import { getWorkoutState } from "../../domain/workouts.js";
 import { el } from "../../ui/dom.js";
 import { capitalize, formatLongDate, formatMonthYear } from "../../ui/format.js";
 import { createPersonalRaceForm } from "../races/personal-race-form.js";
+import { createRaceResultForm } from "../races/race-result-form.js";
 import { renderPersonalRaceCard, renderRaceCard } from "../races/race-card.js";
 import { renderWorkoutCard } from "../workouts/workout-card.js";
 import { renderWorkoutDetail, WORKOUT_DETAIL_TITLE_ID } from "../workouts/workout-detail.js";
@@ -36,9 +37,11 @@ function getEventMarkerClass(event, todayKey) {
  * @param {Object} repository
  * @param {(sources: CalendarSources) => void} [onEventsUpdated] Reçoit les courses et séances
  *   relues après chaque changement.
- * @returns {{ refresh: () => Promise<void>, openPersonalRace: (race?: Object) => void }}
+ * @returns {{ refresh: () => Promise<void>, openPersonalRace: (race?: Object) => void,
+ *   openRaceResult: (race: Object) => void }}
  *   `refresh` recharge les événements depuis la base ; `openPersonalRace` ouvre en plein écran
- *   la modification d’une course personnelle, ou sa création à la date du jour.
+ *   la modification d’une course personnelle, ou sa création à la date du jour ; `openRaceResult`
+ *   la saisie du résultat d’une course faite.
  */
 export function initializeCalendar(racesPromise, repository, onEventsUpdated = () => {}) {
   const heading = document.querySelector(".calendar-heading");
@@ -84,6 +87,23 @@ export function initializeCalendar(racesPromise, repository, onEventsUpdated = (
     },
     onCancel: closeSheet
   });
+  const resultForm = createRaceResultForm({
+    form: document.getElementById("raceResultForm"),
+    // On repart de l’enregistrement stocké, sans les champs d’affichage des objectifs.
+    save: async (race, result) => {
+      const collection = race.eventType === "race" ? "raceCatalog" : "personalRaces";
+      const stored = await repository.get(collection, race.id);
+      if (!stored) throw new Error(`Course introuvable : ${race.id}.`);
+      if (result) stored.result = result;
+      else delete stored.result;
+      await repository.save(collection, stored);
+    },
+    onSaved: async () => {
+      closeSheet();
+      await refreshEvents();
+    },
+    onCancel: closeSheet
+  });
   const workoutForm = createWorkoutForm({
     form: document.getElementById("trainingForm"),
     save: workout => repository.save("workouts", workout),
@@ -119,6 +139,7 @@ export function initializeCalendar(racesPromise, repository, onEventsUpdated = (
     workoutDetail.hidden = true;
     workoutDetail.replaceChildren();
     raceForm.close();
+    resultForm.close();
     workoutForm.close();
   }
 
@@ -204,6 +225,13 @@ export function initializeCalendar(racesPromise, repository, onEventsUpdated = (
     resetSheet();
     openSheet("raceEventFormTitle");
     raceForm.open(date, race);
+  }
+
+  /** @param {Object} race Course faite, du catalogue (`eventType` « race ») ou personnelle. */
+  function openRaceResult(race) {
+    resetSheet();
+    openSheet("raceResultFormTitle");
+    resultForm.open(race);
   }
 
   function renderEventCard(event) {
@@ -304,6 +332,7 @@ export function initializeCalendar(racesPromise, repository, onEventsUpdated = (
 
   return {
     refresh: refreshEvents,
-    openPersonalRace: race => openPersonalRace(race)
+    openPersonalRace: race => openPersonalRace(race),
+    openRaceResult
   };
 }

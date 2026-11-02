@@ -30,6 +30,7 @@ const FILES = [
   "./src/features/calendar/month-picker.js",
   "./src/features/statistics/activity-statistics.js",
   "./src/features/races/personal-race-form.js",
+  "./src/features/races/race-result-form.js",
   "./src/features/races/race-card.js",
   "./src/features/objectives/objectives.js",
   "./src/features/workouts/workout-card.js",

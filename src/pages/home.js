@@ -4,6 +4,7 @@ import { initializeActivityStatistics } from "../features/statistics/activity-st
 import { createPersonalDataStore } from "../storage/personal-data.js";
 import { loadRaceCatalog } from "../storage/race-catalog.js";
 import { daysBetween } from "../domain/dates.js";
+import { listRaceResultsAsWorkouts } from "../domain/statistics.js";
 import { formatDaysAgo } from "../ui/format.js";
 import { initializeTabBar } from "../ui/tab-bar.js";
 
@@ -27,6 +28,31 @@ const exportButton = document.getElementById("exportPersonalData");
 const importButton = document.getElementById("importPersonalData");
 const importInput = document.getElementById("personalDataFile");
 const importChoice = document.getElementById("importChoice");
+const status = document.getElementById("personalDataStatus");
+const lastBackup = document.getElementById("personalDataLastBackup");
+const profileBadges = ["profileBadge", "profileBadgeText"].map(id => document.getElementById(id));
+initializeTabBar(document.querySelector(".tab-bar"));
+const personalData = createPersonalDataStore();
+let raceCatalogPromise = loadRaceCatalog(personalData);
+const updateActivityStatistics = initializeActivityStatistics(
+  document.getElementById("activityStatistics")
+);
+const renderObjectives = createObjectivesView({
+  container: document.getElementById("objectivesList"),
+  onEditPersonalRace: race => calendar.openPersonalRace(race),
+  onEditResult: race => calendar.openRaceResult(race)
+});
+const calendar = initializeCalendar(raceCatalogPromise, personalData.repository, sources => {
+  // Une course validée compte comme une sortie réalisée.
+  updateActivityStatistics([
+    ...sources.workouts,
+    ...listRaceResultsAsWorkouts([...sources.races, ...sources.personalRaces])
+  ]);
+  renderObjectives(sources);
+});
+document
+  .getElementById("addObjectiveRace")
+  .addEventListener("click", () => calendar.openPersonalRace());
 
 /** Demande fusion ou remplacement ; renvoie 'merge', 'replace' ou 'cancel'. */
 function askImportMode() {
@@ -36,27 +62,6 @@ function askImportMode() {
     importChoice.addEventListener("close", () => resolve(importChoice.returnValue), { once: true })
   );
 }
-const status = document.getElementById("personalDataStatus");
-const lastBackup = document.getElementById("personalDataLastBackup");
-const profileBadges = ["profileBadge", "profileBadgeText"].map(id => document.getElementById(id));
-initializeTabBar(document.querySelector(".tab-bar"));
-const personalData = createPersonalDataStore();
-let raceCatalogPromise = loadRaceCatalog(personalData);
-const updateActivityStatistics = initializeActivityStatistics(
-  document.getElementById("activityStatistics"),
-  personalData.repository
-);
-const renderObjectives = createObjectivesView({
-  container: document.getElementById("objectivesList"),
-  onEditPersonalRace: race => calendar.openPersonalRace(race)
-});
-const calendar = initializeCalendar(raceCatalogPromise, personalData.repository, sources => {
-  updateActivityStatistics(sources.workouts);
-  renderObjectives(sources);
-});
-document
-  .getElementById("addObjectiveRace")
-  .addEventListener("click", () => calendar.openPersonalRace());
 
 function showPersonalDataStatus(message, isError = false) {
   status.textContent = message;

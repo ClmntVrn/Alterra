@@ -386,6 +386,68 @@
               aria-live="polite"
             ></p>
           </form>
+          <form class="training-form" id="raceResultForm" hidden>
+            <h3 id="raceResultFormTitle">Valider la course</h3>
+            <fieldset class="training-choice">
+              <legend>Type</legend>
+              <div class="training-choice-options training-type-options">
+                <label class="training-chip"
+                  ><input name="type" type="radio" value="trail" checked /><span>Trail</span></label
+                >
+                <label class="training-chip"
+                  ><input name="type" type="radio" value="running" /><span>Course</span></label
+                >
+              </div>
+            </fieldset>
+            <div class="training-form-measures">
+              <label>
+                Distance (km)
+                <input
+                  name="distanceKm"
+                  type="text"
+                  inputmode="decimal"
+                  maxlength="7"
+                  placeholder="42,2"
+                  autocomplete="off"
+                  required
+                />
+              </label>
+              <label>
+                Durée (h:mm)
+                <input
+                  name="duration"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="7"
+                  placeholder="5:30"
+                  autocomplete="off"
+                  required
+                />
+              </label>
+              <label>
+                D+ (m)
+                <input
+                  name="ascentMeters"
+                  type="number"
+                  min="0"
+                  max="100000"
+                  step="1"
+                  inputmode="numeric"
+                  placeholder="2000"
+                />
+              </label>
+            </div>
+            <div class="training-form-actions">
+              <button class="workout-delete-button" type="button" hidden>
+                Retirer le résultat
+              </button>
+              <button class="calendar-create-button training-form-cancel" type="button">
+                Annuler
+              </button>
+              <button class="training-save-button" type="submit">Enregistrer</button>
+            </div>
+            <p class="training-form-status" role="status" aria-live="polite"></p>
+          </form>
           <form class="training-form" id="trainingForm" hidden>
             <h3 id="trainingFormTitle">Nouvel entraînement</h3>
             <fieldset class="training-choice">

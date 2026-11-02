@@ -139,3 +139,30 @@
   box-shadow: none;
   opacity: 0.8;
 }
+
+/* Bouton « Valider » ou « Terminée », au-dessus du lien étendu à la carte. */
+.objective-result-button {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid var(--color-accent);
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-paper);
+  font-size: 13px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.objective-result-button.is-done {
+  border-color: var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-charcoal);
+}
+
+.objective-card.is-next .objective-result-button {
+  width: 100%;
+  margin-top: 12px;
+}

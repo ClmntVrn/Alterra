@@ -7,6 +7,7 @@ import {
   createWeeks,
   filterCompletedWorkouts,
   getWorkoutsInWeek,
+  listRaceResultsAsWorkouts,
   sumWorkouts
 } from "../../src/domain/statistics.js";
 
@@ -72,4 +73,30 @@ test("getWorkoutsInWeek sélectionne les séances qui commencent dans la semaine
   const [week] = createWeeks(new Date(2026, 9, 28), 1);
   const workouts = [workout("2026-10-26"), workout("2026-11-01"), workout("2026-11-02")];
   assert.equal(getWorkoutsInWeek(workouts, week).length, 2);
+});
+
+test("listRaceResultsAsWorkouts compte seulement les courses validées, à leur date de départ", () => {
+  const races = [
+    { id: "a", name: "Prévue", date: "2026-10-04", distanceKm: 40 },
+    {
+      id: "b",
+      name: "Faite",
+      date: "2026-10-11",
+      endDate: "2026-10-12",
+      result: { type: "trail", distanceKm: 42.5, durationMinutes: 300, ascentMeters: 2100 }
+    }
+  ];
+  assert.deepEqual(listRaceResultsAsWorkouts(races), [
+    {
+      id: "b",
+      date: "2026-10-11",
+      type: "trail",
+      title: "Faite",
+      status: "completed",
+      distanceKm: 42.5,
+      durationMinutes: 300,
+      ascentMeters: 2100
+    }
+  ]);
+  assert.equal(sumWorkouts(listRaceResultsAsWorkouts(races)).effort, 42.5 + 21);
 });

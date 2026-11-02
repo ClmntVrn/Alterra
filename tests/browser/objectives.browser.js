@@ -205,6 +205,81 @@ test("« Retour » de la fiche ramène à l’onglet Objectifs", async () => {
   assert.equal(await page.evaluate(() => location.hash), "#objectifs");
 });
 
+/** Remplit et enregistre le formulaire de résultat ouvert, puis attend sa fermeture. */
+const submitResult = values =>
+  page.evaluate(async values => {
+    const form = document.getElementById("raceResultForm");
+    for (const [name, value] of Object.entries(values)) form.elements.namedItem(name).value = value;
+    form.requestSubmit();
+    await new Promise(resolve => {
+      const check = () =>
+        document.getElementById("calendarSheet").open ? setTimeout(check, 20) : resolve();
+      check();
+    });
+  }, values);
+
+test("une course passée se valide avec ses chiffres et affiche son résultat", async () => {
+  await page.evaluate(() => {
+    document.querySelector(".objectives-past").open = true;
+    document.querySelector(".objectives-past .objective-result-button").click();
+  });
+  assert.deepEqual(
+    await page.evaluate(() => [
+      document.getElementById("raceResultForm").hidden,
+      document.getElementById("raceResultFormTitle").textContent,
+      document.querySelector("#raceResultForm .workout-delete-button").hidden
+    ]),
+    [false, "Valider · Course passée", true]
+  );
+  await submitResult({ type: "running", distanceKm: "21,1", duration: "145", ascentMeters: "150" });
+  await page.waitFor(() =>
+    document.querySelector(".objectives-past .objective-result-button.is-done")
+  );
+  assert.deepEqual(
+    await page.evaluate(() => {
+      const card = document.querySelector(".objectives-past .objective-card");
+      return [
+        card.querySelector(".objective-result-button [aria-hidden]").textContent,
+        card.querySelector(".calendar-event-description").textContent.split(" · ").slice(1)
+      ];
+    }),
+    ["✓ Terminée", ["21,1 km", "1 h 45", "150 m D+"]]
+  );
+  const stored = await page.evaluate(async () => {
+    const { createPersonalDataStore } = await import("/src/storage/personal-data.js");
+    return createPersonalDataStore().repository.get("personalRaces", "p-passe");
+  });
+  assert.deepEqual(stored, {
+    id: "p-passe",
+    name: "Course passée",
+    date: await dayKey(-5),
+    result: { type: "running", distanceKm: 21.1, durationMinutes: 105, ascentMeters: 150 }
+  });
+});
+
+test("la course du jour se valide et compte dans les statistiques de la semaine", async () => {
+  await page.evaluate(() =>
+    document.querySelector(".objective-card.is-next .objective-result-button").click()
+  );
+  await submitResult({ type: "trail", distanceKm: "30", duration: "4:00" });
+  await page.waitFor(() => document.querySelector(".objective-card.is-next .is-done"));
+  assert.equal(
+    await page.evaluate(() => document.getElementById("activityDistance").textContent),
+    "30 km"
+  );
+  // Retirer le résultat le sort des statistiques.
+  await page.evaluate(() => {
+    window.confirm = () => true;
+    document.querySelector(".objective-card.is-next .objective-result-button").click();
+    document.querySelector("#raceResultForm .workout-delete-button").click();
+  });
+  await page.waitFor(() => !document.querySelector(".objective-card.is-next .is-done"));
+  assert.equal(
+    await page.evaluate(() => document.getElementById("activityDistance").textContent),
+    "0 km"
+  );
+});
+
 test("le repli des courses passées reste ouvert après une mise à jour", async () => {
   await page.evaluate(() => {
     document.querySelector(".objectives-past").open = true;
