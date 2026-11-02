@@ -212,8 +212,7 @@
   background: transparent;
 }
 
-.smallbtn:hover,
-.gear-reset:hover {
+.smallbtn:hover {
   background: var(--color-surface);
 }
 

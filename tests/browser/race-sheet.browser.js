@@ -282,8 +282,19 @@ test("la checklist du matériel compte les éléments obligatoires", async () =>
     await page.evaluate(() => JSON.parse(localStorage.getItem("alterra-fiche-test-gear"))),
     { g1: true, g2: true, g3: true }
   );
-  await page.evaluate(() => document.getElementById("resetGear").click());
+  const all = () =>
+    page.evaluate(() => {
+      const box = document.getElementById("gearAll");
+      return [box.checked, box.indeterminate, box.nextElementSibling.textContent];
+    });
+  assert.deepEqual(await all(), [true, false, "Tout décocher"]);
+  await page.evaluate(() => document.querySelector('[data-gear="g3"]').click());
+  assert.deepEqual(await all(), [false, true, "Tout décocher"], "état intermédiaire");
+  await page.evaluate(() => document.getElementById("gearAll").click());
   assert.deepEqual(await state(), ["0/2", "0%"]);
+  assert.deepEqual(await all(), [false, false, "Tout cocher"]);
+  await page.evaluate(() => document.getElementById("gearAll").click());
+  assert.deepEqual(await state(), ["2/2", "100%"]);
 });
 
 test("une fiche inconnue affiche un message clair", async () => {

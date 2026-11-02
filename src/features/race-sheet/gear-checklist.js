@@ -25,6 +25,10 @@ export function createGearChecklist(race, gear) {
     el("div", { className: "gear-progress-track" }, [bar]),
     el("p", { className: "gear-hint", text: gear.hint || "Coche les éléments prévus." })
   ]);
+  // Case maîtresse : décoche tout dès qu’un élément est coché, sinon coche tout.
+  const all = el("input", { attrs: { type: "checkbox", id: "gearAll" } });
+  const allLabel = el("span", { text: "Tout cocher" });
+  body.append(el("label", { className: "gear-item gear-all" }, [all, allLabel]));
   gear.groups.forEach((group, groupIndex) => {
     body.append(
       el("div", {
@@ -42,12 +46,6 @@ export function createGearChecklist(race, gear) {
       );
     }
   });
-  const reset = el("button", {
-    className: "gear-reset",
-    text: "Réinitialiser la checklist",
-    attrs: { type: "button", id: "resetGear" }
-  });
-  body.append(reset);
   if (gear.note) body.append(el("p", { className: "gear-note", text: gear.note }));
 
   const summary = el("summary", { className: "gear-summary" }, [
@@ -77,6 +75,10 @@ export function createGearChecklist(race, gear) {
     const checked = required.filter(box => box.checked).length;
     count.textContent = `${checked}/${required.length}`;
     bar.style.width = `${required.length ? (checked / required.length) * 100 : 0}%`;
+    const checkedCount = boxes.filter(box => box.checked).length;
+    all.checked = checkedCount > 0 && checkedCount === boxes.length;
+    all.indeterminate = checkedCount > 0 && checkedCount < boxes.length;
+    allLabel.textContent = checkedCount ? "Tout décocher" : "Tout cocher";
   }
 
   const saved = readGearState(storageKey) || {};
@@ -84,8 +86,9 @@ export function createGearChecklist(race, gear) {
     if (typeof saved[box.dataset.gear] === "boolean") box.checked = saved[box.dataset.gear];
     box.addEventListener("change", saveState);
   }
-  reset.addEventListener("click", () => {
-    for (const box of boxes) box.checked = false;
+  all.addEventListener("change", () => {
+    const check = !boxes.some(box => box.checked);
+    for (const box of boxes) box.checked = check;
     saveState();
   });
   saveState();

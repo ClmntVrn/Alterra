@@ -125,17 +125,10 @@
   text-decoration: line-through;
 }
 
-.gear-reset {
-  width: 100%;
-  min-height: 46px;
-  margin-top: 18px;
-  padding: 10px 12px;
-  border: 1px solid var(--color-line);
-  border-radius: 11px;
-  background: transparent;
-  color: var(--color-charcoal);
-  font-size: 13px;
-  font-weight: 700;
+/* Case « Tout » en tête de liste. */
+.gear-all {
+  border-bottom-color: var(--color-line);
+  font-weight: 750;
 }
 
 .gear-note {
