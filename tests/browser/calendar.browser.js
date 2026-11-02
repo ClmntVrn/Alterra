@@ -251,6 +251,25 @@ test("une course personnelle s’ajoute sur deux jours, se modifie et se supprim
   await click("#previousDay");
 });
 
+test("la date de fin d’une course suit sa date de début, sauf sur plusieurs jours", async () => {
+  await click("#addRaceButton");
+  const setStart = value =>
+    page.evaluate(value => {
+      const form = document.getElementById("raceEventForm");
+      const start = form.elements.namedItem("date");
+      start.value = value;
+      start.dispatchEvent(new Event("input", { bubbles: true }));
+      return form.elements.namedItem("endDate").value;
+    }, value);
+  assert.equal(await setStart("2027-03-10"), "2027-03-10");
+  await page.evaluate(() => {
+    document.getElementById("raceEventForm").elements.namedItem("endDate").value = "2027-03-12";
+  });
+  assert.equal(await setStart("2027-03-11"), "2027-03-12", "garde une fin réglée à part");
+  assert.equal(await setStart("2027-04-02"), "2027-04-02", "rattrape une fin dépassée");
+  await click("#raceEventForm .training-form-cancel");
+});
+
 test("la navigation passe de la vue jour à la vue mois", async () => {
   await page.evaluate(() => document.getElementById("backToMonth").click());
   assert.deepEqual(

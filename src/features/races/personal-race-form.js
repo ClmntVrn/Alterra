@@ -33,6 +33,7 @@ export function createPersonalRaceForm({ form, save, remove, onSaved, onCancel }
   const cancelButton = form.querySelector(".training-form-cancel");
   const deleteButton = form.querySelector(".workout-delete-button");
   let editingRace = null;
+  let previousStart = "";
 
   function close() {
     form.reset();
@@ -56,6 +57,7 @@ export function createPersonalRaceForm({ form, save, remove, onSaved, onCancel }
     fields.namedItem("endDate").value = race?.endDate || race?.date || toDateKey(date);
     deleteButton.hidden = !race;
     form.hidden = false;
+    previousStart = fields.namedItem("date").value;
     updateDateRangeValidity(form);
     fields.namedItem("name").focus();
   }
@@ -82,9 +84,17 @@ export function createPersonalRaceForm({ form, save, remove, onSaved, onCancel }
       deleteButton.disabled = false;
     }
   });
-  for (const name of ["date", "endDate"]) {
-    fields.namedItem(name).addEventListener("input", () => updateDateRangeValidity(form));
-  }
+  // La date de fin suit la date de début, sauf pour une course déjà réglée sur plusieurs jours.
+  fields.namedItem("date").addEventListener("input", event => {
+    const start = event.target.value;
+    const endField = fields.namedItem("endDate");
+    if (start && (!endField.value || endField.value === previousStart || endField.value < start)) {
+      endField.value = start;
+    }
+    previousStart = start;
+    updateDateRangeValidity(form);
+  });
+  fields.namedItem("endDate").addEventListener("input", () => updateDateRangeValidity(form));
   form.addEventListener("submit", async event => {
     event.preventDefault();
     updateDateRangeValidity(form);
