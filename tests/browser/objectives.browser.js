@@ -231,7 +231,38 @@ test("une course passée se valide avec ses chiffres et affiche son résultat", 
     ]),
     [false, "Valider · Course passée", true]
   );
-  await submitResult({ type: "running", distanceKm: "21,1", duration: "145", ascentMeters: "150" });
+  assert.deepEqual(
+    await page
+      .evaluate(() =>
+        [...document.querySelectorAll("#raceResultForm [name]")].map(field => field.name)
+      )
+      .then(names => [...new Set(names)]),
+    [
+      "type",
+      "distanceKm",
+      "duration",
+      "ascentMeters",
+      "perceivedEffort",
+      "heartRateAvg",
+      "heartRateMax",
+      "weather",
+      "notes"
+    ],
+    "les mêmes champs qu’une séance réalisée"
+  );
+  await page.evaluate(() => {
+    document.querySelector('#raceResultForm [name="perceivedEffort"][value="8"]').click();
+  });
+  await submitResult({
+    type: "running",
+    distanceKm: "21,1",
+    duration: "145",
+    ascentMeters: "150",
+    heartRateAvg: "162",
+    heartRateMax: "181",
+    weather: "rain",
+    notes: "Bonne course"
+  });
   await page.waitFor(() =>
     document.querySelector(".objectives-past .objective-result-button.is-done")
   );
@@ -253,7 +284,17 @@ test("une course passée se valide avec ses chiffres et affiche son résultat", 
     id: "p-passe",
     name: "Course passée",
     date: await dayKey(-5),
-    result: { type: "running", distanceKm: 21.1, durationMinutes: 105, ascentMeters: 150 }
+    result: {
+      type: "running",
+      distanceKm: 21.1,
+      durationMinutes: 105,
+      ascentMeters: 150,
+      perceivedEffort: 8,
+      heartRateAvg: 162,
+      heartRateMax: 181,
+      weather: "rain",
+      notes: "Bonne course"
+    }
   });
 });
 

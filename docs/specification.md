@@ -16,7 +16,7 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 - L’onglet Objectifs liste les courses de référence et les courses personnelles. La prochaine est mise en avant : nom et compte à rebours en grand (« J-23 », « Jour J », « En cours » pendant une course sur plusieurs jours), puis date, distance et D+ s’ils sont connus. Les autres courses à venir suivent, de la plus proche à la plus lointaine, en cartes d’une ligne : pastille de date, nom (avec la période d’une course sur plusieurs jours, distance et D+ connus) et compte à rebours.
 - Une course reste à venir jusqu’à son dernier jour inclus ; les courses passées sont repliées en bas, de la plus récente à la plus ancienne.
 - Toucher une course de référence ouvre sa fiche ; toucher une course personnelle ouvre sa modification en plein écran, qui permet aussi de la supprimer. Toute la carte réagit au toucher, sans sélectionner le texte. Le bouton ＋ de l’en-tête crée une course personnelle, à la date du jour par défaut.
-- Une course passée, ou la prochaine dès son jour de départ, se valide (« Valider ») avec les chiffres relevés par la montre : type (trail ou course), distance, durée et D+ facultatif. Elle affiche alors « ✓ Terminée » et ses chiffres réels ; toucher ce bouton les modifie ou les retire.
+- Une course passée, ou la prochaine dès son jour de départ, se valide (« Valider ») avec les mêmes champs qu’une sortie réalisée : type (trail ou course), distance et durée (obligatoires), D+, ressenti, FC moyenne et max, météo et notes. Elle affiche alors « ✓ Terminée » et ses chiffres réels ; toucher ce bouton les modifie ou les retire.
 - Le compte à rebours suit la date du jour au retour au premier plan.
 
 ## Accueil et calendrier

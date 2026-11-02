@@ -109,7 +109,7 @@ Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à 
 
 - [x] Toute la carte d’une course ou séance réagit au toucher, sans sélectionner le titre.
 - [x] La date de fin d’une nouvelle course suit sa date de début.
-- [x] Courses passées validables avec type, distance, durée et D+ de la montre, comptées dans les statistiques.
+- [x] Courses passées validables avec les mêmes champs qu’une séance réalisée (distance, durée, D+, ressenti, FC, météo, notes), comptées dans les statistiques (0.8.26).
 - [x] Matériel : case « Tout » en tête de liste à la place du bouton de réinitialisation en bas.
 - [x] Import au choix : fusionner (l’appareil l’emporte) ou tout remplacer.
 - [x] Style façon apple.com (orange gardé) et thème sombre ; thème de l’iPhone par défaut, bouton dans le Profil.

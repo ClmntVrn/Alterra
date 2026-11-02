@@ -1,22 +1,16 @@
 // Formulaire de création et de modification d’une séance.
 
 import { parseDateKey, parseTimeOfDay, toDateKey } from "../../domain/dates.js";
-import { formatDuration, formatDurationClock, parseDuration } from "../../domain/durations.js";
-import { parseDecimal } from "../../domain/numbers.js";
-import { computeWorkoutEnd, formatPace } from "../../domain/workouts.js";
+import { parseDuration } from "../../domain/durations.js";
+import { computeWorkoutEnd } from "../../domain/workouts.js";
 import { formatLongDate, formatWeekdayDate } from "../../ui/format.js";
 import { DEFAULT_WORKOUT_TITLE, WORKOUT_TYPE_LABELS } from "./workout-labels.js";
-
-const TEXT_FIELDS = [
-  "title",
-  "type",
-  "time",
-  "ascentMeters",
-  "heartRateAvg",
-  "heartRateMax",
-  "weather",
-  "notes"
-];
+import {
+  bindMeasureInputs,
+  checkMeasures,
+  fillMeasures,
+  readMeasures
+} from "./workout-measures.js";
 
 /**
  * @param {Object} options
@@ -45,41 +39,7 @@ export function createWorkoutForm({ form, save, onSaved, onCancel }) {
     timeField.setCustomValidity(
       time === null ? "Saisis une heure entre 00:00 et 23:59, par exemple 930 pour 09:30." : ""
     );
-    const durationField = fields.namedItem("duration");
-    const durationMinutes = parseDuration(durationField.value);
-    durationField.setCustomValidity(
-      Number.isNaN(durationMinutes)
-        ? "Saisis une durée comme 45 (minutes), 130 (1:30) ou 1020 (10:20)."
-        : ""
-    );
-
-    const heartRateAvgField = fields.namedItem("heartRateAvg");
-    const heartRateMaxField = fields.namedItem("heartRateMax");
-    heartRateMaxField.setCustomValidity(
-      heartRateAvgField.value &&
-        heartRateMaxField.value &&
-        Number(heartRateMaxField.value) < Number(heartRateAvgField.value)
-        ? "La FC max doit être supérieure ou égale à la FC moyenne."
-        : ""
-    );
-
-    const distanceField = fields.namedItem("distanceKm");
-    const distanceValue = distanceField.value.trim();
-    const distanceKm = parseDecimal(distanceValue);
-    const isInRange =
-      !distanceValue ||
-      (Number.isFinite(distanceKm) &&
-        distanceKm >= 0.1 &&
-        distanceKm <= 1000 &&
-        /^\d+(?:[,.]\d{1,2})?$/.test(distanceValue));
-    distanceField.setCustomValidity(
-      isInRange ? "" : "Saisis une distance entre 0,1 et 1 000 km, avec au maximum deux décimales."
-    );
-
-    const parts = [];
-    if (durationMinutes) parts.push(formatDuration(durationMinutes));
-    const pace = formatPace(distanceKm, durationMinutes);
-    if (pace) parts.push(`Allure ${pace}`);
+    const { durationMinutes, parts } = checkMeasures(fields);
     const date = fields.namedItem("date").value;
     if (durationMinutes && time !== null) {
       const { endDate, endTime } = computeWorkoutEnd(date, time, durationMinutes);
@@ -117,17 +77,10 @@ export function createWorkoutForm({ form, save, onSaved, onCancel }) {
       : `Entraînement du ${formatLongDate(date)}`;
     fields.namedItem("date").value = workout?.date || toDateKey(date);
     if (workout) {
-      for (const field of TEXT_FIELDS) fields.namedItem(field).value = workout[field] ?? "";
-      if (Number.isFinite(workout.distanceKm)) {
-        fields.namedItem("distanceKm").value = String(workout.distanceKm).replace(".", ",");
+      for (const field of ["title", "type", "time"]) {
+        fields.namedItem(field).value = workout[field] ?? "";
       }
-      if (Number.isFinite(workout.durationMinutes) && workout.durationMinutes > 0) {
-        fields.namedItem("duration").value = formatDurationClock(workout.durationMinutes);
-      }
-      if (Number.isFinite(workout.perceivedEffort)) {
-        fields.namedItem("perceivedEffort").value = String(workout.perceivedEffort);
-        selectedEffort = String(workout.perceivedEffort);
-      }
+      selectedEffort = fillMeasures(fields, workout);
       fields.namedItem("completed").checked = workout.status === "completed";
     }
     syncCompletedFields();
@@ -162,27 +115,8 @@ export function createWorkoutForm({ form, save, onSaved, onCancel }) {
     }
     if (time) workout.time = time;
     else delete workout.time;
-    if (durationMinutes) workout.durationMinutes = durationMinutes;
-    else delete workout.durationMinutes;
-    const distanceValue = String(formData.get("distanceKm")).trim();
-    if (distanceValue) workout.distanceKm = parseDecimal(distanceValue);
-    else delete workout.distanceKm;
-    const ascentValue = String(formData.get("ascentMeters")).trim();
-    if (ascentValue) workout.ascentMeters = Number(ascentValue);
-    else delete workout.ascentMeters;
     // Le ressenti, la FC et la météo ne concernent qu’une séance réalisée.
-    for (const field of ["perceivedEffort", "heartRateAvg", "heartRateMax"]) {
-      const value = workout.status === "completed" ? String(formData.get(field) ?? "").trim() : "";
-      if (value) workout[field] = Number(value);
-      else delete workout[field];
-    }
-    const weather = workout.status === "completed" ? String(formData.get("weather")) : "";
-    if (weather) workout.weather = weather;
-    else delete workout.weather;
-    const notes = String(formData.get("notes")).trim();
-    if (notes) workout.notes = notes;
-    else delete workout.notes;
-    return workout;
+    return readMeasures(workout, formData, { completed: workout.status === "completed" });
   }
 
   cancelButton.addEventListener("click", () => {
@@ -191,30 +125,17 @@ export function createWorkoutForm({ form, save, onSaved, onCancel }) {
   });
   form.addEventListener("input", updateComputed);
   fields.namedItem("completed").addEventListener("change", syncCompletedFields);
-  for (const fieldName of ["time", "duration"]) {
-    const field = fields.namedItem(fieldName);
-    field.addEventListener("blur", () => {
-      if (fieldName === "time") {
-        const time = parseTimeOfDay(field.value);
-        if (time) field.value = time;
-      } else {
-        const durationMinutes = parseDuration(field.value);
-        if (durationMinutes) field.value = formatDurationClock(durationMinutes);
-      }
-      updateComputed();
-    });
-  }
-  // Toucher à nouveau la note choisie la retire.
-  for (const radio of fields.namedItem("perceivedEffort")) {
-    radio.addEventListener("click", () => {
-      if (radio.value === selectedEffort) {
-        radio.checked = false;
-        selectedEffort = "";
-      } else {
-        selectedEffort = radio.value;
-      }
-    });
-  }
+  const timeField = fields.namedItem("time");
+  timeField.addEventListener("blur", () => {
+    const time = parseTimeOfDay(timeField.value);
+    if (time) timeField.value = time;
+    updateComputed();
+  });
+  bindMeasureInputs(fields, {
+    getEffort: () => selectedEffort,
+    setEffort: value => (selectedEffort = value),
+    onChange: updateComputed
+  });
   form.addEventListener("submit", async event => {
     event.preventDefault();
     updateComputed();

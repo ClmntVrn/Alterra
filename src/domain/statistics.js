@@ -32,21 +32,18 @@ export function sumWorkouts(workouts) {
 
 /**
  * Courses validées vues comme des séances réalisées, pour les statistiques : type, distance,
- * durée et D+ viennent du résultat saisi, la date est celle du départ.
+ * durée, D+, ressenti, FC, météo et notes viennent du résultat saisi, la date est celle du départ.
  * @param {Array<Object>} races Courses du catalogue et personnelles.
  */
 export function listRaceResultsAsWorkouts(races) {
   return races
     .filter(race => race.result && typeof race.result === "object")
     .map(race => ({
+      ...race.result,
       id: race.id,
       date: race.date,
-      type: race.result.type,
       title: race.name,
-      status: "completed",
-      distanceKm: race.result.distanceKm,
-      durationMinutes: race.result.durationMinutes,
-      ascentMeters: race.result.ascentMeters
+      status: "completed"
     }));
 }
 
