@@ -3,10 +3,8 @@
 .personal-data-tools {
   margin-top: 16px;
   padding: 18px;
-  border: 1px solid var(--color-line);
-  border-radius: 18px;
+  border-radius: 20px;
   background: var(--color-paper);
-  box-shadow: var(--shadow-card);
 }
 
 .personal-data-tools h2 {
@@ -77,10 +75,10 @@
   width: min(100% - 32px, 360px);
   padding: 20px;
   border: 0;
-  border-radius: 18px;
+  border-radius: 20px;
   background: var(--color-paper);
   color: var(--color-text);
-  box-shadow: var(--shadow-card);
+  box-shadow: var(--shadow-dialog);
 }
 
 .import-choice::backdrop {
@@ -114,7 +112,7 @@
 }
 
 .import-choice .import-choice-primary {
-  border-color: var(--color-accent);
-  background: var(--color-accent);
-  color: var(--color-paper);
+  border-color: var(--color-accent-fill);
+  background: var(--color-accent-fill);
+  color: var(--color-on-accent);
 }

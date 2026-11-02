@@ -155,6 +155,37 @@ for (const width of [320, 390]) {
   });
 }
 
+test("le bouton du Profil passe du thème automatique au clair, au sombre, puis revient", async () => {
+  await page.send("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-color-scheme", value: "light" }]
+  });
+  await tap('.tab[href="#profil"]');
+  const theme = () =>
+    page.evaluate(() => [
+      document.documentElement.dataset.theme ?? null,
+      localStorage.getItem("alterra-theme"),
+      document.getElementById("themeToggle").getAttribute("aria-label"),
+      getComputedStyle(document.body).backgroundColor
+    ]);
+  const [, , autoLabel, lightBackground] = await theme();
+  assert.equal(autoLabel, "Thème : automatique, comme l’iPhone");
+  await tap("#themeToggle");
+  assert.deepEqual((await theme()).slice(0, 3), ["light", "light", "Thème : clair"]);
+  await tap("#themeToggle");
+  const dark = await theme();
+  assert.deepEqual(dark.slice(0, 3), ["dark", "dark", "Thème : sombre"]);
+  assert.notEqual(dark[3], lightBackground, "le fond change");
+
+  // Le choix vaut aussi pour les autres pages, dès leur chargement.
+  await page.goto("/versions.html");
+  assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), "dark");
+  await openHome(page);
+  await tap('.tab[href="#profil"]');
+  await tap("#themeToggle");
+  assert.deepEqual(await theme(), [null, null, autoLabel, lightBackground]);
+  await tap('.tab[href="#accueil"]');
+});
+
 test("la fiche course n’a pas de barre d’onglets", async () => {
   await page.goto("/race.html?id=inconnue");
   await page.waitFor(() => document.querySelector(".race-error"));

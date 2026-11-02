@@ -13,16 +13,24 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: max(16px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
-  background:
-    radial-gradient(ellipse at 12% 0%, rgb(var(--rgb-muted) / 12%), transparent 34rem),
-    var(--color-stone);
+  background: var(--color-stone);
   color: var(--color-text);
   font:
-    16px/1.55 -apple-system,
+    16px/1.5 -apple-system,
     BlinkMacSystemFont,
+    "SF Pro Text",
     "Segoe UI",
+    Roboto,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Titres façon apple.com : police système, graisse marquée, lettres resserrées. */
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  letter-spacing: -0.022em;
 }
 
 main {

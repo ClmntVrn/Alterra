@@ -29,7 +29,7 @@
 .stat {
   min-width: 0;
   padding: 12px 9px;
-  border: 1px solid rgb(var(--rgb-paper) / 12%);
+  border: 1px solid rgb(var(--rgb-cream) / 12%);
   border-radius: 13px;
   background: rgb(var(--rgb-ink) / 24%);
 }
@@ -41,7 +41,7 @@
 }
 
 .stat span {
-  color: rgb(var(--rgb-paper) / 70%);
+  color: rgb(var(--rgb-cream) / 70%);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -74,7 +74,7 @@
 .selector button.active {
   border-color: var(--color-accent-bright);
   background: var(--color-accent-bright);
-  color: var(--color-charcoal);
+  color: var(--color-ink);
 }
 
 .checkpoint-list {
@@ -373,7 +373,7 @@
   flex: 1;
   border: 0;
   background: var(--color-accent-bright);
-  color: var(--color-charcoal);
+  color: var(--color-ink);
   font-size: 18px;
 }
 

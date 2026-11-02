@@ -7,6 +7,7 @@ import { daysBetween } from "../domain/dates.js";
 import { listRaceResultsAsWorkouts } from "../domain/statistics.js";
 import { formatDaysAgo } from "../ui/format.js";
 import { initializeTabBar } from "../ui/tab-bar.js";
+import { initializeThemeToggle } from "../ui/theme-toggle.js";
 
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
   window.addEventListener("load", () => {
@@ -32,6 +33,7 @@ const status = document.getElementById("personalDataStatus");
 const lastBackup = document.getElementById("personalDataLastBackup");
 const profileBadges = ["profileBadge", "profileBadgeText"].map(id => document.getElementById(id));
 initializeTabBar(document.querySelector(".tab-bar"));
+initializeThemeToggle(document.getElementById("themeToggle"));
 const personalData = createPersonalDataStore();
 let raceCatalogPromise = loadRaceCatalog(personalData);
 const updateActivityStatistics = initializeActivityStatistics(

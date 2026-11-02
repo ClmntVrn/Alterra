@@ -61,6 +61,8 @@ const FILES = [
   "./src/storage/race-catalog.js",
   "./src/ui/dom.js",
   "./src/ui/tab-bar.js",
+  "./src/ui/theme.js",
+  "./src/ui/theme-toggle.js",
   "./src/ui/format.js"
 ];
 

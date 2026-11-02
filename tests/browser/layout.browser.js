@@ -9,12 +9,16 @@ import { openHome, openToday, saveRecords, todayKey } from "./helpers.js";
 let browser;
 let page;
 
-const CHARCOAL = "rgb(32, 38, 43)";
+// Couleurs du thème clair, imposé quel que soit le réglage du système.
+const CHARCOAL = "rgb(29, 29, 31)";
 const ACCENT = "rgb(185, 79, 31)";
 
 before(async () => {
   browser = await launchBrowser();
   page = browser.page;
+  await page.send("Emulation.setEmulatedMedia", {
+    features: [{ name: "prefers-color-scheme", value: "light" }]
+  });
 });
 
 after(() => browser?.close());

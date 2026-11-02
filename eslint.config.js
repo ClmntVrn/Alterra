@@ -23,6 +23,10 @@ export default [
     languageOptions: { sourceType: "script", globals: globals.serviceworker }
   },
   {
+    files: ["src/ui/theme.js"],
+    languageOptions: { sourceType: "script" }
+  },
+  {
     files: ["eslint.config.js", "tests/**/*.js", "tools/**/*.js"],
     languageOptions: { globals: globals.node }
   }

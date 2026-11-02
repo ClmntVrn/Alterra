@@ -5,11 +5,10 @@
   isolation: isolate;
   overflow: hidden;
   padding: clamp(26px, 7vw, 48px);
-  border: 1px solid rgb(var(--rgb-paper) / 12%);
-  border-radius: 28px;
+  border-radius: 24px;
   background:
-    radial-gradient(ellipse at 78% 4%, rgb(var(--rgb-accent-bright) / 25%), transparent 38%),
-    linear-gradient(145deg, var(--color-slate), var(--color-charcoal) 78%);
+    radial-gradient(ellipse at 78% 4%, rgb(var(--rgb-accent-bright) / 22%), transparent 38%),
+    linear-gradient(145deg, var(--color-tile-raised), var(--color-tile) 78%);
   box-shadow: var(--shadow-card);
   color: var(--color-cream);
 }
@@ -34,10 +33,8 @@
 .home-hero h1 {
   max-width: 540px;
   margin: 14px 0;
-  font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(36px, 9vw, 58px);
-  font-weight: 600;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.04em;
   line-height: 1.04;
 }
 
@@ -86,7 +83,7 @@
 
 .activity-filter-viewport::before {
   left: 0;
-  background: linear-gradient(90deg, var(--color-charcoal), transparent);
+  background: linear-gradient(90deg, var(--color-tile), transparent);
   content: "";
   opacity: 0;
 }
@@ -97,7 +94,7 @@
 
 .activity-filter-viewport::after {
   right: 0;
-  background: linear-gradient(270deg, var(--color-charcoal), transparent);
+  background: linear-gradient(270deg, var(--color-tile), transparent);
   content: "";
   opacity: 1;
 }
@@ -134,7 +131,7 @@
 .activity-filter[aria-pressed="true"] {
   border-color: var(--color-sand);
   background: var(--color-sand);
-  color: var(--color-charcoal);
+  color: var(--color-ink);
 }
 
 .activity-filter:hover,
@@ -147,7 +144,7 @@
 
 .activity-filter[aria-pressed="true"]:hover,
 .activity-filter[aria-pressed="true"]:focus-visible {
-  color: var(--color-charcoal);
+  color: var(--color-ink);
 }
 
 .activity-week-details {
@@ -265,7 +262,7 @@
 
 .activity-chart-point circle {
   fill: var(--color-chart);
-  stroke: var(--color-charcoal);
+  stroke: var(--color-tile);
   stroke-width: 2;
 }
 

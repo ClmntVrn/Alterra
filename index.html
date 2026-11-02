@@ -3,9 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#20262b" />
+    <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Alterra" />
 
     <title>Alterra — Coaching trail</title>
@@ -24,6 +25,7 @@
     <link rel="stylesheet" href="./styles/features/calendar.css" />
     <link rel="stylesheet" href="./styles/features/calendar-day.css" />
     <link rel="stylesheet" href="./styles/features/objectives.css" />
+    <script src="./src/ui/theme.js"></script>
   </head>
 
   <body class="page-home">
@@ -286,6 +288,46 @@
             <img class="logo" src="./assets/icons/icon.svg" alt="" />
           </a>
           <h1 class="view-title" id="profileTitle">Profil</h1>
+          <button class="view-action is-neutral" id="themeToggle" type="button">
+            <svg
+              data-theme-icon="auto"
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="8.5"></circle>
+              <path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"></path>
+            </svg>
+            <svg
+              data-theme-icon="light"
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              hidden
+            >
+              <circle cx="12" cy="12" r="4"></circle>
+              <path
+                d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+              ></path>
+            </svg>
+            <svg
+              data-theme-icon="dark"
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linejoin="round"
+              hidden
+            >
+              <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"></path>
+            </svg>
+          </button>
         </header>
 
         <section class="personal-data-tools" aria-labelledby="personalDataTitle">

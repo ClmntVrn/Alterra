@@ -4,7 +4,6 @@
   position: relative;
   margin-top: 20px;
   padding: clamp(18px, 4vw, 26px);
-  border: 1px solid var(--color-line);
   border-radius: 22px;
   background: var(--color-paper);
   box-shadow: var(--shadow-card);
@@ -36,7 +35,6 @@
 .calendar-heading h2 {
   margin: 4px 0 0;
   color: var(--color-charcoal);
-  font-family: Georgia, "Times New Roman", serif;
   font-size: 26px;
   line-height: 1.2;
 }
@@ -109,8 +107,8 @@
   width: 42px;
   height: 42px;
   place-items: center;
-  border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border: 1px solid transparent;
+  border-radius: 50%;
   background: var(--color-surface);
   color: var(--color-charcoal);
   font-size: 18px;

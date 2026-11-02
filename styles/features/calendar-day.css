@@ -16,8 +16,8 @@
 .calendar-item {
   position: relative;
   padding: 14px 16px;
-  border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border: 1px solid var(--color-line-soft);
+  border-radius: 16px;
   background: var(--color-paper);
   -webkit-user-select: none;
   user-select: none;
@@ -41,8 +41,7 @@
 .calendar-item h3 {
   margin: 2px 0 0;
   color: var(--color-charcoal);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1.25;
 }
 
@@ -167,9 +166,9 @@
 }
 
 .workout-check input:checked + .workout-check-mark {
-  border-color: var(--color-charcoal);
-  background: var(--color-charcoal);
-  color: var(--color-cream);
+  border-color: var(--color-accent-fill);
+  background: var(--color-accent-fill);
+  color: var(--color-on-accent);
 }
 
 .workout-check input:focus-visible + .workout-check-mark {
@@ -184,15 +183,13 @@
 /* Détail plein écran d’une séance. */
 .workout-detail {
   padding: 20px 18px;
-  border: 1px solid var(--color-line);
-  border-radius: 16px;
+  border-radius: 20px;
   background: var(--color-paper);
 }
 
 .workout-detail h3 {
   margin: 4px 0 2px;
   color: var(--color-charcoal);
-  font-family: Georgia, "Times New Roman", serif;
   font-size: 28px;
   line-height: 1.2;
 }

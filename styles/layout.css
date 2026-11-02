@@ -63,8 +63,8 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: var(--color-charcoal);
-  color: var(--color-cream);
+  background: var(--color-accent-fill);
+  color: var(--color-on-accent);
 }
 
 .view-action svg {
@@ -74,15 +74,14 @@
 
 .view-action:hover,
 .view-action:focus-visible {
-  background: var(--color-accent);
+  background: var(--color-accent-bright);
 }
 
 .view-title {
   margin: 0;
   color: var(--color-charcoal);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 30px;
-  letter-spacing: -0.02em;
+  font-size: 32px;
+  letter-spacing: -0.03em;
 }
 
 .app > .app-footer {
@@ -146,7 +145,7 @@
   flex: 0 0 44px;
   place-items: center;
   padding: 0;
-  border: 1px solid var(--color-control-line);
+  border: 0;
   border-radius: 50%;
   appearance: none;
   background: var(--color-paper);
@@ -168,21 +167,18 @@
 
 .hero {
   padding: clamp(19px, 5vw, 28px);
-  border: 1px solid var(--color-hero-line);
-  border-radius: 24px;
+  border-radius: 22px;
   background:
-    radial-gradient(ellipse at 90% 0%, rgb(var(--rgb-accent-bright) / 24%), transparent 42%),
-    linear-gradient(145deg, var(--color-slate), var(--color-charcoal));
+    radial-gradient(ellipse at 90% 0%, rgb(var(--rgb-accent-bright) / 22%), transparent 42%),
+    linear-gradient(145deg, var(--color-tile-raised), var(--color-tile));
   box-shadow: var(--shadow-card);
   color: var(--color-cream);
 }
 
 .hero h1 {
   margin: 0 0 8px;
-  font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(30px, 8vw, 43px);
-  font-weight: 600;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.035em;
   line-height: 1.08;
 }
 
@@ -193,13 +189,12 @@
 }
 
 .hero .sub {
-  color: rgb(var(--rgb-paper) / 78%);
+  color: rgb(var(--rgb-cream) / 78%);
 }
 
 .section {
   margin-top: 16px;
   padding: clamp(16px, 4vw, 22px);
-  border: 1px solid var(--color-line);
   border-radius: 20px;
   background: var(--color-paper);
   box-shadow: var(--shadow-card);
@@ -208,7 +203,21 @@
 .section h2 {
   margin: 0 0 12px;
   color: var(--color-charcoal);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 20px;
-  letter-spacing: -0.02em;
+  font-size: 21px;
+}
+
+/* Action secondaire de l’en-tête (thème) : bouton rond neutre. */
+.view-action.is-neutral {
+  background: var(--color-paper);
+  box-shadow: var(--shadow-control);
+  color: var(--color-charcoal);
+}
+
+.view-action.is-neutral:hover,
+.view-action.is-neutral:focus-visible {
+  background: var(--color-accent-soft);
+}
+
+.view-action svg[hidden] {
+  display: none;
 }

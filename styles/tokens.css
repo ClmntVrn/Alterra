@@ -1,59 +1,153 @@
-/* Variables partagées : couleurs, ombres. Les autres feuilles n’écrivent aucune couleur en dur. */
+/* Variables partagées : couleurs, ombres. Les autres feuilles n’écrivent aucune couleur en dur.
+   Thème clair par défaut ; le sombre suit l’iPhone, sauf choix contraire enregistré dans le Profil
+   (attribut data-theme sur <html>). */
 
 :root {
   color-scheme: light;
 
-  /* Palette charbon, ardoise, pierre et orange. */
-  --color-charcoal: #20262b;
-  --color-slate: #454f58;
-  --color-stone: #eceff1;
+  /* Palette sobre façon apple.com : fond gris clair, cartes blanches, encre, un seul accent orange. */
+  --color-charcoal: #1d1d1f;
+  --color-slate: #424245;
+  --color-stone: #f5f5f7;
   --color-paper: #ffffff;
-  --color-cream: #fffdf7;
+  --color-cream: #f5f5f7;
   --color-sand: #e6b486;
-  --color-text: #252c32;
-  --color-muted: #69747d;
+  --color-text: #1d1d1f;
+  --color-muted: #6e6e73;
   --color-accent: #b94f1f;
   --color-accent-bright: #ed6b2e;
-  --color-accent-soft: #fff0e7;
+  --color-accent-soft: #fdf1ea;
   --color-chart: #f29a62;
 
-  /* Surfaces claires et traits. */
-  --color-surface: #f1f3f4;
-  --color-surface-soft: #f7f8f8;
-  --color-surface-faint: #fbfcfc;
-  --color-today: #e9edf0;
-  --color-track: #e2e6e9;
-  --color-line: #d9dfe3;
-  --color-line-soft: #e8ebed;
-  --color-control-line: #a8b0b6;
-  --color-axis: #aab2b8;
-  --color-done-text: #828c94;
-  --color-hero-line: #3d484f;
-  --color-accent-line-soft: #f0d2bd;
+  /* Toujours foncés ou clairs, quel que soit le thème. */
+  --color-ink: #1d1d1f;
+  --color-on-accent: #ffffff;
+  --color-accent-fill: #b94f1f;
+  --color-tile: #1d1d1f;
+  --color-tile-raised: #3a3a3c;
+
+  /* Surfaces et traits. */
+  --color-surface: #f0f0f2;
+  --color-surface-soft: #f5f5f7;
+  --color-surface-faint: #fafafc;
+  --color-today: #e8e8ed;
+  --color-track: #e8e8ed;
+  --color-line: #d2d2d7;
+  --color-line-soft: #e8e8ed;
+  --color-control-line: #aeaeb2;
+  --color-axis: #c7c7cc;
+  --color-done-text: #86868b;
+  --color-accent-line-soft: #f5d9c8;
   --color-accent-line: #f2c7ae;
   --color-accent-line-strong: #d99a77;
 
   /* États. */
-  --color-warning: #fff3d9;
+  --color-warning: #fff4dc;
   --color-warning-line: #e6c78e;
   --color-warning-strong: #b7791f;
   --color-warning-text: #8a5a00;
-  --color-error: #9c2f19;
-  --color-danger: #8f3023;
-  --color-danger-line: #d9a99b;
+  --color-error: #b3261e;
+  --color-danger: #b3261e;
+  --color-danger-line: #e3b3ad;
 
   /* Composantes RVB, pour les transparences : rgb(var(--rgb-cream) / 30%). */
   --rgb-paper: 255 255 255;
-  --rgb-cream: 255 253 247;
-  --rgb-slate: 69 79 88;
-  --rgb-muted: 105 116 125;
-  --rgb-ink: 20 25 29;
+  --rgb-cream: 245 245 247;
+  --rgb-slate: 66 66 69;
+  --rgb-muted: 110 110 115;
+  --rgb-ink: 0 0 0;
   --rgb-accent-bright: 237 107 46;
   --rgb-chart: 242 154 98;
   --rgb-warning-strong: 183 121 31;
-  --rgb-mountain-light: 160 171 179;
-  --rgb-mountain-dark: 59 69 77;
+  --rgb-mountain-light: 160 160 166;
+  --rgb-mountain-dark: 72 72 74;
 
-  --shadow-card: 0 12px 32px rgb(31 41 48 / 8%);
-  --shadow-control: 0 2px 8px rgb(31 41 48 / 12%);
+  /* Cartes à plat : pas d’ombre portée, seulement la fenêtre et les commandes flottantes. */
+  --shadow-card: none;
+  --shadow-control: 0 1px 4px rgb(0 0 0 / 10%);
+  --shadow-dialog: 0 20px 50px rgb(0 0 0 / 22%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-charcoal: #f5f5f7;
+    --color-slate: #d1d1d6;
+    --color-stone: #000000;
+    --color-paper: #1c1c1e;
+    --color-text: #f5f5f7;
+    --color-muted: #98989d;
+    --color-accent: #ff9a62;
+    --color-accent-bright: #f07a3e;
+    --color-accent-soft: #33221a;
+    --color-accent-fill: #d35a22;
+    --color-tile: #1c1c1e;
+    --color-tile-raised: #2c2c2e;
+    --color-surface: #2c2c2e;
+    --color-surface-soft: #2c2c2e;
+    --color-surface-faint: #232325;
+    --color-today: #3a3a3c;
+    --color-track: #3a3a3c;
+    --color-line: #38383a;
+    --color-line-soft: #2c2c2e;
+    --color-control-line: #636366;
+    --color-axis: #48484a;
+    --color-done-text: #8e8e93;
+    --color-accent-line-soft: #4a2c1c;
+    --color-accent-line: #5c3520;
+    --color-accent-line-strong: #8a4a2a;
+    --color-warning: #33280f;
+    --color-warning-line: #6b5320;
+    --color-warning-strong: #e0a53a;
+    --color-warning-text: #f2c46a;
+    --color-error: #ff6961;
+    --color-danger: #ff6961;
+    --color-danger-line: #6b2a26;
+    --rgb-paper: 28 28 30;
+    --rgb-slate: 209 209 214;
+    --rgb-muted: 152 152 157;
+    --shadow-control: 0 1px 4px rgb(0 0 0 / 50%);
+    --shadow-dialog: 0 20px 50px rgb(0 0 0 / 60%);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-charcoal: #f5f5f7;
+  --color-slate: #d1d1d6;
+  --color-stone: #000000;
+  --color-paper: #1c1c1e;
+  --color-text: #f5f5f7;
+  --color-muted: #98989d;
+  --color-accent: #ff9a62;
+  --color-accent-bright: #f07a3e;
+  --color-accent-soft: #33221a;
+  --color-accent-fill: #d35a22;
+  --color-tile: #1c1c1e;
+  --color-tile-raised: #2c2c2e;
+  --color-surface: #2c2c2e;
+  --color-surface-soft: #2c2c2e;
+  --color-surface-faint: #232325;
+  --color-today: #3a3a3c;
+  --color-track: #3a3a3c;
+  --color-line: #38383a;
+  --color-line-soft: #2c2c2e;
+  --color-control-line: #636366;
+  --color-axis: #48484a;
+  --color-done-text: #8e8e93;
+  --color-accent-line-soft: #4a2c1c;
+  --color-accent-line: #5c3520;
+  --color-accent-line-strong: #8a4a2a;
+  --color-warning: #33280f;
+  --color-warning-line: #6b5320;
+  --color-warning-strong: #e0a53a;
+  --color-warning-text: #f2c46a;
+  --color-error: #ff6961;
+  --color-danger: #ff6961;
+  --color-danger-line: #6b2a26;
+  --rgb-paper: 28 28 30;
+  --rgb-slate: 209 209 214;
+  --rgb-muted: 152 152 157;
+  --shadow-control: 0 1px 4px rgb(0 0 0 / 50%);
+  --shadow-dialog: 0 20px 50px rgb(0 0 0 / 60%);
 }

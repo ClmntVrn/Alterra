@@ -15,7 +15,7 @@
   align-items: center;
   gap: 14px;
   padding: 12px 14px;
-  box-shadow: var(--shadow-card);
+  border-color: transparent;
 }
 
 .objective-card-main {
@@ -69,9 +69,7 @@
 /* Prochaine course : la carte la plus visible, compte à rebours en grand à droite du nom. */
 .objective-card.is-next {
   display: block;
-  padding: 16px 18px;
-  border: 2px solid var(--color-accent-line-strong);
-  background: var(--color-accent-soft);
+  padding: 18px;
 }
 
 .objective-next-heading {
@@ -88,9 +86,8 @@
 .objective-card.is-next h2 {
   margin: 2px 0 0;
   color: var(--color-charcoal);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 25px;
-  line-height: 1.2;
+  font-size: 26px;
+  line-height: 1.15;
 }
 
 .objective-card.is-next .objective-countdown {
@@ -100,8 +97,8 @@
 }
 
 .objective-card.is-next .workout-stats {
-  padding-top: 10px;
-  border-top: 1px solid var(--color-accent-line);
+  padding-top: 12px;
+  border-top: 1px solid var(--color-line-soft);
 }
 
 .objectives-past {
@@ -136,8 +133,10 @@
 
 .objectives-past > .objective-card {
   margin-top: 8px;
-  box-shadow: none;
-  opacity: 0.8;
+}
+
+.objectives-past .objective-card h3 {
+  color: var(--color-slate);
 }
 
 /* Bouton « Valider » ou « Terminée », au-dessus du lien étendu à la carte. */
@@ -147,17 +146,17 @@
   flex: none;
   min-height: 36px;
   padding: 6px 14px;
-  border: 1px solid var(--color-accent);
+  border: 1px solid var(--color-accent-fill);
   border-radius: 999px;
-  background: var(--color-accent);
-  color: var(--color-paper);
+  background: var(--color-accent-fill);
+  color: var(--color-on-accent);
   font-size: 13px;
   font-weight: 750;
   white-space: nowrap;
 }
 
 .objective-result-button.is-done {
-  border-color: var(--color-line);
+  border-color: var(--color-surface);
   background: var(--color-surface);
   color: var(--color-charcoal);
 }
