@@ -74,7 +74,7 @@ Collections IndexedDB (clé `id`, identifiant stable généré par `crypto.rando
 | Collection                       | Contenu                                                               | Utilisation                   |
 | -------------------------------- | --------------------------------------------------------------------- | ----------------------------- |
 | `workouts`                       | Sorties prévues ou réalisées (statut `planned` ou `completed`)        | Calendrier, statistiques      |
-| `personalRaces`                  | Courses personnelles (nom, dates)                                     | Calendrier, objectifs         |
+| `personalRaces`                  | Courses personnelles (nom, dates, résultat éventuel)                  | Calendrier, objectifs, stats  |
 | `raceCatalog`                    | Fiches de course de référence, GPX embarqué dans `profile.gpxData`    | Calendrier, objectifs, fiches |
 | `racePlans`                      | Plan personnel d’une course (objectif, scénarios, nutrition, rappels) | Fiches                        |
 | `activities`                     | Non utilisée, conservée pour compatibilité du format                  | —                             |
@@ -83,14 +83,16 @@ Collections IndexedDB (clé `id`, identifiant stable généré par `crypto.rando
 
 Une sortie réalisée est le même enregistrement que la sortie prévue, mis à jour avec les valeurs réelles : le prévu n’est pas conservé après réalisation. Champs d’une sortie : `date`, `endDate` (calculée depuis `time` et `durationMinutes`, absente si la sortie tient sur un jour), `type`, `title`, `status`, `time`, `distanceKm`, `durationMinutes`, `ascentMeters`, `notes`, `createdAt`, `completedAt`, et pour une sortie réalisée `perceivedEffort` (1–10), `heartRateAvg`, `heartRateMax` (bpm) et `weather`. L’état « à vérifier » n’est pas stocké : il est déduit à l’affichage d’une sortie prévue dont la date est passée.
 
-Les états de progression des fiches (ravitos cochés, matériel) sont dans `localStorage` sous des clés `alterra-*` et sont inclus dans la sauvegarde.
+Une course faite, personnelle ou de référence, peut porter un champ facultatif `result` : `type` (`trail` ou `running`), `distanceKm`, `durationMinutes` et `ascentMeters` facultatif. `listRaceResultsAsWorkouts` la convertit en sortie réalisée pour les statistiques ; le format de sauvegarde ne change pas.
+
+Les états de progression des fiches (ravitos cochés, matériel) et le thème choisi (`alterra-theme`) sont dans `localStorage` sous des clés `alterra-*` et sont inclus dans la sauvegarde. Le thème est appliqué dès le `<head>` par `src/ui/theme.js`, script classique chargé après les feuilles de style.
 
 Les dates sont des clés locales `AAAA-MM-JJ`, interprétées dans le fuseau de l’appareil ; les périodes (`date` → `endDate`) sont inclusives.
 
 ## 3. Sauvegarde et limites
 
 - L’export est un JSON autonome (format 3) : toutes les collections, les réglages, les états `localStorage` et la date de la sauvegarde. Les formats 1 et 2 (collections `plannedSessions` et `raceEvents`) restent acceptés : `migratePersonalData` les convertit à l’import.
-- L’import valide le fichier puis, après confirmation, remplace toute la base en une seule transaction.
+- L’import valide le fichier puis, selon le choix, remplace toute la base ou la fusionne (`mergePersonalData` : ajout de ce qui manque, l’appareil l’emporte) ; l’écriture se fait en une seule transaction.
 - Le Profil affiche la date de la dernière sauvegarde et la met en avant à partir de 7 jours, avec une pastille sur l’onglet. Au démarrage, l’application demande un stockage persistant (`navigator.storage.persist()`).
 - Le schéma IndexedDB a un numéro de version (`DATABASE_VERSION`, 3) pour migrer sans effacer les données. Le passage à la version 3 recopie `plannedSessions` et `raceEvents` vers `workouts` et `personalRaces` dans la transaction de mise à niveau : en cas d’échec, la base reste intacte dans sa version précédente.
 

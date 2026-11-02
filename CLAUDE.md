@@ -12,7 +12,8 @@ Documentation de référence, à lire avant une évolution fonctionnelle :
 ## Expérience et style
 
 - Interface lisible en un coup d'œil, libellés simples, pas de texte redondant ni de section superflue.
-- Style outdoor : palette charbon, ardoise, pierre et orange. Pas de vert sans demande explicite.
+- Style sobre façon apple.com : police système, cartes à plat sans ombre, fond gris clair (noir en sombre), orange comme seul accent. Pas de vert sans demande explicite.
+- Thèmes clair et sombre : le sombre suit l’iPhone sauf choix forcé dans le Profil. Toute couleur passe par une variable qui a sa valeur sombre ; `--color-tile`, `--color-ink` et `--color-cream` restent foncés ou clairs dans les deux thèmes (bandeaux sombres, texte sur fond orange clair).
 - Aucune couleur écrite en dur hors de `styles/tokens.css` : utiliser ses variables (`var(--color-…)`, et `rgb(var(--rgb-…) / 30%)` pour une transparence).
 - Retour à l’écran précédent : partout le même bouton rond avec une flèche, en haut à gauche. En-tête des onglets sur une ligne : logo (retour à l’accueil), titre, action éventuelle en bouton rond à droite.
 - Conserver l'accessibilité clavier, les attributs ARIA et des repères qui ne reposent pas uniquement sur la couleur.

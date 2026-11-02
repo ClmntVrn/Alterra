@@ -1,7 +1,7 @@
 # Plan de développement d’Alterra
 
-**Mis à jour le :** 27 octobre 2026  
-**État général :** version locale utilisable (0.8.23) ; entraînements, statistiques, barre d’onglets et objectifs en place, retours iPhone attendus sur les étapes 6 à 8. Prochaines étapes : ajout d’une course depuis l’application (fusion course et fiche), puis nutrition et équipement.
+**Mis à jour le :** 2 novembre 2026  
+**État général :** version locale utilisable (0.8.25) ; entraînements, statistiques, barre d’onglets, objectifs, courses validées et thème sombre en place, retours iPhone attendus sur les étapes 6 à 8 et les retours du 2 novembre. Prochaines étapes : ajout d’une course depuis l’application (fusion course et fiche), puis nutrition et équipement.
 
 ## Vision
 
@@ -37,7 +37,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - Usage personnel d’abord ; un ami pourra plus tard utiliser Alterra avec son propre espace, sans partage implicite.
 - Aucune donnée personnelle envoyée automatiquement à GitHub ou synchronisée pendant la phase locale. Les fiches de course et GPX ne sont pas dans le dépôt : elles vivent dans la base locale et la sauvegarde.
 - Les données personnelles Mallorca ont déjà été poussées dans le dépôt public et peuvent rester visibles dans l’historique Git. Ne pas y ajouter d’informations privées ; toute purge d’historique sera évaluée séparément.
-- Suppression d’une entrée avec confirmation ; l’import remplace toute la base après confirmation.
+- Suppression d’une entrée avec confirmation. L’import propose de fusionner (ajout de ce qui manque, l’appareil l’emporte) ou de tout remplacer (2 novembre 2026).
 - Unités : km, mètres de D+, durée en minutes (saisie en heures et minutes), allure en min/km.
 
 ### Sorties prévues et réalisées
@@ -48,7 +48,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - Une sortie n’a qu’une date de début saisie ; sa date de fin est calculée depuis l’heure et la durée (26 octobre 2026). Une sortie prévue dont la date est passée est « à vérifier », sans être déclarée manquée.
 - Ressenti, FC et météo ne sont enregistrés que sur une sortie réalisée.
 - Une sortie prévue peut être supprimée ; une sortie réalisée ne l’est pas depuis le calendrier (repasser d’abord en « prévu »).
-- Les statistiques ne comptent que les sorties réalisées, une seule fois, dans la semaine de leur date de début.
+- Les statistiques ne comptent que les sorties réalisées, une seule fois, dans la semaine de leur date de début, ainsi que les courses validées avec leurs chiffres de montre (champ `result` sur la course, 2 novembre 2026).
 - Le stockage des traces GPS des sorties est reporté.
 
 ## Feuille de route
@@ -102,6 +102,18 @@ Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à 
 - [ ] Plus tard : autres objectifs datés (fin de programme, test…), avec un nom, une date et une note, visibles aussi au calendrier par un repère discret.
 
 **Validation :** depuis l’onglet, on voit d’un coup d’œil le nombre de jours avant la prochaine course, et on ajoute, modifie ou supprime une course sur le téléphone.
+
+### Retours d’usage du 2 novembre 2026
+
+**Statut :** réalisés en 0.8.25 — à vérifier sur iPhone
+
+- [x] Toute la carte d’une course ou séance réagit au toucher, sans sélectionner le titre.
+- [x] La date de fin d’une nouvelle course suit sa date de début.
+- [x] Courses passées validables avec type, distance, durée et D+ de la montre, comptées dans les statistiques.
+- [x] Matériel : case « Tout » en tête de liste à la place du bouton de réinitialisation en bas.
+- [x] Import au choix : fusionner (l’appareil l’emporte) ou tout remplacer.
+- [x] Style façon apple.com (orange gardé) et thème sombre ; thème de l’iPhone par défaut, bouton dans le Profil.
+- [ ] À vérifier sur iPhone : barre d’état en appli installée (clair et sombre), lisibilité du sombre dehors, toucher des cartes, import d’une vraie sauvegarde en fusion.
 
 ### Étape 9 — Ajout d’une course depuis l’application
 
