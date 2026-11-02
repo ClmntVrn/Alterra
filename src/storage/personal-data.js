@@ -1,5 +1,6 @@
 import {
   createEmptyPersonalData,
+  mergePersonalData,
   PERSONAL_DATA_COLLECTIONS,
   validatePersonalData
 } from "../domain/backup-format.js";
@@ -11,6 +12,24 @@ const LOCAL_STATE_PREFIX = "alterra-";
 export function createPersonalDataStore() {
   const adapter = createIndexedDbAdapter();
   const repository = createPersonalDataRepository(adapter);
+
+  /** Toutes les données de l’appareil, avec les clés `localStorage` préfixées. */
+  async function readAll() {
+    const data = createEmptyPersonalData();
+    for (const collection of PERSONAL_DATA_COLLECTIONS) {
+      data[collection] = await repository.list(collection);
+    }
+    const browserStorage = {};
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (key?.startsWith(LOCAL_STATE_PREFIX)) {
+        browserStorage[key] = localStorage.getItem(key);
+      }
+    }
+    data.settings = { ...(await adapter.getSettings()), browserStorage };
+    return data;
+  }
+
   return Object.freeze({
     repository,
     getSettings: () => adapter.getSettings(),
@@ -23,24 +42,19 @@ export function createPersonalDataStore() {
     },
 
     async exportAll() {
-      const data = createEmptyPersonalData();
-      for (const collection of PERSONAL_DATA_COLLECTIONS) {
-        data[collection] = await repository.list(collection);
-      }
-      data.settings = await adapter.getSettings();
-      const browserStorage = {};
-      for (let index = 0; index < localStorage.length; index += 1) {
-        const key = localStorage.key(index);
-        if (key?.startsWith(LOCAL_STATE_PREFIX)) {
-          browserStorage[key] = localStorage.getItem(key);
-        }
-      }
-      data.settings = { ...data.settings, browserStorage, lastBackupAt: new Date().toISOString() };
+      const data = await readAll();
+      data.settings.lastBackupAt = new Date().toISOString();
       return validatePersonalData(data);
     },
 
-    async restore(backup) {
-      const data = validatePersonalData(backup);
+    /**
+     * @param {unknown} backup
+     * @param {{ merge?: boolean }} [options] Fusion : ajoute ce qui manque sans rien remplacer.
+     */
+    async restore(backup, { merge = false } = {}) {
+      const data = merge
+        ? mergePersonalData(await readAll(), backup)
+        : validatePersonalData(backup);
       await adapter.replaceAll(data);
       const browserStorage = data.settings.browserStorage || {};
       for (const key of Object.keys(localStorage)) {

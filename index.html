@@ -306,6 +306,18 @@
             role="status"
             aria-live="polite"
           ></p>
+          <dialog class="import-choice" id="importChoice" aria-labelledby="importChoiceTitle">
+            <form method="dialog">
+              <h3 id="importChoiceTitle">Importer la sauvegarde</h3>
+              <p>
+                Fusionner ajoute ce qui manque sans rien modifier sur cet appareil. Remplacer efface
+                d’abord toutes les données Alterra de cet appareil.
+              </p>
+              <button class="import-choice-primary" value="merge">Fusionner</button>
+              <button value="replace">Remplacer tout</button>
+              <button value="cancel">Annuler</button>
+            </form>
+          </dialog>
         </section>
 
         <section class="personal-data-tools" aria-labelledby="applicationTitle">

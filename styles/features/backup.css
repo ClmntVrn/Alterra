@@ -71,3 +71,50 @@
   color: var(--color-charcoal);
   font-size: 14px;
 }
+
+/* Choix à l’import : fusionner ou tout remplacer. */
+.import-choice {
+  width: min(100% - 32px, 360px);
+  padding: 20px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--color-paper);
+  color: var(--color-text);
+  box-shadow: var(--shadow-card);
+}
+
+.import-choice::backdrop {
+  background: rgb(var(--rgb-ink) / 40%);
+}
+
+.import-choice h3 {
+  margin: 0 0 6px;
+  color: var(--color-charcoal);
+  font-size: 17px;
+}
+
+.import-choice p {
+  margin: 0 0 16px;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.import-choice form {
+  display: grid;
+  gap: 8px;
+}
+
+.import-choice button {
+  min-height: 44px;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  background: var(--color-surface);
+  color: var(--color-charcoal);
+  font-weight: 750;
+}
+
+.import-choice .import-choice-primary {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-paper);
+}

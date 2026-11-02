@@ -26,6 +26,16 @@ const BACKUP_REMINDER_DAYS = 7;
 const exportButton = document.getElementById("exportPersonalData");
 const importButton = document.getElementById("importPersonalData");
 const importInput = document.getElementById("personalDataFile");
+const importChoice = document.getElementById("importChoice");
+
+/** Demande fusion ou remplacement ; renvoie 'merge', 'replace' ou 'cancel'. */
+function askImportMode() {
+  importChoice.returnValue = "cancel";
+  importChoice.showModal();
+  return new Promise(resolve =>
+    importChoice.addEventListener("close", () => resolve(importChoice.returnValue), { once: true })
+  );
+}
 const status = document.getElementById("personalDataStatus");
 const lastBackup = document.getElementById("personalDataLastBackup");
 const profileBadges = ["profileBadge", "profileBadgeText"].map(id => document.getElementById(id));
@@ -111,19 +121,18 @@ importInput.addEventListener("change", async () => {
   importButton.disabled = true;
   try {
     const data = JSON.parse(await file.text());
-    if (
-      !window.confirm(
-        "Cette importation remplacera toutes les données Alterra de cet appareil, y compris les courses et états de checklist. Continuer ?"
-      )
-    ) {
-      return;
-    }
-    await personalData.restore(data);
+    const mode = await askImportMode();
+    if (mode === "cancel") return;
+    await personalData.restore(data, { merge: mode === "merge" });
     raceCatalogPromise = loadRaceCatalog(personalData);
     await raceCatalogPromise;
     await calendar.refresh();
     refreshLastBackup();
-    showPersonalDataStatus("Base complète restaurée sur cet appareil.");
+    showPersonalDataStatus(
+      mode === "merge"
+        ? "Sauvegarde fusionnée avec les données de cet appareil."
+        : "Base complète restaurée sur cet appareil."
+    );
   } catch (error) {
     console.error("Échec de la restauration des données personnelles.", error);
     showPersonalDataStatus(`Restauration impossible : ${error.message}`, true);

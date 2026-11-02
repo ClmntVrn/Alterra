@@ -147,6 +147,33 @@ test("une sauvegarde au format 2 s’importe dans la nouvelle version", async ()
   assert.equal(await page.evaluate(() => localStorage.getItem("alterra-test-etat")), "[]");
 });
 
+test("une fusion ajoute ce qui manque sans modifier les données de l’appareil", async () => {
+  await page.evaluate(() => localStorage.setItem("alterra-test-etat", '["r1"]'));
+  const backup = createFormatTwoBackup(today);
+  backup.plannedSessions.push({ ...backup.plannedSessions[0], id: "seance-nouvelle" });
+  backup.plannedSessions[0].title = "Titre de la sauvegarde";
+  backup.settings.browserStorage["alterra-autre"] = "1";
+  await page.evaluate(async backup => {
+    const { createPersonalDataStore } = await import("/src/storage/personal-data.js");
+    await createPersonalDataStore().restore(backup, { merge: true });
+  }, backup);
+  const exported = await exportAll();
+  assert.deepEqual(
+    exported.workouts.map(workout => [workout.id, workout.title]),
+    [
+      ["seance-nouvelle", "Sortie importée"],
+      ["seance-v2", "Sortie importée"]
+    ]
+  );
+  assert.deepEqual(
+    await page.evaluate(() => [
+      localStorage.getItem("alterra-test-etat"),
+      localStorage.getItem("alterra-autre")
+    ]),
+    ['["r1"]', "1"]
+  );
+});
+
 test("une sauvegarde invalide est refusée et les données restent intactes", async () => {
   const before = withoutBackupDate(await exportAll());
   const invalid = { ...createFormatTwoBackup(today), formatVersion: 9 };

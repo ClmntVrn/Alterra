@@ -5,6 +5,7 @@ import {
   PERSONAL_DATA_COLLECTIONS,
   PERSONAL_DATA_FORMAT_VERSION,
   createEmptyPersonalData,
+  mergePersonalData,
   migratePersonalData,
   validatePersonalData
 } from "../../src/domain/backup-format.js";
@@ -127,3 +128,43 @@ test(
     assert.deepEqual(validatePersonalData(migrated), migrated, "la migration est stable");
   }
 );
+
+test("la fusion ajoute ce qui manque et garde la version de l’appareil", () => {
+  const current = {
+    ...createEmptyPersonalData(),
+    workouts: [{ ...workout, title: "Sortie de l’appareil" }],
+    settings: {
+      lastBackupAt: "2026-10-30T08:00:00.000Z",
+      browserStorage: { "alterra-fiche-checkpoints": '["r1"]' }
+    }
+  };
+  const incoming = {
+    ...formatTwo(),
+    plannedSessions: [workout, { ...workout, id: "w2" }],
+    settings: {
+      lastBackupAt: "2026-10-01T08:00:00.000Z",
+      browserStorage: { "alterra-fiche-checkpoints": "[]", "alterra-autre": "1" }
+    }
+  };
+  const merged = mergePersonalData(current, incoming);
+  assert.deepEqual(
+    merged.workouts.map(item => [item.id, item.title]),
+    [
+      ["w1", "Sortie de l’appareil"],
+      ["w2", "Sortie"]
+    ]
+  );
+  assert.deepEqual(merged.personalRaces, [personalRace]);
+  assert.deepEqual(merged.raceCatalog, [raceSheet]);
+  assert.deepEqual(merged.settings, {
+    lastBackupAt: "2026-10-30T08:00:00.000Z",
+    browserStorage: { "alterra-fiche-checkpoints": '["r1"]', "alterra-autre": "1" }
+  });
+});
+
+test("la fusion refuse une sauvegarde invalide", () => {
+  assert.throws(
+    () => mergePersonalData(createEmptyPersonalData(), { formatVersion: 9 }),
+    /Version des données non prise en charge : 9/
+  );
+});

@@ -153,3 +153,31 @@ export function validatePersonalData(data) {
 
   return migrated;
 }
+
+/**
+ * Fusionne une sauvegarde dans les données de l’appareil sans rien supprimer : les éléments
+ * absents sont ajoutés ; pour un même identifiant ou une même clé, l’appareil l’emporte.
+ * @param {PersonalData} current Données de l’appareil, au format courant.
+ * @param {unknown} incoming Sauvegarde à fusionner, migrée et vérifiée ici.
+ * @returns {PersonalData}
+ */
+export function mergePersonalData(current, incoming) {
+  const data = validatePersonalData(incoming);
+  const merged = createEmptyPersonalData();
+  for (const collection of PERSONAL_DATA_COLLECTIONS) {
+    const ids = new Set(current[collection].map(record => record.id));
+    merged[collection] = [
+      ...current[collection],
+      ...data[collection].filter(record => !ids.has(record.id))
+    ];
+  }
+  merged.settings = {
+    ...data.settings,
+    ...current.settings,
+    browserStorage: {
+      ...(data.settings.browserStorage || {}),
+      ...(current.settings.browserStorage || {})
+    }
+  };
+  return validatePersonalData(merged);
+}
