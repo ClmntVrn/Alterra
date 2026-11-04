@@ -114,6 +114,7 @@ Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à 
 - [x] Import au choix : fusionner (l’appareil l’emporte) ou tout remplacer.
 - [x] Style façon apple.com (orange gardé) et thème sombre ; thème de l’iPhone par défaut, bouton dans le Profil.
 - [x] Durée saisie en deux cases heures et minutes ; vitesse en km/h pour le vélo à la place de l’allure (0.8.27).
+- [x] Statistiques de l’accueil sur une carte normale, sans bandeau sombre ni relief de montagne (0.8.29).
 - [ ] À vérifier sur iPhone : barre d’état en appli installée (clair et sombre), lisibilité du sombre dehors, toucher des cartes, import d’une vraie sauvegarde en fusion.
 
 ### Étape 9 — Ajout d’une course depuis l’application

@@ -59,8 +59,6 @@
   --rgb-accent-bright: 237 107 46;
   --rgb-chart: 242 154 98;
   --rgb-warning-strong: 183 121 31;
-  --rgb-mountain-light: 160 160 166;
-  --rgb-mountain-dark: 72 72 74;
 
   /* Cartes à plat : pas d’ombre portée, seulement la fenêtre et les commandes flottantes. */
   --shadow-card: none;
