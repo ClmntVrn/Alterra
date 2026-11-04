@@ -1,9 +1,9 @@
 // Champs communs à une séance et au résultat d’une course : distance, durée, D+, ressenti, FC,
 // météo et notes. Mêmes noms de champs, mêmes règles de saisie, mêmes noms d’enregistrement.
 
-import { formatDuration, formatDurationClock, parseDuration } from "../../domain/durations.js";
+import { durationFromParts, formatDuration, splitDuration } from "../../domain/durations.js";
 import { parseDecimal } from "../../domain/numbers.js";
-import { formatPace } from "../../domain/workouts.js";
+import { formatRate } from "./workout-parts.js";
 
 /** Champs propres à une sortie réalisée. */
 export const COMPLETED_FIELDS = Object.freeze([
@@ -13,6 +13,13 @@ export const COMPLETED_FIELDS = Object.freeze([
   "weather"
 ]);
 
+/** @returns {number|null} Minutes saisies dans les cases h et min, null si vides, NaN si invalides. */
+export function readDuration(source) {
+  const read = name =>
+    source instanceof FormData ? source.get(name) : source.namedItem(name).value;
+  return durationFromParts(read("durationHours"), read("durationMins"));
+}
+
 /**
  * Vérifie la durée, la distance et la FC, avec un message pour chaque saisie invalide.
  * @param {HTMLFormControlsCollection} fields
@@ -20,12 +27,14 @@ export const COMPLETED_FIELDS = Object.freeze([
  *   et éléments du résumé calculé (durée, allure).
  */
 export function checkMeasures(fields) {
-  const durationField = fields.namedItem("duration");
-  const durationMinutes = parseDuration(durationField.value);
-  durationField.setCustomValidity(
+  const hoursField = fields.namedItem("durationHours");
+  const durationMinutes = readDuration(fields);
+  hoursField.setCustomValidity(
     Number.isNaN(durationMinutes)
-      ? "Saisis une durée comme 45 (minutes), 130 (1:30) ou 1020 (10:20)."
-      : ""
+      ? "Saisis une durée en heures et minutes, par exemple 1 h 30."
+      : durationMinutes === null && "required" in hoursField.dataset
+        ? "Saisis la durée."
+        : ""
   );
 
   const heartRateAvgField = fields.namedItem("heartRateAvg");
@@ -53,8 +62,8 @@ export function checkMeasures(fields) {
 
   const parts = [];
   if (durationMinutes) parts.push(formatDuration(durationMinutes));
-  const pace = formatPace(distanceKm, durationMinutes);
-  if (pace) parts.push(`Allure ${pace}`);
+  const rate = formatRate(fields.namedItem("type").value, distanceKm, durationMinutes);
+  if (rate) parts.push(`${rate.label} ${rate.value}`);
   return { distanceKm, durationMinutes, parts };
 }
 
@@ -70,13 +79,18 @@ export function fillMeasures(fields, record) {
   fields.namedItem("distanceKm").value = Number.isFinite(record.distanceKm)
     ? String(record.distanceKm).replace(".", ",")
     : "";
-  fields.namedItem("duration").value =
-    Number.isFinite(record.durationMinutes) && record.durationMinutes > 0
-      ? formatDurationClock(record.durationMinutes)
-      : "";
+  fillDuration(fields, record.durationMinutes);
   if (!Number.isFinite(record.perceivedEffort)) return "";
   fields.namedItem("perceivedEffort").value = String(record.perceivedEffort);
   return String(record.perceivedEffort);
+}
+
+/** Remplit les cases h et min ; une durée absente les laisse vides. */
+function fillDuration(fields, durationMinutes) {
+  const hasDuration = Number.isFinite(durationMinutes) && durationMinutes > 0;
+  const { hours, minutes } = hasDuration ? splitDuration(durationMinutes) : {};
+  fields.namedItem("durationHours").value = hasDuration && hours ? String(hours) : "";
+  fields.namedItem("durationMins").value = hasDuration ? String(minutes) : "";
 }
 
 /**
@@ -86,7 +100,7 @@ export function fillMeasures(fields, record) {
  * @param {{ completed: boolean }} options Sans réalisation, ressenti, FC et météo sont retirés.
  */
 export function readMeasures(record, formData, { completed }) {
-  const durationMinutes = parseDuration(formData.get("duration"));
+  const durationMinutes = readDuration(formData);
   if (durationMinutes) record.durationMinutes = durationMinutes;
   else delete record.durationMinutes;
   const distanceValue = String(formData.get("distanceKm")).trim();
@@ -110,19 +124,22 @@ export function readMeasures(record, formData, { completed }) {
 }
 
 /**
- * Comportements de saisie : durée remise en h:mm en quittant le champ, ressenti retiré en
+ * Comportements de saisie : minutes au-delà de 59 reportées en heures en quittant la case, ressenti retiré en
  * touchant à nouveau la note choisie.
  * @param {HTMLFormControlsCollection} fields
  * @param {{ getEffort: () => string, setEffort: (value: string) => void, onChange: () => void }}
  *   effort Ressenti choisi, tenu par le formulaire ; `onChange` met à jour le résumé.
  */
 export function bindMeasureInputs(fields, { getEffort, setEffort, onChange }) {
-  const durationField = fields.namedItem("duration");
-  durationField.addEventListener("blur", () => {
-    const durationMinutes = parseDuration(durationField.value);
-    if (durationMinutes) durationField.value = formatDurationClock(durationMinutes);
-    onChange();
-  });
+  for (const name of ["durationHours", "durationMins"]) {
+    fields.namedItem(name).addEventListener("blur", () => {
+      const durationMinutes = readDuration(fields);
+      if (durationMinutes > 59 && Number(fields.namedItem("durationMins").value) > 59) {
+        fillDuration(fields, durationMinutes);
+      }
+      onChange();
+    });
+  }
   for (const radio of fields.namedItem("perceivedEffort")) {
     radio.addEventListener("click", () => {
       if (radio.value === getEffort()) {

@@ -365,7 +365,7 @@
         <section class="personal-data-tools" aria-labelledby="applicationTitle">
           <h2 id="applicationTitle">Application</h2>
           <p class="app-version">
-            <span>Version <strong>0.8.26</strong></span>
+            <span>Version <strong>0.8.27</strong></span>
             <a href="./versions.html">Historique des versions</a>
           </p>
         </section>
@@ -455,18 +455,6 @@
                 />
               </label>
               <label>
-                Durée (h:mm)
-                <input
-                  name="duration"
-                  type="text"
-                  inputmode="numeric"
-                  maxlength="7"
-                  placeholder="5:30"
-                  autocomplete="off"
-                  required
-                />
-              </label>
-              <label>
                 D+ (m)
                 <input
                   name="ascentMeters"
@@ -478,6 +466,38 @@
                   placeholder="2000"
                 />
               </label>
+              <fieldset class="training-choice training-duration">
+                <legend>Durée</legend>
+                <div class="training-duration-fields">
+                  <label>
+                    <input
+                      name="durationHours"
+                      type="number"
+                      min="0"
+                      max="9999"
+                      step="1"
+                      inputmode="numeric"
+                      placeholder="5"
+                      aria-label="Heures"
+                      data-required
+                    />
+                    <span aria-hidden="true">h</span>
+                  </label>
+                  <label>
+                    <input
+                      name="durationMins"
+                      type="number"
+                      min="0"
+                      max="9999"
+                      step="1"
+                      inputmode="numeric"
+                      placeholder="30"
+                      aria-label="Minutes"
+                    />
+                    <span aria-hidden="true">min</span>
+                  </label>
+                </div>
+              </fieldset>
             </div>
             <p class="training-computed" aria-live="polite" hidden></p>
             <fieldset class="training-choice">
@@ -624,17 +644,6 @@
                 />
               </label>
               <label>
-                Durée (h:mm)
-                <input
-                  name="duration"
-                  type="text"
-                  inputmode="numeric"
-                  maxlength="7"
-                  placeholder="1:30"
-                  autocomplete="off"
-                />
-              </label>
-              <label>
                 D+ (m)
                 <input
                   name="ascentMeters"
@@ -646,6 +655,37 @@
                   placeholder="600"
                 />
               </label>
+              <fieldset class="training-choice training-duration">
+                <legend>Durée</legend>
+                <div class="training-duration-fields">
+                  <label>
+                    <input
+                      name="durationHours"
+                      type="number"
+                      min="0"
+                      max="9999"
+                      step="1"
+                      inputmode="numeric"
+                      placeholder="1"
+                      aria-label="Heures"
+                    />
+                    <span aria-hidden="true">h</span>
+                  </label>
+                  <label>
+                    <input
+                      name="durationMins"
+                      type="number"
+                      min="0"
+                      max="9999"
+                      step="1"
+                      inputmode="numeric"
+                      placeholder="30"
+                      aria-label="Minutes"
+                    />
+                    <span aria-hidden="true">min</span>
+                  </label>
+                </div>
+              </fieldset>
             </div>
             <p class="training-computed" id="trainingComputed" aria-live="polite" hidden></p>
             <label class="training-completed-toggle">

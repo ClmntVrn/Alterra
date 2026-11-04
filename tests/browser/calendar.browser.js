@@ -75,28 +75,43 @@ test("la saisie rapide de l’heure et de la durée est convertie", async () => 
   await openToday(page);
   await page.evaluate(() => document.getElementById("addTrainingButton").click());
   assert.equal(await fill("time", "930"), "09:30");
-  assert.equal(await fill("duration", "1020"), "10:20");
+  await fill("durationHours", "10");
+  await fill("durationMins", "20");
   assert.equal(await computed(), "10 h 20 · Fin 19:50");
+  await fill("durationHours", "");
+  assert.equal(await fill("durationMins", "90"), "30", "90 min deviennent 1 h 30");
+  assert.equal(await fill("durationHours", "1"), "1");
+  assert.equal(await computed(), "1 h 30 · Fin 11:00");
 });
 
 test("l’allure et une fin le lendemain sont calculées ; une durée impossible est refusée", async () => {
   await fill("time", "07:00");
   await fill("distanceKm", "21,1");
-  await fill("duration", "130");
+  await fill("durationHours", "1");
+  await fill("durationMins", "30");
   assert.equal(await computed(), "1 h 30 · Allure 4:16 min/km · Fin 08:30");
+  await page.evaluate(() =>
+    document.querySelector('#trainingForm [name="type"][value="cycling"]').click()
+  );
+  assert.equal(await computed(), "1 h 30 · Vitesse 14,1 km/h · Fin 08:30", "vitesse à vélo");
+  await page.evaluate(() =>
+    document.querySelector('#trainingForm [name="type"][value="trail"]').click()
+  );
   await fill("time", "22h");
-  await fill("duration", "3000");
+  await fill("durationHours", "30");
+  await fill("durationMins", "");
   assert.match(await computed(), /^30 h · Allure 85:18 min\/km · Fin le .+ à 04:00$/);
-  await fill("duration", "1075");
+  await fill("durationHours", "10000");
   const valid = await page.evaluate(
-    () => document.getElementById("trainingForm").elements.namedItem("duration").validity.valid
+    () => document.getElementById("trainingForm").elements.namedItem("durationHours").validity.valid
   );
   assert.equal(valid, false);
 });
 
 test("une séance réalisée est comptée une seule fois dans les statistiques", async () => {
   await fill("time", "07:00");
-  await fill("duration", "60");
+  await fill("durationHours", "1");
+  await fill("durationMins", "");
   await fill("distanceKm", "10");
   await fill("ascentMeters", "200");
   await page.evaluate(() => {

@@ -1,7 +1,6 @@
 // Formulaire de création et de modification d’une séance.
 
 import { parseDateKey, parseTimeOfDay, toDateKey } from "../../domain/dates.js";
-import { parseDuration } from "../../domain/durations.js";
 import { computeWorkoutEnd } from "../../domain/workouts.js";
 import { formatLongDate, formatWeekdayDate } from "../../ui/format.js";
 import { DEFAULT_WORKOUT_TITLE, WORKOUT_TYPE_LABELS } from "./workout-labels.js";
@@ -9,6 +8,7 @@ import {
   bindMeasureInputs,
   checkMeasures,
   fillMeasures,
+  readDuration,
   readMeasures
 } from "./workout-measures.js";
 
@@ -93,7 +93,7 @@ export function createWorkoutForm({ form, save, onSaved, onCancel }) {
     const formData = new FormData(form);
     const type = String(formData.get("type"));
     const time = parseTimeOfDay(formData.get("time"));
-    const durationMinutes = parseDuration(formData.get("duration"));
+    const durationMinutes = readDuration(formData);
     const workout = {
       ...(editingWorkout || {}),
       id: editingWorkout?.id || crypto.randomUUID(),

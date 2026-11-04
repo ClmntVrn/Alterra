@@ -2,50 +2,49 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   MAX_DURATION_MINUTES,
+  durationFromParts,
   formatDuration,
-  formatDurationClock,
-  parseDuration
+  splitDuration
 } from "../../src/domain/durations.js";
 
-test("parseDuration lit les saisies rapides", () => {
-  const cases = {
-    45: 45,
-    90: 90,
-    "90min": 90,
-    "90 mn": 90,
-    130: 90,
-    "1h30": 90,
-    "1:30": 90,
-    "1h": 60,
-    1020: 620,
-    3000: 1800
-  };
-  for (const [input, minutes] of Object.entries(cases)) {
-    assert.equal(parseDuration(input), minutes, input);
+test("durationFromParts additionne les heures et les minutes", () => {
+  const cases = [
+    ["1", "", 60],
+    ["1", "30", 90],
+    ["", "45", 45],
+    ["0", "90", 90],
+    [" 10 ", "20", 620],
+    ["30", "0", 1800]
+  ];
+  for (const [hours, minutes, total] of cases) {
+    assert.equal(durationFromParts(hours, minutes), total, `${hours} h ${minutes}`);
   }
 });
 
-test("parseDuration rend null pour une saisie vide", () => {
-  assert.equal(parseDuration(""), null);
-  assert.equal(parseDuration("   "), null);
-  assert.equal(parseDuration(undefined), null);
+test("durationFromParts rend null pour deux cases vides", () => {
+  assert.equal(durationFromParts("", ""), null);
+  assert.equal(durationFromParts("  ", undefined), null);
 });
 
-test("parseDuration refuse les durées invalides", () => {
-  for (const value of ["1075", "1:75", "0", "abc", "1,5"]) {
-    assert.ok(Number.isNaN(parseDuration(value)), value);
+test("durationFromParts refuse les durées invalides", () => {
+  for (const [hours, minutes] of [
+    ["0", "0"],
+    ["1,5", ""],
+    ["-1", ""],
+    ["abc", "10"]
+  ]) {
+    assert.ok(Number.isNaN(durationFromParts(hours, minutes)), `${hours} h ${minutes}`);
   }
 });
 
-test("parseDuration plafonne à 9 999 h 59", () => {
-  assert.equal(parseDuration("999959"), MAX_DURATION_MINUTES);
-  assert.ok(Number.isNaN(parseDuration("9999:60")));
+test("durationFromParts plafonne à 9 999 h 59", () => {
+  assert.equal(durationFromParts("9999", "59"), MAX_DURATION_MINUTES);
+  assert.ok(Number.isNaN(durationFromParts("9999", "60")));
 });
 
-test("formatDurationClock affiche h:mm", () => {
-  assert.equal(formatDurationClock(45), "0:45");
-  assert.equal(formatDurationClock(620), "10:20");
-  assert.equal(formatDurationClock(61), "1:01");
+test("splitDuration sépare heures et minutes", () => {
+  assert.deepEqual(splitDuration(45), { hours: 0, minutes: 45 });
+  assert.deepEqual(splitDuration(620), { hours: 10, minutes: 20 });
 });
 
 test("formatDuration affiche une durée lisible", () => {

@@ -38,7 +38,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - Aucune donnée personnelle envoyée automatiquement à GitHub ou synchronisée pendant la phase locale. Les fiches de course et GPX ne sont pas dans le dépôt : elles vivent dans la base locale et la sauvegarde.
 - Les données personnelles Mallorca ont déjà été poussées dans le dépôt public et peuvent rester visibles dans l’historique Git. Ne pas y ajouter d’informations privées ; toute purge d’historique sera évaluée séparément.
 - Suppression d’une entrée avec confirmation. L’import propose de fusionner (ajout de ce qui manque, l’appareil l’emporte) ou de tout remplacer (2 novembre 2026).
-- Unités : km, mètres de D+, durée en minutes (saisie en heures et minutes), allure en min/km.
+- Unités : km, mètres de D+, durée en minutes (saisie en deux cases heures et minutes), allure en min/km, vitesse en km/h pour le vélo.
 
 ### Sorties prévues et réalisées
 
@@ -113,6 +113,7 @@ Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à 
 - [x] Matériel : case « Tout » en tête de liste à la place du bouton de réinitialisation en bas.
 - [x] Import au choix : fusionner (l’appareil l’emporte) ou tout remplacer.
 - [x] Style façon apple.com (orange gardé) et thème sombre ; thème de l’iPhone par défaut, bouton dans le Profil.
+- [x] Durée saisie en deux cases heures et minutes ; vitesse en km/h pour le vélo à la place de l’allure (0.8.27).
 - [ ] À vérifier sur iPhone : barre d’état en appli installée (clair et sombre), lisibilité du sombre dehors, toucher des cartes, import d’une vraie sauvegarde en fusion.
 
 ### Étape 9 — Ajout d’une course depuis l’application

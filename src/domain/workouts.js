@@ -52,3 +52,16 @@ export function formatPace(distanceKm, durationMinutes) {
   const paceSeconds = String(secondsPerKm % 60).padStart(2, "0");
   return `${paceMinutes}:${paceSeconds} min/km`;
 }
+
+/** @returns {number} Vitesse moyenne en km/h, ou NaN si distance ou durée manquent. */
+export function computeSpeed(distanceKm, durationMinutes) {
+  if (
+    !Number.isFinite(distanceKm) ||
+    distanceKm <= 0 ||
+    !Number.isFinite(durationMinutes) ||
+    durationMinutes <= 0
+  ) {
+    return NaN;
+  }
+  return (distanceKm * 60) / durationMinutes;
+}

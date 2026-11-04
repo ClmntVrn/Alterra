@@ -210,6 +210,7 @@ const submitResult = values =>
   page.evaluate(async values => {
     const form = document.getElementById("raceResultForm");
     for (const [name, value] of Object.entries(values)) form.elements.namedItem(name).value = value;
+    form.dispatchEvent(new Event("input"));
     form.requestSubmit();
     await new Promise(resolve => {
       const check = () =>
@@ -240,8 +241,9 @@ test("une course passée se valide avec ses chiffres et affiche son résultat", 
     [
       "type",
       "distanceKm",
-      "duration",
       "ascentMeters",
+      "durationHours",
+      "durationMins",
       "perceivedEffort",
       "heartRateAvg",
       "heartRateMax",
@@ -256,7 +258,8 @@ test("une course passée se valide avec ses chiffres et affiche son résultat", 
   await submitResult({
     type: "running",
     distanceKm: "21,1",
-    duration: "145",
+    durationHours: "1",
+    durationMins: "45",
     ascentMeters: "150",
     heartRateAvg: "162",
     heartRateMax: "181",
@@ -302,7 +305,7 @@ test("la course du jour se valide et compte dans les statistiques de la semaine"
   await page.evaluate(() =>
     document.querySelector(".objective-card.is-next .objective-result-button").click()
   );
-  await submitResult({ type: "trail", distanceKm: "30", duration: "4:00" });
+  await submitResult({ type: "trail", distanceKm: "30", durationHours: "4" });
   await page.waitFor(() => document.querySelector(".objective-card.is-next .is-done"));
   assert.equal(
     await page.evaluate(() => document.getElementById("activityDistance").textContent),

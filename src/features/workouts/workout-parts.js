@@ -1,7 +1,7 @@
 // Éléments communs à la carte et au détail d’une séance : chiffres, catégorie, case « réalisée ».
 
 import { formatDuration } from "../../domain/durations.js";
-import { formatPace } from "../../domain/workouts.js";
+import { computeSpeed, formatPace } from "../../domain/workouts.js";
 import { el } from "../../ui/dom.js";
 import { formatNumber } from "../../ui/format.js";
 import {
@@ -14,7 +14,7 @@ const CHECK_ICON =
   '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12.5 4 4 8-9"></path></svg>';
 
 // Chiffres de la carte selon le type, comme sur Strava : l’allure compte en course à pied,
-// le dénivelé en trail et à vélo.
+// le dénivelé en trail et à vélo (le détail y ajoute l’allure, ou la vitesse à vélo).
 const SUMMARY_STATS = {
   trail: ["distance", "ascent", "duration"],
   running: ["distance", "pace", "duration"],
@@ -23,8 +23,24 @@ const SUMMARY_STATS = {
 };
 const DEFAULT_SUMMARY_STATS = ["distance", "ascent", "duration"];
 
+/**
+ * Allure en min/km à pied, vitesse en km/h à vélo ; rien en renforcement.
+ * @returns {{ label: string, value: string } | null}
+ */
+export function formatRate(type, distanceKm, durationMinutes) {
+  if (type === "strength") return null;
+  if (type === "cycling") {
+    const speed = computeSpeed(distanceKm, durationMinutes);
+    return Number.isFinite(speed)
+      ? { label: "Vitesse", value: `${formatNumber(speed)} km/h` }
+      : null;
+  }
+  const pace = formatPace(distanceKm, durationMinutes);
+  return pace ? { label: "Allure", value: pace } : null;
+}
+
 function readStats(workout) {
-  const pace = formatPace(workout.distanceKm, workout.durationMinutes);
+  const rate = formatRate(workout.type, workout.distanceKm, workout.durationMinutes);
   const isCompleted = workout.status === "completed";
   return {
     distance: Number.isFinite(workout.distanceKm)
@@ -36,7 +52,7 @@ function readStats(workout) {
     duration: Number.isFinite(workout.durationMinutes)
       ? ["Durée", formatDuration(workout.durationMinutes)]
       : null,
-    pace: pace ? ["Allure", pace.replace(" min/km", " /km")] : null,
+    pace: rate ? [rate.label, rate.value.replace(" min/km", " /km")] : null,
     effort:
       isCompleted && Number.isFinite(workout.perceivedEffort)
         ? ["Ressenti", `${workout.perceivedEffort}/10`]

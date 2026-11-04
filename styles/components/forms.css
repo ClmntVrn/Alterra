@@ -101,8 +101,31 @@
 }
 
 .training-form-measures {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: end;
+}
+
+/* Durée en deux cases alignées sur les colonnes distance et D+, l’unité à droite de chacune. */
+.training-duration {
+  grid-column: 1 / -1;
+}
+
+.training-duration-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.training-form .training-duration-fields label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-slate);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.training-duration-fields span {
+  min-width: 2.2em;
 }
 
 .training-form-row input,

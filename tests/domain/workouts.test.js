@@ -1,6 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { computeWorkoutEnd, formatPace, getWorkoutState } from "../../src/domain/workouts.js";
+import {
+  computeSpeed,
+  computeWorkoutEnd,
+  formatPace,
+  getWorkoutState
+} from "../../src/domain/workouts.js";
 
 test("computeWorkoutEnd reste sur la journée pour une séance courte", () => {
   assert.deepEqual(computeWorkoutEnd("2026-10-26", "09:30", 620), {
@@ -68,4 +73,10 @@ test("formatPace est vide sans distance ou durée valide", () => {
   assert.equal(formatPace(0, 50), "");
   assert.equal(formatPace(10, null), "");
   assert.equal(formatPace(NaN, 50), "");
+});
+
+test("computeSpeed calcule la vitesse en km/h", () => {
+  assert.equal(computeSpeed(50, 120), 25);
+  assert.ok(Number.isNaN(computeSpeed(0, 60)));
+  assert.ok(Number.isNaN(computeSpeed(20, null)));
 });
