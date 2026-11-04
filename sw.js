@@ -1,4 +1,4 @@
-const CACHE_NAME = "alterra-0.8.29";
+const CACHE_NAME = "alterra-0.8.30";
 
 const FILES = [
   "./",
@@ -14,6 +14,7 @@ const FILES = [
   "./styles/components/tab-bar.css",
   "./styles/features/statistics.css",
   "./styles/features/backup.css",
+  "./styles/features/account.css",
   "./styles/features/calendar.css",
   "./styles/features/calendar-day.css",
   "./styles/features/objectives.css",
@@ -35,6 +36,7 @@ const FILES = [
   "./src/features/races/race-result-form.js",
   "./src/features/races/race-card.js",
   "./src/features/objectives/objectives.js",
+  "./src/features/account/account.js",
   "./src/features/workouts/workout-card.js",
   "./src/features/workouts/workout-detail.js",
   "./src/features/workouts/workout-parts.js",
@@ -58,11 +60,15 @@ const FILES = [
   "./src/domain/numbers.js",
   "./src/domain/period-statistics.js",
   "./src/domain/statistics.js",
+  "./src/domain/sync.js",
   "./src/domain/workouts.js",
   "./src/storage/repository.js",
   "./src/storage/indexeddb.js",
   "./src/storage/personal-data.js",
   "./src/storage/race-catalog.js",
+  "./src/storage/supabase.js",
+  "./src/storage/supabase-config.js",
+  "./src/storage/sync.js",
   "./src/ui/dom.js",
   "./src/ui/tab-bar.js",
   "./src/ui/theme.js",
@@ -91,7 +97,13 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") return;
+  // La base en ligne (autre origine) passe directement par le réseau, sans cache.
+  if (
+    event.request.method !== "GET" ||
+    new URL(event.request.url).origin !== self.location.origin
+  ) {
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)

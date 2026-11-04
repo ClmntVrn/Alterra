@@ -11,7 +11,21 @@ const LOCAL_STATE_PREFIX = "alterra-";
 
 export function createPersonalDataStore() {
   const adapter = createIndexedDbAdapter();
-  const repository = createPersonalDataRepository(adapter);
+  const changeListeners = new Set();
+  const notifyChange = () => changeListeners.forEach(listener => listener());
+  // Chaque écriture des écrans est signalée, pour l’envoyer en ligne sans attendre.
+  const repository = createPersonalDataRepository({
+    ...adapter,
+    async save(collection, record) {
+      await adapter.save(collection, record);
+      notifyChange();
+    },
+    async remove(collection, id) {
+      const removed = await adapter.remove(collection, id);
+      if (removed) notifyChange();
+      return removed;
+    }
+  });
 
   /** Toutes les données de l’appareil, avec les clés `localStorage` préfixées. */
   async function readAll() {
@@ -32,6 +46,12 @@ export function createPersonalDataStore() {
 
   return Object.freeze({
     repository,
+    /** Adaptateur local, pour la synchronisation (file d’envoi et changements reçus). */
+    syncAdapter: adapter,
+    /** @param {() => void} listener Appelé après chaque modification locale. */
+    onLocalChange(listener) {
+      changeListeners.add(listener);
+    },
     getSettings: () => adapter.getSettings(),
     saveSettings: value => adapter.saveSettings(value),
     initializeRaceCatalog: records => adapter.initializeRaceCatalog(records),
@@ -63,6 +83,7 @@ export function createPersonalDataStore() {
       for (const [key, value] of Object.entries(browserStorage)) {
         localStorage.setItem(key, value);
       }
+      notifyChange();
     }
   });
 }

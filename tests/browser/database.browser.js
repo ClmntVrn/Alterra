@@ -89,10 +89,10 @@ const restore = backup =>
   }, backup);
 const withoutBackupDate = data => ({ ...data, settings: { ...data.settings, lastBackupAt: null } });
 
-test("au lancement, la base passe de la version 2 à la version 3 sans perte", async () => {
+test("au lancement, la base passe de la version 2 à la version 4 sans perte", async () => {
   await openHome(page);
   const database = await readDatabase(page);
-  assert.equal(database.version, 3);
+  assert.equal(database.version, 4);
   assert.deepEqual(database.stores.sort(), [
     "activities",
     "equipment",
@@ -101,6 +101,8 @@ test("au lancement, la base passe de la version 2 à la version 3 sans perte", a
     "raceCatalog",
     "racePlans",
     "settings",
+    "syncQueue",
+    "syncState",
     "workouts"
   ]);
   assert.deepEqual(database.data.workouts, [legacyWorkout(today)]);

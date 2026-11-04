@@ -28,7 +28,8 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - [x] Barre d’onglets (Accueil, Objectifs, Stats, Profil ; IA à venir), onglet Objectifs avec compte à rebours et onglet Stats.
 - [ ] Ajout d’une fiche de course complète depuis l’application.
 - [ ] Nutrition et équipement personnels.
-- [ ] Comptes, synchronisation multi-appareils et intégrations (Garmin, IA).
+- [x] Compte et synchronisation multi-appareils (Supabase, 0.8.30).
+- [ ] Intégrations (Garmin, IA).
 
 ## Décisions de référence
 
@@ -169,23 +170,29 @@ Rangés dans l’onglet Profil.
 
 ### Étape 13 — Préparer et tester la migration
 
-**Statut :** à faire
+**Statut :** fournisseur choisi le 4 novembre 2026 (Supabase) — migration réelle à vérifier
 
 - Stabiliser le format d’export et les identifiants des données.
 - Tester la migration de données locales vers un espace de test sans écraser la sauvegarde d’origine.
-- Comparer les offres gratuites de backend, leurs quotas, leur politique de pause, leurs sauvegardes et leurs conditions de confidentialité ; choisir ensuite le fournisseur.
+- [x] Offres comparées (Supabase, Firebase) : Supabase retenu (500 Mo, comptes inclus, GPX dans les lignes ; pause après 7 jours d’inactivité, pas de sauvegarde automatique). Firebase écarté : 1 Mo par document et stockage de fichiers payant.
+- [x] Première connexion : sauvegarde de secours téléchargée, puis données de l’appareil fusionnées avec le compte (0.8.30).
+- [ ] À vérifier : migration de la vraie base sur iPhone.
 
 **Validation :** une sauvegarde locale peut être migrée et vérifiée ; les limites et risques du fournisseur choisi sont compris.
 
 ### Étape 14 — Comptes et synchronisation multi-appareils
 
-**Statut :** à faire
+**Statut :** réalisée en 0.8.30 — à vérifier sur iPhone avec le vrai projet
 
-- Authentification et synchronisation avec un backend, d’abord sur une offre gratuite.
-- Isolation des données par compte imposée côté serveur/base de données.
-- Migration des données locales avec confirmation et export de secours.
-- Compte indépendant pour un ami ; rien de partagé sans action explicite.
-- Récupération de compte, export et suppression des données.
+Décisions du 4 novembre 2026 : connexion par e-mail et mot de passe ; inscription libre fermée ; adresse et clé publique Supabase dans le dépôt (la clé `service_role` jamais).
+
+- [x] Connexion, déconnexion, changement et oubli du mot de passe dans le Profil.
+- [x] Synchronisation hors ligne d’abord : file d’envoi locale, récupération des nouveautés, modification la plus récente gagnante.
+- [x] Isolation des données par compte imposée par la base (RLS, `supabase/schema.sql`).
+- [x] Migration des données locales avec confirmation et export de secours.
+- [x] Suppression du compte et de ses données en ligne ; l’export reste disponible.
+- [ ] Compte pour un ami, créé depuis le tableau de bord.
+- [ ] À vérifier sur iPhone : connexion dans l’app installée, synchronisation entre deux appareils, lien de mot de passe oublié.
 
 **Validation :** les données d’un compte ne sont jamais accessibles depuis un autre ; une modification se synchronise entre appareils.
 

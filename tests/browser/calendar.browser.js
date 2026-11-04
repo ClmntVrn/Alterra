@@ -56,9 +56,9 @@ const lastPointDistance = () =>
         .split(", ")[1]
   );
 
-test("une installation neuve crée la base en version 3", async () => {
+test("une installation neuve crée la base en version 4", async () => {
   const database = await readDatabase(page);
-  assert.equal(database.version, 3);
+  assert.equal(database.version, 4);
   assert.deepEqual(database.stores.sort(), [
     "activities",
     "equipment",
@@ -67,6 +67,8 @@ test("une installation neuve crée la base en version 3", async () => {
     "raceCatalog",
     "racePlans",
     "settings",
+    "syncQueue",
+    "syncState",
     "workouts"
   ]);
 });

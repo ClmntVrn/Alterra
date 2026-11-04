@@ -3,11 +3,24 @@ import {
   RENAMED_COLLECTIONS,
   validatePersonalData
 } from "../domain/backup-format.js";
+import { createPendingChange, pendingKey, stableStringify } from "../domain/sync.js";
 
 const DATABASE_NAME = "alterra-personal-data";
 // 3 : collections renommées (plannedSessions → workouts, raceEvents → personalRaces).
-const DATABASE_VERSION = 3;
+// 4 : file des modifications à envoyer en ligne (syncQueue) et état de la connexion (syncState),
+// propres à l’appareil et absents des sauvegardes.
+const DATABASE_VERSION = 4;
 const SETTINGS_KEY = "root";
+const SYNC_QUEUE = "syncQueue";
+const SYNC_STATE = "syncState";
+const SYNC_STATE_KEY = "root";
+
+/** Note une modification locale dans la file d’envoi, dans la même transaction. */
+function enqueue(transaction, collection, id, deleted) {
+  transaction
+    .objectStore(SYNC_QUEUE)
+    .put(createPendingChange(collection, id, { deleted, changedAt: new Date().toISOString() }));
+}
 
 function openDatabase() {
   if (!("indexedDB" in globalThis)) {
@@ -23,8 +36,10 @@ function openDatabase() {
           database.createObjectStore(collection, { keyPath: "id" });
         }
       }
-      if (!database.objectStoreNames.contains("settings")) {
-        database.createObjectStore("settings", { keyPath: "key" });
+      for (const store of ["settings", SYNC_QUEUE, SYNC_STATE]) {
+        if (!database.objectStoreNames.contains(store)) {
+          database.createObjectStore(store, { keyPath: "key" });
+        }
       }
       moveRenamedCollections(database, request.transaction);
     };
@@ -115,15 +130,16 @@ export function createIndexedDbAdapter() {
     async save(collection, record) {
       assertCollection(collection);
       const db = await getDatabase();
-      const transaction = db.transaction(collection, "readwrite");
+      const transaction = db.transaction([collection, SYNC_QUEUE], "readwrite");
       transaction.objectStore(collection).put(record);
+      enqueue(transaction, collection, record.id, false);
       await transactionComplete(transaction);
     },
 
     async remove(collection, id) {
       assertCollection(collection);
       const db = await getDatabase();
-      const transaction = db.transaction(collection, "readwrite");
+      const transaction = db.transaction([collection, SYNC_QUEUE], "readwrite");
       const store = transaction.objectStore(collection);
       const request = store.getKey(id);
       return new Promise((resolve, reject) => {
@@ -132,6 +148,7 @@ export function createIndexedDbAdapter() {
           if (request.result !== undefined) {
             removed = true;
             store.delete(id);
+            enqueue(transaction, collection, id, true);
           }
         };
         request.onerror = () =>
@@ -184,19 +201,119 @@ export function createIndexedDbAdapter() {
       return records;
     },
 
+    /** Remplace tout ; les ajouts et les retraits partent aussi en ligne. */
     async replaceAll(backup) {
       const data = validatePersonalData(backup);
       const db = await getDatabase();
-      const storeNames = [...PERSONAL_DATA_COLLECTIONS, "settings"];
+      const storeNames = [...PERSONAL_DATA_COLLECTIONS, "settings", SYNC_QUEUE];
       const transaction = db.transaction(storeNames, "readwrite");
       for (const collection of PERSONAL_DATA_COLLECTIONS) {
         const store = transaction.objectStore(collection);
-        store.clear();
-        data[collection].forEach(record => store.put(record));
+        const keptIds = new Set(data[collection].map(record => record.id));
+        store.getAllKeys().onsuccess = event => {
+          for (const id of event.target.result) {
+            if (!keptIds.has(id)) enqueue(transaction, collection, id, true);
+          }
+          store.clear();
+          for (const record of data[collection]) {
+            store.put(record);
+            enqueue(transaction, collection, record.id, false);
+          }
+        };
       }
       const settings = transaction.objectStore("settings");
       settings.clear();
       settings.put({ key: SETTINGS_KEY, value: data.settings });
+      await transactionComplete(transaction);
+    },
+
+    /** @returns {Promise<import("../domain/sync.js").PendingChange[]>} */
+    async listPending() {
+      const db = await getDatabase();
+      const transaction = db.transaction(SYNC_QUEUE, "readonly");
+      return requestResult(transaction.objectStore(SYNC_QUEUE).getAll(), transaction);
+    },
+
+    /** Met toutes les données de l’appareil dans la file, pour un premier envoi. */
+    async enqueueAll() {
+      const db = await getDatabase();
+      const transaction = db.transaction([...PERSONAL_DATA_COLLECTIONS, SYNC_QUEUE], "readwrite");
+      for (const collection of PERSONAL_DATA_COLLECTIONS) {
+        transaction.objectStore(collection).getAllKeys().onsuccess = event => {
+          for (const id of event.target.result) enqueue(transaction, collection, id, false);
+        };
+      }
+      await transactionComplete(transaction);
+    },
+
+    /** Retire de la file les modifications envoyées, sauf celles refaites entre-temps. */
+    async clearPending(changes) {
+      const db = await getDatabase();
+      const transaction = db.transaction(SYNC_QUEUE, "readwrite");
+      const queue = transaction.objectStore(SYNC_QUEUE);
+      for (const change of changes) {
+        queue.get(change.key).onsuccess = event => {
+          if (event.target.result?.changedAt === change.changedAt) queue.delete(change.key);
+        };
+      }
+      await transactionComplete(transaction);
+    },
+
+    /**
+     * Applique des changements venus d’en ligne sans les remettre dans la file ; une modification
+     * locale faite entre-temps l’emporte.
+     * @returns {Promise<number>} Nombre d’enregistrements réellement modifiés.
+     */
+    async applyRemote({ saves, removes }) {
+      if (!saves.length && !removes.length) return 0;
+      const changes = [...saves, ...removes];
+      const collections = [...new Set(changes.map(change => change.collection))];
+      collections.forEach(assertCollection);
+      const db = await getDatabase();
+      const transaction = db.transaction([...collections, SYNC_QUEUE], "readwrite");
+      const queue = transaction.objectStore(SYNC_QUEUE);
+      let changed = 0;
+      const unlessPending = (collection, id, apply) => {
+        queue.getKey(pendingKey(collection, id)).onsuccess = event => {
+          if (event.target.result === undefined) apply(transaction.objectStore(collection));
+        };
+      };
+      for (const { collection, record } of saves) {
+        unlessPending(collection, record.id, store => {
+          store.get(record.id).onsuccess = event => {
+            if (stableStringify(event.target.result) === stableStringify(record)) return;
+            store.put(record);
+            changed += 1;
+          };
+        });
+      }
+      for (const { collection, id } of removes) {
+        unlessPending(collection, id, store => {
+          store.getKey(id).onsuccess = event => {
+            if (event.target.result === undefined) return;
+            store.delete(id);
+            changed += 1;
+          };
+        });
+      }
+      await transactionComplete(transaction);
+      return changed;
+    },
+
+    async getSyncState() {
+      const db = await getDatabase();
+      const transaction = db.transaction(SYNC_STATE, "readonly");
+      const entry = await requestResult(
+        transaction.objectStore(SYNC_STATE).get(SYNC_STATE_KEY),
+        transaction
+      );
+      return entry?.value ?? {};
+    },
+
+    async saveSyncState(value) {
+      const db = await getDatabase();
+      const transaction = db.transaction(SYNC_STATE, "readwrite");
+      transaction.objectStore(SYNC_STATE).put({ key: SYNC_STATE_KEY, value });
       await transactionComplete(transaction);
     }
   });

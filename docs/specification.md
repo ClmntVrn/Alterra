@@ -6,7 +6,16 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 
 - Une barre d’onglets reste visible en bas de l’application : Accueil · Objectifs · Stats · IA · Profil. IA est grisé avec « Bientôt » tant qu’il n’est pas disponible.
 - Changer d’onglet ne recharge pas la page et n’ajoute pas d’entrée d’historique ; chaque vue garde sa position (journée ou mois affiché, défilement). Toucher l’onglet affiché remonte en haut. L’adresse `index.html#profil` ouvre directement le Profil.
-- Le Profil contient la sauvegarde (date de la dernière, export, restauration) et la version de l’application avec son historique. Son bouton rond en haut à droite change le thème : automatique (celui de l’iPhone, par défaut), clair, puis sombre ; le choix vaut pour toutes les pages de l’appareil. Une pastille orange sur l’onglet Profil signale une sauvegarde de plus de 7 jours ou absente.
+- Le Profil contient le compte, la sauvegarde (date de la dernière, export, restauration) et la version de l’application avec son historique. Son bouton rond en haut à droite change le thème : automatique (celui de l’iPhone, par défaut), clair, puis sombre ; le choix vaut pour toutes les pages de l’appareil. Une pastille orange sur l’onglet Profil signale une sauvegarde de plus de 7 jours ou absente, sauf si l’appareil s’est synchronisé ces 7 derniers jours.
+
+## Compte et synchronisation
+
+- Sans compte, tout reste sur l’appareil. Avec un compte, les données sont aussi en ligne et se retrouvent sur chaque appareil connecté ; l’application reste utilisable hors ligne.
+- Connexion par e-mail et mot de passe ; il n’y a pas d’inscription depuis l’application (les comptes sont créés par l’administrateur).
+- Connecté, le Profil affiche l’e-mail, l’état (« Synchronisé à 14:32 », « Hors ligne : 2 modifications en attente. », ou l’erreur) et les actions Synchroniser, Changer le mot de passe (8 caractères au moins), Se déconnecter et Supprimer mon compte en ligne. Se déconnecter ou supprimer le compte garde les données sur l’appareil.
+- La synchronisation se fait seule : à l’ouverture, au retour dans l’application, au retour du réseau et peu après chaque modification. Si une même donnée est modifiée sur deux appareils, la modification la plus récente l’emporte.
+- À la première connexion d’un appareil qui a déjà des données, une sauvegarde de secours est téléchargée, puis ses données sont ajoutées au compte.
+- « Mot de passe oublié » envoie un e-mail ; son lien rouvre Alterra (dans Safari) sur le choix d’un nouveau mot de passe, à utiliser ensuite pour se connecter dans l’application.
 - L’en-tête d’un onglet tient sur une ligne : logo Alterra (retour à l’accueil d’un toucher), titre (« Alterra » sur l’accueil) et, s’il y a lieu, un bouton d’action rond à droite.
 - Partout, le retour à l’écran précédent est un bouton rond avec une flèche, en haut à gauche (plein écran, fiche course, historique des versions).
 - La fiche course est une page à part, sans barre d’onglets ; le bouton retour (flèche, en haut à gauche) ramène à l’écran d’où elle a été ouverte (Objectifs ou calendrier), ou à l’accueil si elle a été ouverte directement.

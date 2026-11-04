@@ -1,0 +1,72 @@
+/* Profil : compte en ligne, connexion et état de la synchronisation. */
+
+.account-form {
+  display: grid;
+  gap: 10px;
+}
+
+.account-form[hidden] {
+  display: none;
+}
+
+.account-form label {
+  display: grid;
+  gap: 5px;
+  color: var(--color-charcoal);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.account-form input {
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 11px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-surface-faint);
+  color: var(--color-text);
+  font-size: 16px;
+}
+
+.account-form .personal-data-actions {
+  margin-top: 2px;
+}
+
+#accountPasswordForm {
+  margin-top: 12px;
+}
+
+.personal-data-actions .is-primary {
+  border-color: var(--color-accent-fill);
+  background: var(--color-accent-fill);
+  color: var(--color-on-accent);
+}
+
+.personal-data-tools .account-email {
+  margin-bottom: 2px;
+  color: var(--color-charcoal);
+  font-size: 14px;
+}
+
+.personal-data-tools .account-sync:empty {
+  display: none;
+}
+
+.personal-data-tools .account-sync[data-state="error"] {
+  color: var(--color-error);
+}
+
+.account-delete {
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-danger);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.account .personal-data-status {
+  margin-bottom: 0;
+}

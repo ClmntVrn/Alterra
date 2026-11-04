@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="./styles/components/tab-bar.css" />
     <link rel="stylesheet" href="./styles/features/statistics.css" />
     <link rel="stylesheet" href="./styles/features/backup.css" />
+    <link rel="stylesheet" href="./styles/features/account.css" />
     <link rel="stylesheet" href="./styles/features/calendar.css" />
     <link rel="stylesheet" href="./styles/features/calendar-day.css" />
     <link rel="stylesheet" href="./styles/features/objectives.css" />
@@ -385,11 +386,81 @@
           </button>
         </header>
 
+        <section class="personal-data-tools account" id="account" aria-labelledby="accountTitle">
+          <h2 id="accountTitle">Compte</h2>
+          <form class="account-form" id="accountSignIn">
+            <p>
+              Connecte-toi pour retrouver tes données sur tous tes appareils. Sans compte, elles
+              restent sur cet appareil.
+            </p>
+            <label>
+              E-mail
+              <input
+                name="email"
+                type="email"
+                autocomplete="username"
+                autocapitalize="off"
+                spellcheck="false"
+                required
+              />
+            </label>
+            <label>
+              Mot de passe
+              <input name="password" type="password" autocomplete="current-password" required />
+            </label>
+            <div class="personal-data-actions">
+              <button class="is-primary" type="submit">Se connecter</button>
+              <button id="accountForgot" type="button">Mot de passe oublié</button>
+            </div>
+          </form>
+          <div id="accountSignedIn" hidden>
+            <p class="account-email">Connecté : <strong id="accountEmail"></strong></p>
+            <p class="account-sync" id="accountSyncStatus" aria-live="polite"></p>
+            <div class="personal-data-actions">
+              <button id="accountSyncNow" type="button">Synchroniser</button>
+              <button id="accountChangePassword" type="button">Changer le mot de passe</button>
+              <button id="accountSignOut" type="button">Se déconnecter</button>
+            </div>
+            <form class="account-form" id="accountPasswordForm" hidden>
+              <label>
+                Nouveau mot de passe
+                <input
+                  name="password"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  minlength="8"
+                />
+              </label>
+              <div class="personal-data-actions">
+                <button class="is-primary" type="submit">Enregistrer</button>
+                <button class="account-cancel" type="button">Annuler</button>
+              </div>
+            </form>
+            <button class="account-delete" id="accountDelete" type="button">
+              Supprimer mon compte en ligne
+            </button>
+          </div>
+          <p id="accountStatus" class="personal-data-status" role="status" aria-live="polite"></p>
+          <dialog class="import-choice" id="accountRecovery" aria-labelledby="accountRecoveryTitle">
+            <form class="account-form" method="dialog">
+              <h3 id="accountRecoveryTitle">Nouveau mot de passe</h3>
+              <label>
+                Mot de passe (8 caractères au moins)
+                <input name="password" type="password" autocomplete="new-password" minlength="8" />
+              </label>
+              <button class="import-choice-primary" value="save">Enregistrer</button>
+              <button value="cancel" formnovalidate>Annuler</button>
+            </form>
+          </dialog>
+        </section>
+
         <section class="personal-data-tools" aria-labelledby="personalDataTitle">
           <h2 id="personalDataTitle">Sauvegarde</h2>
           <p>
             La sauvegarde complète inclut tes courses, leurs traces et tes données personnelles.
-            Elle n’est pas synchronisée automatiquement ; garde le fichier en lieu sûr.
+            Sans compte, rien n’est envoyé en ligne : garde le fichier en lieu sûr. Avec un compte,
+            un export de temps en temps reste une sécurité.
           </p>
           <p id="personalDataLastBackup" class="personal-data-last-backup" hidden></p>
           <div class="personal-data-actions">
@@ -420,7 +491,7 @@
         <section class="personal-data-tools" aria-labelledby="applicationTitle">
           <h2 id="applicationTitle">Application</h2>
           <p class="app-version">
-            <span>Version <strong>0.8.29</strong></span>
+            <span>Version <strong>0.8.30</strong></span>
             <a href="./versions.html">Historique des versions</a>
           </p>
         </section>

@@ -59,7 +59,7 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 
 Le code des écrans délègue les calculs à `src/domain/` ; c’est la partie couverte par les tests. Un test vérifie aussi que chaque ressource livrée figure dans le précache de `sw.js`.
 
-Les écrans passent par le repository, jamais directement par les transactions IndexedDB. Le jour où une synchronisation sera nécessaire, une implémentation distante du même repository pourra remplacer ou compléter IndexedDB.
+Les écrans passent par le repository, jamais directement par les transactions IndexedDB. Chaque écriture du repository est aussi notée dans une file d’envoi, que la synchronisation (section 4) transmet à la base en ligne.
 
 ## 2. Données
 
@@ -71,15 +71,16 @@ Le dépôt ne contient que le code de l’application : aucune fiche de course, 
 
 Collections IndexedDB (clé `id`, identifiant stable généré par `crypto.randomUUID()` pour les créations) :
 
-| Collection                       | Contenu                                                               | Utilisation                   |
-| -------------------------------- | --------------------------------------------------------------------- | ----------------------------- |
-| `workouts`                       | Sorties prévues ou réalisées (statut `planned` ou `completed`)        | Calendrier, statistiques      |
-| `personalRaces`                  | Courses personnelles (nom, dates, résultat éventuel)                  | Calendrier, objectifs, stats  |
-| `raceCatalog`                    | Fiches de course de référence, GPX embarqué dans `profile.gpxData`    | Calendrier, objectifs, fiches |
-| `racePlans`                      | Plan personnel d’une course (objectif, scénarios, nutrition, rappels) | Fiches                        |
-| `activities`                     | Non utilisée, conservée pour compatibilité du format                  | —                             |
-| `nutritionProducts`, `equipment` | Prévues pour l’étape 10                                               | —                             |
-| `settings`                       | Réglages : catalogue initialisé, date de la dernière sauvegarde       | Profil                        |
+| Collection                       | Contenu                                                                | Utilisation                   |
+| -------------------------------- | ---------------------------------------------------------------------- | ----------------------------- |
+| `workouts`                       | Sorties prévues ou réalisées (statut `planned` ou `completed`)         | Calendrier, statistiques      |
+| `personalRaces`                  | Courses personnelles (nom, dates, résultat éventuel)                   | Calendrier, objectifs, stats  |
+| `raceCatalog`                    | Fiches de course de référence, GPX embarqué dans `profile.gpxData`     | Calendrier, objectifs, fiches |
+| `racePlans`                      | Plan personnel d’une course (objectif, scénarios, nutrition, rappels)  | Fiches                        |
+| `activities`                     | Non utilisée, conservée pour compatibilité du format                   | —                             |
+| `nutritionProducts`, `equipment` | Prévues pour l’étape 10                                                | —                             |
+| `settings`                       | Réglages : catalogue initialisé, date de la dernière sauvegarde        | Profil                        |
+| `syncQueue`, `syncState`         | File des modifications à envoyer, session et repère de synchronisation | Compte (hors sauvegarde)      |
 
 Une sortie réalisée est le même enregistrement que la sortie prévue, mis à jour avec les valeurs réelles : le prévu n’est pas conservé après réalisation. Champs d’une sortie : `date`, `endDate` (calculée depuis `time` et `durationMinutes`, absente si la sortie tient sur un jour), `type`, `title`, `status`, `time`, `distanceKm`, `durationMinutes`, `ascentMeters`, `notes`, `createdAt`, `completedAt`, et pour une sortie réalisée `perceivedEffort` (1–10), `heartRateAvg`, `heartRateMax` (bpm) et `weather`. L’état « à vérifier » n’est pas stocké : il est déduit à l’affichage d’une sortie prévue dont la date est passée.
 
@@ -94,22 +95,32 @@ Les dates sont des clés locales `AAAA-MM-JJ`, interprétées dans le fuseau de 
 - L’export est un JSON autonome (format 3) : toutes les collections, les réglages, les états `localStorage` et la date de la sauvegarde. Les formats 1 et 2 (collections `plannedSessions` et `raceEvents`) restent acceptés : `migratePersonalData` les convertit à l’import.
 - L’import valide le fichier puis, selon le choix, remplace toute la base ou la fusionne (`mergePersonalData` : ajout de ce qui manque, l’appareil l’emporte) ; l’écriture se fait en une seule transaction.
 - Le Profil affiche la date de la dernière sauvegarde et la met en avant à partir de 7 jours, avec une pastille sur l’onglet. Au démarrage, l’application demande un stockage persistant (`navigator.storage.persist()`).
-- Le schéma IndexedDB a un numéro de version (`DATABASE_VERSION`, 3) pour migrer sans effacer les données. Le passage à la version 3 recopie `plannedSessions` et `raceEvents` vers `workouts` et `personalRaces` dans la transaction de mise à niveau : en cas d’échec, la base reste intacte dans sa version précédente.
+- Le schéma IndexedDB a un numéro de version (`DATABASE_VERSION`, 4 depuis l’ajout de `syncQueue` et `syncState`) pour migrer sans effacer les données. Le passage à la version 3 recopie `plannedSessions` et `raceEvents` vers `workouts` et `personalRaces` dans la transaction de mise à niveau : en cas d’échec, la base reste intacte dans sa version précédente.
 
 Limites :
 
-- pas de synchronisation entre appareils ;
+- sans compte, pas de synchronisation entre appareils ;
 - l’effacement des données du navigateur ou la perte de l’appareil supprime la base ;
 - les exports contiennent des données personnelles et doivent être conservés en lieu sûr ;
 - IndexedDB n’est pas chiffré : la protection de l’appareil reste importante.
 
 Le service worker ne met en cache que l’interface ; les données personnelles ne transitent pas par son cache. Son cache porte le numéro de version (`alterra-<version>`) : chaque version publiée avec `npm run release` le renouvelle.
 
-## 4. Évolutions prévues
+## 4. Compte et synchronisation
 
-- **Backend :** quand la synchronisation sera nécessaire, ajouter une implémentation distante du repository avec authentification et isolation des données par utilisateur vérifiées côté serveur ; migrer par export puis import vérifié, sans supprimer la sauvegarde source.
+Décidé le 4 novembre 2026 : Supabase (offre gratuite, région Europe), connexion par e-mail et mot de passe, inscription libre fermée (les comptes sont créés depuis le tableau de bord Supabase).
+
+- **Base en ligne :** une table `records` (`supabase/schema.sql`) avec une ligne par enregistrement : `user_id`, `collection`, `id`, `data` (JSON complet, `null` pour une suppression), `deleted`, `modified_at` (heure de la modification sur l’appareil) et `updated_at` (heure d’écriture sur le serveur). Les règles d’accès (RLS) limitent chaque compte connecté à ses lignes ; `delete_my_account()` supprime le compte et ses lignes.
+- **Clés :** l’adresse et la clé publique du projet sont dans `src/storage/supabase-config.js` : elles n’ouvrent aucune donnée sans session. La clé `service_role` ne sort jamais du tableau de bord.
+- **Client :** `src/storage/supabase.js` appelle Supabase par simples requêtes HTTP, sans bibliothèque. Le service worker laisse passer ces requêtes sans cache.
+- **Synchronisation :** `src/storage/sync.js`. L’appareil reste la source de l’affichage et fonctionne hors ligne. Chaque écriture locale entre dans `syncQueue` dans la même transaction ; à l’ouverture, au retour au premier plan, au retour du réseau et 1,5 s après une modification, la file part en ligne puis les lignes modifiées depuis le dernier repère (moins une minute de marge) sont récupérées. La modification la plus récente l’emporte (`modified_at`, vérifié par la base) ; une modification locale pas encore envoyée n’est jamais écrasée. Règles pures dans `src/domain/sync.js`.
+- **Première connexion d’un compte sur un appareil :** une sauvegarde de secours est téléchargée, puis toutes les données de l’appareil sont envoyées et fusionnées avec celles du compte.
+- **Limites de l’offre gratuite :** projet mis en pause après une semaine sans aucune requête (l’application continue en local ; le projet se relance depuis le tableau de bord), pas de sauvegarde automatique côté serveur : un export de temps en temps reste conseillé.
+
+## 5. Évolutions prévues
+
 - **Intégrations :** Garmin/Strava et IA passeront par un serveur ; aucun secret d’API dans le navigateur. Les séances générées par IA restent des propositions à valider.
 
-## 5. Confidentialité de l’historique
+## 6. Confidentialité de l’historique
 
 Le dépôt GitHub est public. Des données privées de Mallorca ont été publiées dans d’anciens commits et peuvent rester dans l’historique Git. Une éventuelle purge réécrirait l’historique : c’est une décision distincte à discuter avant toute action.
