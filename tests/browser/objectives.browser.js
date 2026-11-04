@@ -191,11 +191,16 @@ async function waitAcrossNavigation(fn) {
 }
 
 test("« Retour » de la fiche ramène à l’onglet Objectifs", async () => {
-  await page.evaluate(() =>
-    document.querySelector('.objective-card a[href="./race.html?id=fiche-test"]').click()
-  );
+  // Clic différé : la page peut changer avant que la commande de test ait sa réponse.
+  await page.evaluate(() => {
+    const link = document.querySelector('.objective-card a[href="./race.html?id=fiche-test"]');
+    setTimeout(() => link.click());
+  });
   await waitAcrossNavigation(() => document.querySelector(".hero h1")?.textContent);
-  await page.evaluate(() => document.getElementById("raceBack").click());
+  await page.evaluate(() => {
+    const back = document.getElementById("raceBack");
+    setTimeout(() => back.click());
+  });
   await waitAcrossNavigation(
     () =>
       location.pathname.endsWith("/index.html") &&
