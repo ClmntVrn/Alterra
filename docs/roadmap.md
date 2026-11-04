@@ -175,7 +175,7 @@ Rangés dans l’onglet Profil.
 - Stabiliser le format d’export et les identifiants des données.
 - Tester la migration de données locales vers un espace de test sans écraser la sauvegarde d’origine.
 - [x] Offres comparées (Supabase, Firebase) : Supabase retenu (500 Mo, comptes inclus, GPX dans les lignes ; pause après 7 jours d’inactivité, pas de sauvegarde automatique). Firebase écarté : 1 Mo par document et stockage de fichiers payant.
-- [x] Première connexion : sauvegarde de secours téléchargée, puis données de l’appareil fusionnées avec le compte (0.8.30).
+- [x] Première connexion : confirmation, puis données de l’appareil fusionnées avec le compte (0.8.30, sans téléchargement automatique depuis 0.8.31).
 - [ ] À vérifier : migration de la vraie base sur iPhone.
 
 **Validation :** une sauvegarde locale peut être migrée et vérifiée ; les limites et risques du fournisseur choisi sont compris.
@@ -189,7 +189,8 @@ Décisions du 4 novembre 2026 : connexion par e-mail et mot de passe ; inscripti
 - [x] Connexion, déconnexion, changement et oubli du mot de passe dans le Profil.
 - [x] Synchronisation hors ligne d’abord : file d’envoi locale, récupération des nouveautés, modification la plus récente gagnante.
 - [x] Isolation des données par compte imposée par la base (RLS, `supabase/schema.sql`).
-- [x] Migration des données locales avec confirmation et export de secours.
+- [x] Migration des données locales avec confirmation (l’export de secours se fait avant, depuis le Profil : le téléchargement automatique coupait la connexion sur iPhone, 0.8.31).
+- [x] Connexion obligatoire : écran de connexion au lancement sans session, session gardée hors ligne (0.8.31, décision du 4 novembre 2026).
 - [x] Suppression du compte et de ses données en ligne ; l’export reste disponible.
 - [ ] Compte pour un ami, créé depuis le tableau de bord.
 - [ ] À vérifier sur iPhone : connexion dans l’app installée, synchronisation entre deux appareils, lien de mot de passe oublié.

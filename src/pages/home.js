@@ -89,7 +89,7 @@ const sync = createSync({
   }
 });
 const account = createAccountView({
-  container: document.getElementById("account"),
+  root: document,
   sync,
   beforeFirstSignIn,
   recoveryUrl: `${location.origin}${location.pathname}`
@@ -103,23 +103,18 @@ async function refreshFromRemote() {
 }
 
 /**
- * Première connexion sur cet appareil avec des données : elles vont partir sur le compte, une
- * sauvegarde de secours est d’abord téléchargée. Renvoie false si la personne renonce.
+ * Première connexion sur cet appareil avec des données : elles vont partir sur le compte, après
+ * confirmation. Pas de téléchargement ici : sur iPhone, la feuille du fichier interrompt la
+ * connexion qui suit. Renvoie false si la personne renonce.
  */
 async function beforeFirstSignIn() {
   if ((await personalData.syncAdapter.getSyncState()).userId) return true;
   const data = await personalData.exportAll();
   const hasData = PERSONAL_DATA_COLLECTIONS.some(collection => data[collection].length);
   if (!hasData) return true;
-  if (
-    !window.confirm(
-      "Première connexion sur cet appareil : ses données vont être ajoutées à ton compte. Une sauvegarde de secours va d’abord être téléchargée. Continuer ?"
-    )
-  ) {
-    return false;
-  }
-  await exportBackup();
-  return true;
+  return window.confirm(
+    "Première connexion sur cet appareil : ses données vont être ajoutées à ton compte. Pense à exporter une sauvegarde avant si ce n’est pas fait. Continuer ?"
+  );
 }
 
 let syncTimer = 0;
@@ -128,10 +123,22 @@ personalData.onLocalChange(() => {
   syncTimer = window.setTimeout(() => sync.sync(), SYNC_DELAY_MS);
 });
 window.addEventListener("online", () => sync.sync());
+// La session lue décide de l’écran : application, ou connexion si aucune session n’est ouverte.
 sync
   .status()
   .then(() => sync.sync())
-  .catch(error => console.error("Synchronisation :", error));
+  .catch(error => {
+    console.error("Lecture de la session :", error);
+    account.render({
+      connected: false,
+      email: "",
+      syncing: false,
+      pending: 0,
+      lastSyncAt: null,
+      error: "La session n’a pas pu être lue. Reconnecte-toi.",
+      offline: false
+    });
+  });
 if (recoveryToken) account.openRecovery(recoveryToken);
 if (authError) account.showMessage(`Lien refusé : ${authError}`, true);
 

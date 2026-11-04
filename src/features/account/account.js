@@ -1,5 +1,6 @@
-// Compte du Profil : connexion par e-mail et mot de passe, état de la synchronisation,
-// changement ou oubli du mot de passe, déconnexion et suppression du compte en ligne.
+// Accès réservé et compte : écran de connexion tant qu’aucune session n’est ouverte, puis dans le
+// Profil l’état de la synchronisation, le changement de mot de passe, la déconnexion et la
+// suppression du compte en ligne. Le mot de passe oublié se règle depuis l’écran de connexion.
 
 const MIN_PASSWORD_LENGTH = 8;
 const timeFormatter = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit" });
@@ -24,24 +25,31 @@ export function describeSyncStatus(status, today = new Date()) {
 
 /**
  * @param {Object} options
- * @param {HTMLElement} options.container Section du compte.
+ * @param {Document | HTMLElement} options.root Contient l’écran de connexion et le compte du Profil.
  * @param {ReturnType<typeof import("../../storage/sync.js").createSync>} options.sync
- * @param {() => Promise<boolean>} options.beforeFirstSignIn Sauvegarde de secours avant le premier
- *   envoi ; renvoie false pour annuler la connexion.
+ * @param {() => Promise<boolean>} options.beforeFirstSignIn Confirmation avant le premier envoi
+ *   des données de l’appareil ; renvoie false pour annuler la connexion.
  * @param {string} options.recoveryUrl Page où ramène l’e-mail de réinitialisation.
  */
-export function createAccountView({ container, sync, beforeFirstSignIn, recoveryUrl }) {
-  const signInForm = container.querySelector("#accountSignIn");
-  const signedIn = container.querySelector("#accountSignedIn");
-  const email = container.querySelector("#accountEmail");
-  const syncStatus = container.querySelector("#accountSyncStatus");
-  const passwordForm = container.querySelector("#accountPasswordForm");
-  const recovery = container.querySelector("#accountRecovery");
-  const message = container.querySelector("#accountStatus");
+export function createAccountView({ root, sync, beforeFirstSignIn, recoveryUrl }) {
+  const signInView = root.querySelector("#viewSignIn");
+  const signInForm = root.querySelector("#accountSignIn");
+  const signInMessage = root.querySelector("#accountSignInStatus");
+  const signedIn = root.querySelector("#accountSignedIn");
+  const email = root.querySelector("#accountEmail");
+  const syncStatus = root.querySelector("#accountSyncStatus");
+  const passwordForm = root.querySelector("#accountPasswordForm");
+  const recovery = root.querySelector("#accountRecovery");
+  const profileMessage = root.querySelector("#accountStatus");
   let current = null;
   let recoveryToken = "";
 
+  /** Message sur l’écran affiché : connexion sans session, Profil sinon. */
   function say(text, isError = false) {
+    const message = current?.connected ? profileMessage : signInMessage;
+    for (const other of [profileMessage, signInMessage]) {
+      if (other !== message) other.textContent = "";
+    }
     message.textContent = text;
     if (isError) message.dataset.state = "error";
     else delete message.dataset.state;
@@ -81,7 +89,7 @@ export function createAccountView({ container, sync, beforeFirstSignIn, recovery
     });
   });
 
-  container.querySelector("#accountForgot").addEventListener("click", () => {
+  root.querySelector("#accountForgot").addEventListener("click", () => {
     const field = signInForm.elements.namedItem("email");
     if (!field.value.trim() || !field.checkValidity()) {
       field.setCustomValidity("Saisis ton e-mail pour recevoir le lien.");
@@ -95,12 +103,12 @@ export function createAccountView({ container, sync, beforeFirstSignIn, recovery
     });
   });
 
-  container.querySelector("#accountSyncNow").addEventListener("click", () => {
+  root.querySelector("#accountSyncNow").addEventListener("click", () => {
     say("");
     sync.sync();
   });
 
-  container.querySelector("#accountChangePassword").addEventListener("click", () => {
+  root.querySelector("#accountChangePassword").addEventListener("click", () => {
     passwordForm.hidden = false;
     passwordForm.elements.namedItem("password").focus();
   });
@@ -120,18 +128,23 @@ export function createAccountView({ container, sync, beforeFirstSignIn, recovery
     passwordForm.hidden = true;
   });
 
-  container.querySelector("#accountSignOut").addEventListener("click", () => {
+  root.querySelector("#accountSignOut").addEventListener("click", () => {
     const pending = current?.pending
       ? `\n\n${current.pending} modification${current.pending > 1 ? "s" : ""} pas encore envoyée${current.pending > 1 ? "s" : ""} partira à la prochaine connexion.`
       : "";
-    if (!window.confirm(`Se déconnecter ? Les données restent sur cet appareil.${pending}`)) return;
+    if (
+      !window.confirm(
+        `Se déconnecter ? L’écran de connexion s’affichera ; les données restent sur cet appareil.${pending}`
+      )
+    )
+      return;
     run(signedIn, async () => {
       await sync.signOut();
-      say("Déconnecté. Les données restent sur cet appareil.");
+      say("Déconnecté.");
     });
   });
 
-  container.querySelector("#accountDelete").addEventListener("click", () => {
+  root.querySelector("#accountDelete").addEventListener("click", () => {
     if (
       !window.confirm(
         "Supprimer ton compte et toutes tes données en ligne ? Les données de cet appareil sont gardées. C’est définitif."
@@ -141,7 +154,7 @@ export function createAccountView({ container, sync, beforeFirstSignIn, recovery
     }
     run(signedIn, async () => {
       await sync.deleteAccount();
-      say("Compte et données en ligne supprimés. Les données restent sur cet appareil.");
+      say("Compte et données en ligne supprimés.");
     });
   });
 
@@ -161,13 +174,17 @@ export function createAccountView({ container, sync, beforeFirstSignIn, recovery
   return {
     /** @param {import("../../storage/sync.js").SyncStatus} status */
     render(status) {
+      const wasConnected = current?.connected;
       current = status;
-      signInForm.hidden = status.connected;
-      signedIn.hidden = !status.connected;
+      document.body.classList.remove("is-auth-pending");
+      document.body.classList.toggle("is-signed-out", !status.connected);
+      signInView.hidden = status.connected;
+      if (status.connected && wasConnected === false)
+        window.scrollTo({ top: 0, behavior: "instant" });
       email.textContent = status.email;
       syncStatus.textContent = describeSyncStatus(status);
       syncStatus.dataset.state = status.error && !status.offline ? "error" : "";
-      // Session fermée par le serveur : le message reste visible sur le formulaire de connexion.
+      // Session fermée par le serveur : le message reste visible sur l’écran de connexion.
       if (!status.connected && status.error) say(status.error, true);
     },
 

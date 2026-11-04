@@ -1,4 +1,4 @@
-/* Profil : compte en ligne, connexion et état de la synchronisation. */
+/* Écran de connexion et compte du Profil : connexion, état de la synchronisation. */
 
 .account-form {
   display: grid;
@@ -69,4 +69,87 @@
 
 .account .personal-data-status {
   margin-bottom: 0;
+}
+
+/* Accès réservé : rien ne s’affiche tant que la session n’est pas lue, puis seul l’écran de
+   connexion sans session. Les vues gardent leur propre attribut hidden (barre d’onglets). */
+.is-auth-pending .app-view,
+.is-auth-pending .tab-bar,
+.is-signed-out .app-view,
+.is-signed-out .tab-bar {
+  display: none !important;
+}
+
+.sign-in-view {
+  display: grid;
+  width: min(100%, 380px);
+  gap: 14px;
+  margin: 0 auto;
+  padding: max(10vh, 32px) 0 32px;
+}
+
+.sign-in-view[hidden] {
+  display: none;
+}
+
+.sign-in-logo {
+  width: 64px;
+  height: 64px;
+}
+
+.sign-in-title {
+  margin: 0;
+  color: var(--color-charcoal);
+  font-size: 34px;
+  letter-spacing: -0.03em;
+}
+
+.sign-in-intro {
+  margin: -6px 0 6px;
+  color: var(--color-muted);
+  font-size: 15px;
+}
+
+.sign-in-view .account-form {
+  gap: 12px;
+  padding: 18px;
+  border-radius: 20px;
+  background: var(--color-paper);
+}
+
+.sign-in-submit {
+  min-height: 48px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-accent-fill);
+  color: var(--color-on-accent);
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.sign-in-forgot {
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sign-in-submit:disabled,
+.sign-in-forgot:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.sign-in-view .personal-data-status {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.sign-in-view .personal-data-status[data-state="error"] {
+  color: var(--color-error);
 }

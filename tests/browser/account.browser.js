@@ -4,7 +4,7 @@
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { launchBrowser } from "../../tools/browser.js";
-import { openHome, readDatabase, saveRecords, todayKey } from "./helpers.js";
+import { installServer, openHome, readDatabase, saveRecords, signIn, todayKey } from "./helpers.js";
 
 let browser;
 let page;
@@ -99,27 +99,23 @@ before(async () => {
   browser = await launchBrowser();
   page = browser.page;
   await page.setViewport(375, 812, { touch: true });
-  await page.send("Page.addScriptToEvaluateOnNewDocument", { source: `(${fakeSupabase})();` });
-  await openHome(page);
+  await installServer(page, fakeSupabase);
+  await openHome(page, { signIn: false });
 });
 
 after(() => browser?.close());
 
 const server = () => page.evaluate(() => JSON.parse(localStorage.getItem("fake-supabase")));
 const text = id => page.evaluate(id => document.getElementById(id).textContent.trim(), id);
-const visible = id => page.evaluate(id => !document.getElementById(id).hidden, id);
 const tap = selector =>
   page.evaluate(selector => document.querySelector(selector).click(), selector);
-const signIn = (email, password) =>
-  page.evaluate(
-    (email, password) => {
-      const form = document.getElementById("accountSignIn");
-      form.elements.namedItem("email").value = email;
-      form.elements.namedItem("password").value = password;
-      form.requestSubmit();
-    },
-    email,
-    password
+/** Ce qui est réellement affiché : écran de connexion, accueil, barre d’onglets. */
+const screens = () =>
+  page.evaluate(() =>
+    ["viewSignIn", "viewHome"]
+      .map(id => document.getElementById(id))
+      .concat(document.querySelector(".tab-bar"))
+      .map(element => getComputedStyle(element).display !== "none" && !element.hidden)
   );
 const waitSynced = () =>
   page.waitFor(() => /^Synchronisé/.test(document.getElementById("accountSyncStatus").textContent));
@@ -134,20 +130,22 @@ const workout = (id, date, title) => ({
   createdAt: "2026-01-01T00:00:00.000Z"
 });
 
-test("le Profil propose la connexion ; un mauvais mot de passe est signalé", async () => {
-  await tap('.tab[href="#profil"]');
-  assert.deepEqual(
-    [await visible("accountSignIn"), await visible("accountSignedIn")],
-    [true, false]
+test("sans session, seul l’écran de connexion s’affiche ; un mauvais mot de passe est signalé", async () => {
+  assert.deepEqual(await screens(), [true, false, false]);
+  await signIn(page, "test@exemple.fr", "faux");
+  await page.waitFor(
+    () => document.getElementById("accountSignInStatus").dataset.state === "error"
   );
-  await signIn("test@exemple.fr", "faux");
-  await page.waitFor(() => document.getElementById("accountStatus").dataset.state === "error");
-  assert.equal(await text("accountStatus"), "E-mail ou mot de passe incorrect.");
+  assert.equal(await text("accountSignInStatus"), "E-mail ou mot de passe incorrect.");
+  assert.deepEqual(await screens(), [true, false, false]);
 });
 
 test("la connexion envoie les données de l’appareil et affiche la synchronisation", async () => {
   await saveRecords(page, "workouts", [workout("w-local", await todayKey(page), "Trail local")]);
-  await signIn("test@exemple.fr", "motdepasse1");
+  await signIn(page, "test@exemple.fr", "motdepasse1");
+  await page.waitFor(() => !document.body.classList.contains("is-signed-out"));
+  assert.deepEqual(await screens(), [false, true, true], "l’application s’ouvre");
+  await tap('.tab[href="#profil"]');
   await waitSynced();
   assert.equal(await text("accountEmail"), "test@exemple.fr");
   assert.deepEqual(
@@ -217,10 +215,11 @@ test("une séance enregistrée depuis l’application part en ligne", async () =
   );
 });
 
-test("la déconnexion garde les données sur l’appareil", async () => {
+test("la déconnexion ramène à l’écran de connexion et garde les données", async () => {
   await tap('.tab[href="#profil"]');
   await tap("#accountSignOut");
-  await page.waitFor(() => !document.getElementById("accountSignIn").hidden);
+  await page.waitFor(() => document.body.classList.contains("is-signed-out"));
+  assert.deepEqual(await screens(), [true, false, false]);
   const database = await readDatabase(page);
   assert.equal(database.data.workouts.length, 3);
   assert.equal(database.data.syncState[0].value.session, null);

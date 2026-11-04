@@ -59,7 +59,12 @@ export function createSupabaseClient({ url, key, fetch: fetchImpl, now = Date.no
         body: body === undefined ? undefined : JSON.stringify(body)
       });
     } catch (error) {
-      throw new SyncError("Pas de connexion à Internet.", { offline: true, cause: error });
+      // Réseau présent mais requête bloquée (serveur en pause, bloqueur…) : on le dit autrement.
+      const message =
+        globalThis.navigator?.onLine === false
+          ? "Pas de connexion à Internet."
+          : "Serveur injoignable. Réessaie dans un instant.";
+      throw new SyncError(message, { offline: true, cause: error });
     }
     const text = await response.text();
     let data;

@@ -22,9 +22,76 @@ export function saveRecords(page, collection, records) {
   );
 }
 
-/** Ouvre l’accueil et attend l’affichage du calendrier et des événements enregistrés. */
-export async function openHome(page) {
+const pagesWithServer = new WeakSet();
+
+/**
+ * Serveur Supabase par défaut des tests : la connexion accepte tout, le reste échoue comme hors
+ * ligne. Aucune requête ne sort ; les confirmations sont acceptées.
+ */
+function offlineServer() {
+  const realFetch = window.fetch.bind(window);
+  window.confirm = () => true;
+  window.fetch = async (input, options) => {
+    const url = new URL(typeof input === "string" ? input : input.url);
+    if (!url.hostname.endsWith(".supabase.co")) return realFetch(input, options);
+    if (url.pathname === "/auth/v1/token") {
+      return new Response(
+        JSON.stringify({
+          access_token: "jeton-test",
+          refresh_token: "renouvellement-test",
+          expires_in: 3600,
+          user: { id: "u-test", email: "test@exemple.fr" }
+        })
+      );
+    }
+    throw new TypeError("Load failed");
+  };
+}
+
+/**
+ * Installe un faux serveur Supabase avant tout script de la page, pour toute la durée du test.
+ * @param {Function} [server] Fonction exécutée dans la page avant ses scripts.
+ */
+export async function installServer(page, server = offlineServer) {
+  if (pagesWithServer.has(page)) return;
+  pagesWithServer.add(page);
+  await page.send("Page.addScriptToEvaluateOnNewDocument", { source: `(${server})();` });
+}
+
+/** Se connecte depuis l’écran de connexion affiché. */
+export function signIn(page, email = "test@exemple.fr", password = "motdepasse1") {
+  return page.evaluate(
+    (email, password) => {
+      const form = document.getElementById("accountSignIn");
+      form.elements.namedItem("email").value = email;
+      form.elements.namedItem("password").value = password;
+      form.requestSubmit();
+    },
+    email,
+    password
+  );
+}
+
+/**
+ * Ouvre l’accueil et attend l’affichage du calendrier et des événements enregistrés. Sans session,
+ * se connecte d’abord (faux serveur) ; `signIn: false` s’arrête sur l’écran de connexion.
+ */
+export async function openHome(page, { signIn: shouldSignIn = true } = {}) {
+  await installServer(page);
   await page.goto("/index.html");
+  const screen = await page.waitFor(
+    () =>
+      !document.body.classList.contains("is-auth-pending") &&
+      (document.body.classList.contains("is-signed-out") ? "signIn" : "app"),
+    { message: "Ni l’application ni l’écran de connexion ne se sont affichés." }
+  );
+  if (screen === "signIn") {
+    if (!shouldSignIn) return;
+    await signIn(page);
+    await page.waitFor(() => !document.body.classList.contains("is-signed-out"), {
+      message: "La connexion de test a échoué."
+    });
+  }
   await page.waitFor(
     () =>
       document.querySelectorAll(".calendar-day").length > 0 &&
