@@ -193,7 +193,8 @@ Décisions du 4 novembre 2026 : connexion par e-mail et mot de passe ; inscripti
 - [x] Connexion obligatoire : écran de connexion au lancement sans session, session gardée hors ligne (0.8.31, décision du 4 novembre 2026).
 - [x] Suppression du compte et de ses données en ligne ; l’export reste disponible.
 - [ ] Compte pour un ami, créé depuis le tableau de bord.
-- [ ] À vérifier sur iPhone : connexion dans l’app installée, synchronisation entre deux appareils, lien de mot de passe oublié.
+- [x] Connexion dans l’app installée sur iPhone (4 novembre 2026).
+- [ ] À vérifier sur iPhone : synchronisation entre deux appareils, lien de mot de passe oublié.
 
 **Validation :** les données d’un compte ne sont jamais accessibles depuis un autre ; une modification se synchronise entre appareils.
 
