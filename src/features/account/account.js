@@ -27,11 +27,9 @@ export function describeSyncStatus(status, today = new Date()) {
  * @param {Object} options
  * @param {Document | HTMLElement} options.root Contient l’écran de connexion et le compte du Profil.
  * @param {ReturnType<typeof import("../../storage/sync.js").createSync>} options.sync
- * @param {() => Promise<boolean>} options.beforeFirstSignIn Confirmation avant le premier envoi
- *   des données de l’appareil ; renvoie false pour annuler la connexion.
  * @param {string} options.recoveryUrl Page où ramène l’e-mail de réinitialisation.
  */
-export function createAccountView({ root, sync, beforeFirstSignIn, recoveryUrl }) {
+export function createAccountView({ root, sync, recoveryUrl }) {
   const signInView = root.querySelector("#viewSignIn");
   const signInForm = root.querySelector("#accountSignIn");
   const signInMessage = root.querySelector("#accountSignInStatus");
@@ -80,7 +78,6 @@ export function createAccountView({ root, sync, beforeFirstSignIn, recoveryUrl }
   signInForm.addEventListener("submit", event => {
     event.preventDefault();
     run(signInForm, async () => {
-      if (!(await beforeFirstSignIn())) return;
       say("Connexion…");
       const fields = signInForm.elements;
       await sync.signIn(fields.namedItem("email").value, fields.namedItem("password").value);
@@ -179,8 +176,14 @@ export function createAccountView({ root, sync, beforeFirstSignIn, recoveryUrl }
       document.body.classList.remove("is-auth-pending");
       document.body.classList.toggle("is-signed-out", !status.connected);
       signInView.hidden = status.connected;
-      if (status.connected && wasConnected === false)
+      // Juste après la connexion : l’Accueil, quel que soit l’onglet de l’adresse (#profil…).
+      if (status.connected && wasConnected === false) {
+        if (!["", "#accueil"].includes(location.hash)) {
+          history.replaceState(null, "", "#accueil");
+          window.dispatchEvent(new HashChangeEvent("hashchange"));
+        }
         window.scrollTo({ top: 0, behavior: "instant" });
+      }
       email.textContent = status.email;
       syncStatus.textContent = describeSyncStatus(status);
       syncStatus.dataset.state = status.error && !status.offline ? "error" : "";

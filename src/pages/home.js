@@ -8,7 +8,6 @@ import { loadRaceCatalog } from "../storage/race-catalog.js";
 import { createSupabaseClient } from "../storage/supabase.js";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "../storage/supabase-config.js";
 import { createSync } from "../storage/sync.js";
-import { PERSONAL_DATA_COLLECTIONS } from "../domain/backup-format.js";
 import { daysBetween } from "../domain/dates.js";
 import { listRaceResultsAsWorkouts } from "../domain/statistics.js";
 import { formatDaysAgo } from "../ui/format.js";
@@ -91,7 +90,6 @@ const sync = createSync({
 const account = createAccountView({
   root: document,
   sync,
-  beforeFirstSignIn,
   recoveryUrl: `${location.origin}${location.pathname}`
 });
 
@@ -100,21 +98,6 @@ async function refreshFromRemote() {
   raceCatalogPromise = loadRaceCatalog(personalData);
   await raceCatalogPromise;
   await calendar.refresh();
-}
-
-/**
- * Première connexion sur cet appareil avec des données : elles vont partir sur le compte, après
- * confirmation. Pas de téléchargement ici : sur iPhone, la feuille du fichier interrompt la
- * connexion qui suit. Renvoie false si la personne renonce.
- */
-async function beforeFirstSignIn() {
-  if ((await personalData.syncAdapter.getSyncState()).userId) return true;
-  const data = await personalData.exportAll();
-  const hasData = PERSONAL_DATA_COLLECTIONS.some(collection => data[collection].length);
-  if (!hasData) return true;
-  return window.confirm(
-    "Première connexion sur cet appareil : ses données vont être ajoutées à ton compte. Pense à exporter une sauvegarde avant si ce n’est pas fait. Continuer ?"
-  );
 }
 
 let syncTimer = 0;

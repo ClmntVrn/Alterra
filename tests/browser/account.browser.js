@@ -249,6 +249,17 @@ test("le lien de réinitialisation ouvre le choix d’un nouveau mot de passe", 
   );
 });
 
+test("après la connexion, l’Accueil s’affiche même depuis l’adresse du Profil", async () => {
+  assert.equal(await page.evaluate(() => location.hash), "#profil");
+  await signIn(page, "test@exemple.fr", "nouveau-secret");
+  await page.waitFor(() => !document.body.classList.contains("is-signed-out"));
+  await page.waitFor(() => !document.getElementById("viewHome").hidden);
+  assert.deepEqual(
+    [await page.evaluate(() => location.hash), await screens()],
+    ["#accueil", [false, true, true]]
+  );
+});
+
 test("aucune erreur JavaScript", () => {
   assert.deepEqual(page.errors, []);
 });
