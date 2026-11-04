@@ -4,7 +4,7 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 
 ## Navigation
 
-- Une barre d’onglets reste visible en bas de l’application : Accueil · Objectifs · Stats · IA · Profil. Stats et IA sont grisés avec « Bientôt » tant qu’ils ne sont pas disponibles.
+- Une barre d’onglets reste visible en bas de l’application : Accueil · Objectifs · Stats · IA · Profil. IA est grisé avec « Bientôt » tant qu’il n’est pas disponible.
 - Changer d’onglet ne recharge pas la page et n’ajoute pas d’entrée d’historique ; chaque vue garde sa position (journée ou mois affiché, défilement). Toucher l’onglet affiché remonte en haut. L’adresse `index.html#profil` ouvre directement le Profil.
 - Le Profil contient la sauvegarde (date de la dernière, export, restauration) et la version de l’application avec son historique. Son bouton rond en haut à droite change le thème : automatique (celui de l’iPhone, par défaut), clair, puis sombre ; le choix vaut pour toutes les pages de l’appareil. Une pastille orange sur l’onglet Profil signale une sauvegarde de plus de 7 jours ou absente.
 - L’en-tête d’un onglet tient sur une ligne : logo Alterra (retour à l’accueil d’un toucher), titre (« Alterra » sur l’accueil) et, s’il y a lieu, un bouton d’action rond à droite.
@@ -46,6 +46,15 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 - L’indicateur sélectionnable est la distance, la durée, le D+ ou le km-effort. Le km-effort vaut distance en km + D+ en mètres / 100.
 - Sélectionner une semaine affiche ses totaux de distance, temps et D+. Le graphique indique à droite les valeurs de son échelle verticale.
 - Les statistiques sont calculées depuis les sorties enregistrées dans Alterra ; aucune connexion à Strava ou autre service n’est intégrée.
+
+## Onglet Stats
+
+- Mêmes règles de comptage que l’accueil : sorties réalisées et courses validées, chacune dans la période de sa date de début.
+- Le choix Semaine · Mois (par défaut) · Année et un filtre de sport : Trail + course (par défaut), Trail, Course, Vélo ou Tout.
+- La période choisie affiche sa distance, son temps, son D+, ses km-effort et son nombre de sorties, chacun avec son évolution par rapport à la période précédente (▲ ou ▼ en %, « = 0 % », « — » sans sortie dans la période précédente). Pour la période en cours, la comparaison s’arrête au même jour de la période précédente (« à la même date ») : du 1er au 4 novembre contre du 1er au 4 octobre.
+- Un graphique en barres montre les 12 dernières semaines, les 12 derniers mois ou les 6 dernières années sur la distance, le temps, le D+ ou les km-effort ; toucher une barre choisit sa période.
+- La répartition par sport couvre tous les sports de la période choisie, quel que soit le filtre : temps et part du temps total, nombre de sorties, distance et D+.
+- Les records portent sur toutes les sorties du filtre : plus longue sortie, plus gros D+, plus longue durée, meilleure semaine et meilleur mois en distance.
 
 ## Fiche de course
 

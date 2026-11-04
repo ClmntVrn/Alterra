@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="./styles/features/calendar.css" />
     <link rel="stylesheet" href="./styles/features/calendar-day.css" />
     <link rel="stylesheet" href="./styles/features/objectives.css" />
+    <link rel="stylesheet" href="./styles/features/stats.css" />
     <script src="./src/ui/theme.js"></script>
   </head>
 
@@ -282,6 +283,60 @@
         <div class="objectives-list" id="objectivesList"></div>
       </div>
 
+      <div class="app-view" id="viewStats" hidden>
+        <header class="view-header">
+          <a class="view-home" href="#accueil" aria-label="Accueil" title="Accueil">
+            <img class="logo" src="./assets/icons/icon.svg" alt="" />
+          </a>
+          <h1 class="view-title">Stats</h1>
+        </header>
+        <section class="section stats-overview" aria-labelledby="statsPeriodTitle">
+          <div class="stats-segmented" id="statsPeriodKinds" role="group" aria-label="Période">
+            <button type="button" data-kind="week" aria-pressed="false">Semaine</button>
+            <button type="button" data-kind="month" aria-pressed="true">Mois</button>
+            <button type="button" data-kind="year" aria-pressed="false">Année</button>
+          </div>
+          <div
+            class="stats-chips"
+            id="statsCategories"
+            role="group"
+            aria-label="Filtrer par activité"
+          >
+            <button type="button" data-category="combined" aria-pressed="true">
+              Trail + course
+            </button>
+            <button type="button" data-category="trail" aria-pressed="false">Trail</button>
+            <button type="button" data-category="running" aria-pressed="false">Course</button>
+            <button type="button" data-category="cycling" aria-pressed="false">Vélo</button>
+            <button type="button" data-category="all" aria-pressed="false">Tout</button>
+          </div>
+          <h2 class="stats-period-title" id="statsPeriodTitle" aria-live="polite"></h2>
+          <p class="stats-compare-label" id="statsCompareLabel"></p>
+          <dl class="stats-kpis" id="statsKpis"></dl>
+          <div class="stats-chart" id="statsChart" role="group"></div>
+          <div
+            class="stats-segmented is-small"
+            id="statsMetrics"
+            role="group"
+            aria-label="Indicateur du graphique"
+          >
+            <button type="button" data-metric="distance" aria-pressed="true">Distance</button>
+            <button type="button" data-metric="duration" aria-pressed="false">Temps</button>
+            <button type="button" data-metric="ascent" aria-pressed="false">D+</button>
+            <button type="button" data-metric="effort" aria-pressed="false">Km-effort</button>
+          </div>
+        </section>
+        <section class="section" aria-labelledby="statsSportsTitle">
+          <h2 id="statsSportsTitle">Répartition par sport</h2>
+          <p class="stats-section-hint" id="statsSportsPeriod"></p>
+          <ul class="stats-sports" id="statsSports"></ul>
+        </section>
+        <section class="section" aria-labelledby="statsRecordsTitle">
+          <h2 id="statsRecordsTitle">Records</h2>
+          <div id="statsRecords"></div>
+        </section>
+      </div>
+
       <div class="app-view" id="viewProfile" hidden>
         <header class="view-header">
           <a class="view-home" href="#accueil" aria-label="Accueil" title="Accueil">
@@ -365,7 +420,7 @@
         <section class="personal-data-tools" aria-labelledby="applicationTitle">
           <h2 id="applicationTitle">Application</h2>
           <p class="app-version">
-            <span>Version <strong>0.8.27</strong></span>
+            <span>Version <strong>0.8.28</strong></span>
             <a href="./versions.html">Historique des versions</a>
           </p>
         </section>
@@ -830,7 +885,7 @@
           </svg>
           <span>Objectifs</span>
         </a>
-        <span class="tab is-soon" aria-disabled="true">
+        <a class="tab" href="#stats" data-view="viewStats">
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
@@ -843,8 +898,7 @@
             <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path>
           </svg>
           <span>Stats</span>
-          <small>Bientôt</small>
-        </span>
+        </a>
         <span class="tab is-soon" aria-disabled="true">
           <svg
             aria-hidden="true"

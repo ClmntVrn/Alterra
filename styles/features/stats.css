@@ -1,0 +1,297 @@
+/* Onglet Stats : période, totaux comparés, barres, répartition par sport et records. */
+
+.stats-segmented {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+
+.stats-segmented button {
+  min-height: 36px;
+  flex: 1 1 0;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-slate);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.stats-segmented button[aria-pressed="true"] {
+  border-color: var(--color-line);
+  background: var(--color-paper);
+  color: var(--color-charcoal);
+}
+
+.stats-segmented.is-small {
+  margin-top: 10px;
+}
+
+.stats-segmented.is-small button {
+  min-height: 32px;
+  font-size: 12px;
+}
+
+/* Sur une ligne ; défile si la police de l’appareil est plus large. */
+.stats-chips {
+  display: flex;
+  gap: 5px;
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.stats-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.stats-chips button {
+  min-height: 36px;
+  flex: none;
+  padding: 6px 9px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-slate);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stats-chips button[aria-pressed="true"] {
+  border-color: var(--color-sand);
+  background: var(--color-sand);
+  color: var(--color-ink);
+}
+
+.stats-segmented button:focus-visible,
+.stats-chips button:focus-visible,
+.stats-bar:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.stats-period-title {
+  margin: 18px 0 2px;
+  color: var(--color-charcoal);
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+.stats-compare-label,
+.stats-section-hint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.stats-section-hint {
+  margin: -8px 0 12px;
+}
+
+.stats-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 10px;
+  margin: 16px 0 0;
+}
+
+.stats-kpi {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.stats-kpi dt {
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.stats-kpi dd {
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-charcoal);
+  font-size: clamp(17px, 4.6vw, 21px);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-kpi .stats-change {
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.stats-kpi .stats-change[data-trend="up"] {
+  color: var(--color-accent);
+}
+
+/* Barres : une par période, la sélectionnée en orange plein et son libellé en gras. */
+.stats-chart {
+  display: grid;
+  height: 150px;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 4px;
+  margin-top: 20px;
+}
+
+.stats-bar {
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.stats-bar-track {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.stats-bar-fill {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  min-height: 3px;
+  border-radius: 5px 5px 2px 2px;
+  background: rgb(var(--rgb-chart) / 38%);
+}
+
+.stats-bar[aria-pressed="true"] .stats-bar-fill {
+  background: var(--color-accent-bright);
+}
+
+.stats-bar-label {
+  display: block;
+  min-height: 1.2em;
+  overflow: visible;
+  color: var(--color-muted);
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.stats-bar[aria-pressed="true"] .stats-bar-label {
+  color: var(--color-charcoal);
+  font-weight: 800;
+}
+
+.stats-sports {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stats-sport-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stats-sport-heading strong {
+  color: var(--color-charcoal);
+  font-size: 15px;
+}
+
+.stats-sport-heading span {
+  color: var(--color-slate);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.stats-sport-track {
+  display: block;
+  height: 6px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-track);
+}
+
+.stats-sport-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-accent-bright);
+}
+
+.stats-sport-details {
+  margin: 5px 0 0;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.stats-records {
+  margin: 0;
+}
+
+.stats-record {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-line-soft);
+}
+
+.stats-record:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.stats-record:last-child {
+  padding-bottom: 0;
+}
+
+.stats-record dt {
+  color: var(--color-charcoal);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.stats-record dd {
+  margin: 0;
+}
+
+.stats-record-value {
+  color: var(--color-charcoal);
+  font-size: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.stats-record-detail {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-empty {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}

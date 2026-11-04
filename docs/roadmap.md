@@ -1,7 +1,7 @@
 # Plan de développement d’Alterra
 
-**Mis à jour le :** 2 novembre 2026  
-**État général :** version locale utilisable (0.8.25) ; entraînements, statistiques, barre d’onglets, objectifs, courses validées et thème sombre en place, retours iPhone attendus sur les étapes 6 à 8 et les retours du 2 novembre. Prochaines étapes : ajout d’une course depuis l’application (fusion course et fiche), puis nutrition et équipement.
+**Mis à jour le :** 4 novembre 2026  
+**État général :** version locale utilisable (0.8.28) ; entraînements, statistiques et onglet Stats, barre d’onglets, objectifs, courses validées et thème sombre en place, retours iPhone attendus sur les étapes 6 à 8 et les retours du 2 novembre. Prochaines étapes : ajout d’une course depuis l’application (fusion course et fiche), puis nutrition et équipement.
 
 ## Vision
 
@@ -25,7 +25,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - [x] Calendrier mois/jour avec sorties, courses personnelles et courses de référence, y compris sur plusieurs jours.
 - [x] Sorties prévues ou réalisées, modifiables ; statistiques des 12 dernières semaines sur les sorties réalisées.
 - [x] Fiches de course génériques : profil GPX, ravitos, scénarios, nutrition, rappels, matériel, sources ; bloc « En course » pour suivre la progression.
-- [x] Barre d’onglets (Accueil, Objectifs, Profil ; Stats et IA à venir) et onglet Objectifs avec compte à rebours.
+- [x] Barre d’onglets (Accueil, Objectifs, Stats, Profil ; IA à venir), onglet Objectifs avec compte à rebours et onglet Stats.
 - [ ] Ajout d’une fiche de course complète depuis l’application.
 - [ ] Nutrition et équipement personnels.
 - [ ] Comptes, synchronisation multi-appareils et intégrations (Garmin, IA).
@@ -145,13 +145,15 @@ Rangés dans l’onglet Profil.
 
 ### Étape 11 — Tableau de bord et KPIs
 
-**Statut :** première version réalisée
+**Statut :** onglet Stats réalisé en 0.8.28 — à vérifier sur iPhone
 
 - [x] Graphique des 12 dernières semaines sur les sorties réalisées : distance, durée, D+ et km-effort.
 - [x] Filtres Trail + course à pied, Trail, Course à pied, Vélo ; totaux de la semaine sélectionnée.
 - [x] Repères du calendrier distinguant entraînement/course et prévu/réalisé sans reposer uniquement sur la couleur.
 - [x] Calculs KPI extraits dans `src/domain/statistics.js` et couverts par des tests.
-- [ ] Éventuellement : nombre de sorties par semaine, comparaison avec le volume prévu.
+- [x] Onglet Stats (0.8.28) : semaine, mois ou année avec totaux et nombre de sorties, évolution par rapport à la période précédente (à la même date pour la période en cours), barres pour choisir la période, répartition par sport et records. Le graphique 12 semaines reste à l’accueil (décision du 4 novembre 2026).
+- [ ] À vérifier sur iPhone : lisibilité des barres et des évolutions, défilement des filtres si la police est plus large.
+- [ ] Éventuellement : comparaison avec le volume prévu.
 
 ### Étape 12 — Fiabiliser la version gratuite
 

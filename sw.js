@@ -1,4 +1,4 @@
-const CACHE_NAME = "alterra-0.8.27";
+const CACHE_NAME = "alterra-0.8.28";
 
 const FILES = [
   "./",
@@ -17,6 +17,7 @@ const FILES = [
   "./styles/features/calendar.css",
   "./styles/features/calendar-day.css",
   "./styles/features/objectives.css",
+  "./styles/features/stats.css",
   "./styles/features/race-sheet.css",
   "./styles/features/elevation-profile.css",
   "./styles/features/gear-checklist.css",
@@ -29,6 +30,7 @@ const FILES = [
   "./src/features/calendar/month-grid.js",
   "./src/features/calendar/month-picker.js",
   "./src/features/statistics/activity-statistics.js",
+  "./src/features/statistics/period-statistics.js",
   "./src/features/races/personal-race-form.js",
   "./src/features/races/race-result-form.js",
   "./src/features/races/race-card.js",
@@ -54,6 +56,7 @@ const FILES = [
   "./src/domain/dates.js",
   "./src/domain/durations.js",
   "./src/domain/numbers.js",
+  "./src/domain/period-statistics.js",
   "./src/domain/statistics.js",
   "./src/domain/workouts.js",
   "./src/storage/repository.js",

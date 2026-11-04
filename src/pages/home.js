@@ -1,6 +1,7 @@
 import { initializeCalendar } from "../features/calendar/calendar.js";
 import { createObjectivesView } from "../features/objectives/objectives.js";
 import { initializeActivityStatistics } from "../features/statistics/activity-statistics.js";
+import { initializePeriodStatistics } from "../features/statistics/period-statistics.js";
 import { createPersonalDataStore } from "../storage/personal-data.js";
 import { loadRaceCatalog } from "../storage/race-catalog.js";
 import { daysBetween } from "../domain/dates.js";
@@ -39,6 +40,7 @@ let raceCatalogPromise = loadRaceCatalog(personalData);
 const updateActivityStatistics = initializeActivityStatistics(
   document.getElementById("activityStatistics")
 );
+const updatePeriodStatistics = initializePeriodStatistics(document.getElementById("viewStats"));
 const renderObjectives = createObjectivesView({
   container: document.getElementById("objectivesList"),
   onEditPersonalRace: race => calendar.openPersonalRace(race),
@@ -46,10 +48,12 @@ const renderObjectives = createObjectivesView({
 });
 const calendar = initializeCalendar(raceCatalogPromise, personalData.repository, sources => {
   // Une course validée compte comme une sortie réalisée.
-  updateActivityStatistics([
+  const activities = [
     ...sources.workouts,
     ...listRaceResultsAsWorkouts([...sources.races, ...sources.personalRaces])
-  ]);
+  ];
+  updateActivityStatistics(activities);
+  updatePeriodStatistics(activities);
   renderObjectives(sources);
 });
 document

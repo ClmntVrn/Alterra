@@ -1,4 +1,4 @@
-// Barre d’onglets de l’accueil : vues, onglets à venir, pastille de sauvegarde et mise en page.
+// Barre d’onglets de l’accueil : vues, onglet à venir, pastille de sauvegarde et mise en page.
 
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
@@ -45,7 +45,7 @@ test("l’accueil s’ouvre par défaut avec les statistiques et le calendrier",
   );
 });
 
-test("Stats et IA sont grisés et annoncés indisponibles", async () => {
+test("seul l’onglet IA reste grisé et annoncé indisponible", async () => {
   assert.deepEqual(
     await page.evaluate(() =>
       [...document.querySelectorAll(".tab.is-soon")].map(tab => [
@@ -54,10 +54,7 @@ test("Stats et IA sont grisés et annoncés indisponibles", async () => {
         tab.textContent.replace(/\s+/g, " ").trim()
       ])
     ),
-    [
-      ["SPAN", "true", "Stats Bientôt"],
-      ["SPAN", "true", "IA Bientôt"]
-    ]
+    [["SPAN", "true", "IA Bientôt"]]
   );
 });
 
