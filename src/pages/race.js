@@ -36,9 +36,14 @@ function renderRace(race, personalPlan = null, storageError = null) {
   const displayRace = applyPersonalPlan(race, personalPlan);
   document.title = `${displayRace.name} · Alterra`;
 
-  const elevation = displayRace.profile?.gpx ? createElevationSection(displayRace) : null;
   let live = null;
-  const checkpoints = displayRace.checkpoints?.length
+  let checkpoints = null;
+  const elevation = displayRace.profile?.gpx
+    ? createElevationSection(displayRace, {
+        getScenarioIndex: () => checkpoints?.getScenarioIndex() ?? 0
+      })
+    : null;
+  checkpoints = displayRace.checkpoints?.length
     ? createCheckpointsSection(displayRace, {
         onChange: () => {
           elevation?.update();

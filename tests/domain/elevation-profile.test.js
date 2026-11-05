@@ -5,8 +5,12 @@ import {
   buildElevationProfile,
   computeAxisStep,
   computeProgress,
+  computeSections,
+  computeSlopeSegments,
+  gradeAt,
   measureClimb,
-  measureTrack
+  measureTrack,
+  slopeBand
 } from "../../src/domain/elevation-profile.js";
 
 // Trace fictive plein nord : 0,1° de latitude ≈ 11,12 km entre chaque point.
@@ -102,4 +106,102 @@ test("buildElevationProfile place la trace dans la zone de tracé demandée", ()
   const [start, finish] = profile.markers;
   assert.deepEqual([start.x, start.y, finish.x], [46, 216, 378]);
   assert.equal(profile.plot, plot);
+});
+
+test("buildElevationProfile adapte l’échelle d’altitude au relief", () => {
+  const flat = [500, 530, 510, 560].map((elevation, index) => ({
+    latitude: 45 + index * 0.01,
+    longitude: 6,
+    elevation
+  }));
+  const profile = buildElevationProfile(flat);
+  assert.equal(profile.elevationStep, 20);
+  assert.deepEqual([profile.minElevation, profile.maxElevation], [500, 560]);
+});
+
+test("buildElevationProfile zoome sur une partie de la trace", () => {
+  const plot = { left: 0, right: 100, top: 0, bottom: 100 };
+  const profile = buildElevationProfile(
+    track,
+    [
+      { id: "a", km: 5 },
+      { id: "b", km: 15 }
+    ],
+    plot,
+    { fromKm: 10, toKm: 20 }
+  );
+  assert.deepEqual([profile.fromKm, profile.toKm], [10, 20]);
+  assert.equal(profile.samples[0][0], 0);
+  assert.equal(profile.samples.at(-1)[0], 100);
+  assert.deepEqual(
+    profile.markers.map(marker => `${marker.id}:${marker.inView}`),
+    ["start:false", "a:false", "b:true", "finish:false"]
+  );
+  assert.ok(Math.abs(profile.markers[2].x - 50) < 1e-9);
+  // Entre 10 et 20 km, l’altitude va d’environ 1 405 à 1 270 m (pic à 1 450 m au km 11,12).
+  assert.deepEqual([profile.minElevation, profile.maxElevation], [1250, 1450]);
+
+  const ids = new Set(["a", "b"]);
+  assert.deepEqual(computeProgress(profile, ids, () => false).points, [], "départ hors zoom");
+  const atA = computeProgress(profile, ids, id => id === "a");
+  assert.deepEqual(atA.points, [], "ravito avant la zone affichée");
+  const atB = computeProgress(profile, ids, () => true);
+  assert.equal(atB.points[0][0], 0);
+  assert.equal(atB.points.at(-1)[0], profile.markers[2].x);
+});
+
+test("slopeBand et gradeAt classent la pente en montée comme en descente", () => {
+  assert.deepEqual([0, 4.9, -5, 9.9, 10, -25].map(slopeBand), [
+    "easy",
+    "easy",
+    "medium",
+    "medium",
+    "hard",
+    "hard"
+  ]);
+  const points = [0, 1, 2].map(distanceKm => ({ distanceKm, elevation: distanceKm * 80 }));
+  assert.ok(Math.abs(gradeAt(points, 1) - 8) < 1e-9);
+  assert.ok(Math.abs(gradeAt(points, 0) - 8) < 1e-9, "fenêtre tronquée au départ");
+});
+
+test("computeSlopeSegments regroupe les tronçons de même pente", () => {
+  // 0–2 km à plat, 2–3 km à 12 %, 3–3,2 km à plat, 3,2–5 km à 12 %.
+  const profile = [
+    [0, 100],
+    [2, 100],
+    [3, 220],
+    [3.2, 220],
+    [5, 436]
+  ].map(([distanceKm, elevation]) => ({ distanceKm, elevation }));
+  const segments = computeSlopeSegments(profile);
+  assert.deepEqual(
+    segments.map(segment => segment.band),
+    ["easy", "hard"],
+    "le replat de 200 m rejoint la montée"
+  );
+  assert.equal(segments[0].fromKm, 0);
+  assert.ok(Math.abs(segments.at(-1).toKm - 5) < 1e-9);
+  assert.ok(Math.abs(segments[1].fromKm - 2) < 0.15, "la montée commence vers le km 2");
+});
+
+test("computeSections mesure chaque section entre deux repères", () => {
+  const { points } = measureTrack(track);
+  const sections = computeSections(points, [
+    { id: "start", km: 0 },
+    { id: "col", km: 11.12 },
+    { id: "double", km: 11.12 },
+    { id: "finish", km: 33.36 }
+  ]);
+  assert.deepEqual(
+    sections.map(({ fromId, toId, ascentMeters, descentMeters }) => [
+      fromId,
+      toId,
+      ascentMeters,
+      descentMeters
+    ]),
+    [
+      ["start", "col", 450, 0],
+      ["double", "finish", 700, 250]
+    ]
+  );
 });

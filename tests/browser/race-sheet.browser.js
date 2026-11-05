@@ -115,7 +115,118 @@ test("le profil place les repères des ravitos et reprend la progression enregis
     [true, true, "visible"],
     "tracé à la taille de l’écran, partie parcourue remplie, position marquée"
   );
-  assert.deepEqual(await texts(".elevation-section p:not([hidden])"), [], "aucun texte d’aide");
+  assert.deepEqual(
+    await texts(".elevation-section p:not([hidden]):not(.elevation-legend)"),
+    [],
+    "aucun texte d’aide"
+  );
+});
+
+test("le profil colore la pente, liste les sections et donne le passage au doigt", async () => {
+  const state = await page.evaluate(() => ({
+    bands: [
+      ...new Set(
+        [...document.querySelectorAll(".elevation-section .elevation-slope-line")].map(line =>
+          [...line.classList].find(name => name.startsWith("slope-"))
+        )
+      )
+    ].sort(),
+    sections: [...document.querySelectorAll(".elevation-sections li")].map(
+      row => row.querySelector(".elevation-section-name").textContent
+    ),
+    legend: document.querySelector(".elevation-legend").textContent
+  }));
+  assert.ok(state.bands.length >= 2, `plusieurs classes de pente : ${state.bands}`);
+  assert.deepEqual(state.sections, ["Départ → Col A", "Col A → Refuge B", "Refuge B → Arrivée"]);
+  assert.match(state.legend, /< 5 %5–10 %≥ 10 %Point haut \d+ m · km [\d,]+/);
+
+  const readout = await page.evaluate(() => {
+    const chart = document.querySelector(".elevation-section .elevation-chart");
+    const rect = chart.getBoundingClientRect();
+    const plotLeft = 42;
+    const plotRight = rect.width - 14;
+    // Au milieu de la zone de tracé : environ 20 km sur une trace d’environ 39 km.
+    const clientX = rect.left + (plotLeft + plotRight) / 2;
+    chart.dispatchEvent(
+      new PointerEvent("pointerdown", {
+        pointerId: 7,
+        clientX,
+        clientY: rect.top + 80,
+        bubbles: true
+      })
+    );
+    chart.dispatchEvent(
+      new PointerEvent("pointerup", {
+        pointerId: 7,
+        clientX,
+        clientY: rect.top + 80,
+        bubbles: true
+      })
+    );
+    const box = document.querySelector(".elevation-section .elevation-readout");
+    return [box.hidden, [...box.children].map(line => line.textContent)];
+  });
+  assert.equal(readout[0], false);
+  assert.match(readout[1][0], /^Km (19|20)(,\d)? · \d+ m · [+−-]?\d+ %$/);
+  assert.match(readout[1][1], /^Passage \d{2}:\d{2} · \dh\d{2}$/, "heure estimée du scénario");
+});
+
+test("le profil s’ouvre en plein écran, zoome et revient à la course entière", async () => {
+  await page.evaluate(() => document.querySelector(".elevation-expand").click());
+  const full = () =>
+    page.evaluate(() => {
+      const dialog = document.querySelector(".elevation-full");
+      const chart = dialog.querySelector(".elevation-chart");
+      return {
+        open: dialog.open,
+        view: chart.dataset.view,
+        reset: !dialog.querySelector(".elevation-reset").hidden,
+        stops: chart.querySelectorAll("[data-profile-stop]").length,
+        figures: chart.querySelectorAll(".elevation-section-figures").length,
+        fills: Math.round(chart.getBoundingClientRect().height) >= window.innerHeight * 0.5
+      };
+    });
+  assert.deepEqual(await full(), {
+    open: true,
+    view: "",
+    reset: false,
+    stops: 4,
+    figures: 3,
+    fills: true
+  });
+
+  await page.evaluate(() => {
+    const chart = document.querySelector(".elevation-full .elevation-chart");
+    const rect = chart.getBoundingClientRect();
+    chart.dispatchEvent(
+      new WheelEvent("wheel", {
+        deltaY: -600,
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2,
+        bubbles: true,
+        cancelable: true
+      })
+    );
+  });
+  await page.waitFor(() => document.querySelector(".elevation-full .elevation-chart").dataset.view);
+  const zoomed = await full();
+  assert.equal(zoomed.reset, true, "bouton Course entière");
+  const [from, to] = zoomed.view.split("-").map(Number);
+  assert.ok(from > 0 && to < 40 && to - from < 15, `partie zoomée : ${zoomed.view}`);
+
+  await page.evaluate(() => document.querySelector(".elevation-reset").click());
+  assert.deepEqual([(await full()).view, (await full()).reset], ["", false]);
+
+  await page.evaluate(() =>
+    document
+      .querySelector('.elevation-full [data-profile-stop="r1"]')
+      .dispatchEvent(new MouseEvent("click"))
+  );
+  const wasChecked = await isChecked("r1");
+  await page.evaluate(() => document.querySelector(".elevation-close").click());
+  assert.equal(await page.evaluate(() => document.querySelector(".elevation-full").open), false);
+  await page.evaluate(() => document.querySelector('.checkpoint[data-id="r1"] input').click());
+  assert.equal(await isChecked("r1"), !wasChecked, "le plein écran coche les mêmes ravitos");
 });
 
 test("un scénario change les temps et horaires de passage", async () => {

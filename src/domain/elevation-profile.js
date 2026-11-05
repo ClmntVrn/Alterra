@@ -4,8 +4,11 @@
 export const PLOT = Object.freeze({ left: 52, right: 884, top: 26, bottom: 213 });
 
 const EARTH_RADIUS_KM = 6371;
-const ELEVATION_ROUNDING = 200;
-const MAX_SAMPLES = 250;
+// Écart d’altitude minimal de l’échelle : une section presque plate n’est pas grossie à l’excès.
+const MIN_ELEVATION_RANGE = 40;
+const MAX_SAMPLES = 400;
+// Demi-fenêtre de calcul de la pente, en km.
+const SLOPE_WINDOW_KM = 0.15;
 // Variation d’altitude en dessous de laquelle le dénivelé n’avance pas : filtre le bruit du GPS.
 const CLIMB_THRESHOLD_METERS = 5;
 
@@ -45,7 +48,7 @@ export function measureTrack(trackpoints) {
  * Altitude interpolée à une distance de la trace.
  * @param {Array<{ elevation: number, distanceKm: number }>} points Trace mesurée.
  */
-function elevationAt(points, km) {
+export function elevationAt(points, km) {
   let nextIndex = points.findIndex(point => point.distanceKm >= km);
   if (nextIndex < 0) return points[points.length - 1].elevation;
   if (nextIndex < 1) nextIndex = 1;
@@ -90,33 +93,57 @@ export function measureClimb(points, fromKm, toKm) {
  * @param {Array<{ latitude: number, longitude: number, elevation: number }>} trackpoints
  * @param {Array<{ id: string, km?: number }>} [checkpoints]
  * @param {{ left: number, right: number, top: number, bottom: number }} [plot] Zone de tracé.
+ * @param {{ fromKm: number, toKm: number } | null} [view] Partie affichée (zoom) ; toute la
+ *   trace par défaut. L’échelle d’altitude suit la partie affichée.
  */
-export function buildElevationProfile(trackpoints, checkpoints = [], plot = PLOT) {
+export function buildElevationProfile(trackpoints, checkpoints = [], plot = PLOT, view = null) {
   const { points, distanceKm } = measureTrack(trackpoints);
-  const elevations = points.map(point => point.elevation);
-  const minElevation =
-    Math.floor(Math.min(...elevations) / ELEVATION_ROUNDING) * ELEVATION_ROUNDING;
-  let maxElevation = Math.ceil(Math.max(...elevations) / ELEVATION_ROUNDING) * ELEVATION_ROUNDING;
-  if (maxElevation <= minElevation) maxElevation = minElevation + ELEVATION_ROUNDING;
+  const fromKm = Math.max(0, Math.min(distanceKm, view?.fromKm ?? 0));
+  const toKm = Math.max(fromKm, Math.min(distanceKm, view?.toKm ?? distanceKm));
+  const spanKm = toKm - fromKm || distanceKm;
 
+  const stride = Math.max(
+    1,
+    Math.ceil(points.filter(p => p.distanceKm > fromKm && p.distanceKm < toKm).length / MAX_SAMPLES)
+  );
+  const sampleKms = [
+    fromKm,
+    ...points
+      .filter(point => point.distanceKm > fromKm && point.distanceKm < toKm)
+      .filter((point, index) => index % stride === 0)
+      .map(point => point.distanceKm),
+    toKm
+  ];
+  const elevations = sampleKms.map(km => elevationAt(points, km));
+  const rawMin = Math.min(...elevations);
+  const rawMax = Math.max(...elevations);
+  const elevationStep = computeAxisStep(Math.max(rawMax - rawMin, MIN_ELEVATION_RANGE));
+  // Bornes au demi-pas : l’échelle colle au relief sans partir de zéro.
+  const bound = elevationStep / 2;
+  const minElevation = Math.floor(rawMin / bound) * bound;
+  let maxElevation = Math.ceil(rawMax / bound) * bound;
+  if (maxElevation <= minElevation) maxElevation = minElevation + elevationStep;
+
+  const xAt = km => plot.left + ((km - fromKm) / spanKm) * (plot.right - plot.left);
+  const yAt = elevation =>
+    plot.bottom -
+    ((elevation - minElevation) / (maxElevation - minElevation)) * (plot.bottom - plot.top);
   const pointAt = targetKm => {
-    const target = Math.max(0, Math.min(distanceKm, targetKm));
-    const elevation = elevationAt(points, target);
-    return {
-      km: target,
-      elevation,
-      x: plot.left + (target / distanceKm) * (plot.right - plot.left),
-      y:
-        plot.bottom -
-        ((elevation - minElevation) / (maxElevation - minElevation)) * (plot.bottom - plot.top)
-    };
+    const km = Math.max(0, Math.min(distanceKm, targetKm));
+    const elevation = elevationAt(points, km);
+    return { km, elevation, x: xAt(km), y: yAt(elevation) };
+  };
+  /** Courbe [x, y] entre deux distances, limitée à la partie affichée. */
+  const curve = (startKm, endKm) => {
+    const start = Math.max(fromKm, startKm);
+    const end = Math.min(toKm, endKm);
+    if (end <= start) return start <= toKm ? [[xAt(start), yAt(elevationAt(points, start))]] : [];
+    return [start, ...sampleKms.filter(km => km > start && km < end), end].map(km => [
+      xAt(km),
+      yAt(elevationAt(points, km))
+    ]);
   };
 
-  const stride = Math.max(1, Math.ceil(points.length / MAX_SAMPLES));
-  const samples = points
-    .filter((point, index) => index % stride === 0 || index === points.length - 1)
-    .map(point => pointAt(point.distanceKm))
-    .map(point => [point.x, point.y]);
   const markers = [{ id: "start", ...pointAt(0) }];
   for (const checkpoint of checkpoints) {
     if (!Number.isFinite(checkpoint.km)) continue;
@@ -126,8 +153,96 @@ export function buildElevationProfile(trackpoints, checkpoints = [], plot = PLOT
   if (!markers.some(marker => marker.id === "finish")) {
     markers.push({ id: "finish", ...pointAt(distanceKm) });
   }
+  for (const marker of markers) marker.inView = marker.km >= fromKm && marker.km <= toKm;
 
-  return { distanceKm, minElevation, maxElevation, samples, markers, points, plot };
+  return {
+    distanceKm,
+    fromKm,
+    toKm,
+    minElevation,
+    maxElevation,
+    elevationStep,
+    samples: curve(fromKm, toKm),
+    markers,
+    points,
+    plot,
+    xAt,
+    yAt,
+    curve
+  };
+}
+
+/** Classe de pente : moins de 5 %, de 5 à 10 %, 10 % et plus, en montée comme en descente. */
+export const SLOPE_LIMITS = Object.freeze({ easy: 5, medium: 10 });
+
+/** @returns {"easy" | "medium" | "hard"} */
+export function slopeBand(gradePercent) {
+  const grade = Math.abs(gradePercent);
+  if (grade < SLOPE_LIMITS.easy) return "easy";
+  if (grade < SLOPE_LIMITS.medium) return "medium";
+  return "hard";
+}
+
+/**
+ * Pente moyenne autour d’une distance, en %, lissée sur une fenêtre pour ignorer le bruit du GPS.
+ * @param {Array<{ elevation: number, distanceKm: number }>} points Trace mesurée.
+ */
+export function gradeAt(points, km, windowKm = SLOPE_WINDOW_KM) {
+  const total = points[points.length - 1].distanceKm;
+  const from = Math.max(0, km - windowKm);
+  const to = Math.min(total, km + windowKm);
+  if (to <= from) return 0;
+  return ((elevationAt(points, to) - elevationAt(points, from)) / ((to - from) * 1000)) * 100;
+}
+
+/**
+ * Tronçons de même classe de pente sur toute la trace ; un tronçon trop court rejoint le précédent.
+ * @param {Array<{ elevation: number, distanceKm: number }>} points Trace mesurée.
+ * @returns {Array<{ fromKm: number, toKm: number, band: "easy" | "medium" | "hard" }>}
+ */
+export function computeSlopeSegments(points, { stepKm = 0.1, minKm = 0.3 } = {}) {
+  const total = points[points.length - 1].distanceKm;
+  const segments = [];
+  for (let index = 0; index * stepKm < total; index += 1) {
+    const from = index * stepKm;
+    const to = Math.min(total, from + stepKm);
+    const band = slopeBand(gradeAt(points, (from + to) / 2));
+    const last = segments[segments.length - 1];
+    if (last?.band === band) last.toKm = to;
+    else segments.push({ fromKm: from, toKm: to, band });
+  }
+  const merged = [];
+  for (const segment of segments) {
+    const last = merged[merged.length - 1];
+    if (last && (last.band === segment.band || segment.toKm - segment.fromKm < minKm)) {
+      last.toKm = segment.toKm;
+    } else {
+      merged.push({ ...segment });
+    }
+  }
+  return merged;
+}
+
+/**
+ * Sections entre deux repères consécutifs : distance, D+ et D−.
+ * @param {Array<{ elevation: number, distanceKm: number }>} points Trace mesurée.
+ * @param {Array<{ id: string, km: number }>} markers Repères du profil, du départ à l’arrivée.
+ */
+export function computeSections(points, markers) {
+  return markers
+    .slice(1)
+    .map((to, index) => {
+      const from = markers[index];
+      return {
+        fromId: from.id,
+        toId: to.id,
+        fromKm: from.km,
+        toKm: to.km,
+        distanceKm: to.km - from.km,
+        ...measureClimb(points, from.km, to.km)
+      };
+    })
+    .filter(section => section.distanceKm > 0);
 }
 
 /** Pas « rond » (1, 2, 2,5, 5 ou 10 × 10ⁿ) pour environ quatre graduations d’altitude ou de km. */
@@ -166,12 +281,7 @@ export function computeProgress(profile, checkpointIds, isChecked) {
   }
   const marker = progressMarkers[completedCount];
   if (!marker) return null;
-  let points = profile.samples.filter(point => point[0] <= marker.x);
-  const next = profile.samples.find(point => point[0] > marker.x);
-  const previous = points[points.length - 1];
-  if (next && previous && previous[0] !== marker.x) {
-    const ratio = (marker.x - previous[0]) / (next[0] - previous[0]);
-    points = [...points, [marker.x, previous[1] + ratio * (next[1] - previous[1])]];
-  }
+  // Partie affichée seulement : rien avant le début d’un zoom, tout si le ravito est au-delà.
+  const points = marker.km < profile.fromKm ? [] : profile.curve(profile.fromKm, marker.km);
   return { marker, points, remainingKm: Math.max(0, profile.distanceKm - marker.km) };
 }

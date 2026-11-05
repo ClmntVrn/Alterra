@@ -1,18 +1,38 @@
-/* Profil d’altitude de la fiche course, dessiné à la taille réelle de l’écran. */
+/* Profil d’altitude de la fiche course : courbe colorée selon la pente, ravitos, sections,
+   lecture au doigt et plein écran. */
 
 .elevation-section {
   padding: 16px 14px 12px;
 }
 
-.elevation-section h2 {
+.elevation-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 4px;
+}
+
+.elevation-head h2 {
+  margin: 0;
+}
+
+.elevation-expand[hidden] {
+  display: none;
+}
+
+.elevation-chart-wrap {
+  position: relative;
 }
 
 .elevation-chart {
   display: block;
   width: 100%;
-  height: auto;
   overflow: visible;
+  /* Glisser à l’horizontale lit le profil ; à la verticale, la page défile. */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .elevation-status {
@@ -32,11 +52,16 @@
   stroke-width: 1;
 }
 
-.elevation-grid text {
+.elevation-grid text,
+.elevation-section-figures {
   fill: var(--color-muted);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
+}
+
+.elevation-section-shade {
+  fill: var(--color-surface-faint);
 }
 
 .elevation-axis {
@@ -45,34 +70,71 @@
   stroke-width: 1;
 }
 
-.elevation-area {
-  fill: var(--color-track);
-}
-
-/* Partie parcourue : remplie en orange sous la courbe. */
-.elevation-completed-area {
-  fill: rgb(var(--rgb-accent-bright) / 38%);
-}
-
+/* Trait de secours sous les tronçons colorés. */
 .elevation-line {
   fill: none;
   stroke: var(--color-slate);
   stroke-linejoin: round;
-  stroke-width: 2;
+  stroke-width: 1;
+}
+
+.elevation-slope-area {
+  stroke: none;
+}
+
+.elevation-slope-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.elevation-slope-area.slope-easy {
+  fill: rgb(var(--rgb-slope-easy) / 26%);
+}
+
+.elevation-slope-area.slope-medium {
+  fill: rgb(var(--rgb-slope-medium) / 30%);
+}
+
+.elevation-slope-area.slope-hard {
+  fill: rgb(var(--rgb-slope-hard) / 28%);
+}
+
+.elevation-slope-line.slope-easy {
+  stroke: var(--color-slope-easy);
+}
+
+.elevation-slope-line.slope-medium {
+  stroke: var(--color-slope-medium);
+}
+
+.elevation-slope-line.slope-hard {
+  stroke: var(--color-slope-hard);
+}
+
+/* Partie parcourue : voilée et grisée, la position reste en orange. */
+.elevation-completed-area {
+  fill: rgb(var(--rgb-paper) / 62%);
 }
 
 .elevation-completed {
   fill: none;
-  stroke: var(--color-accent-bright);
+  stroke: var(--color-done-text);
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-width: 4;
+  stroke-width: 3;
 }
 
 .elevation-position {
-  stroke: var(--color-charcoal);
-  stroke-dasharray: 4 4;
-  stroke-width: 1.5;
+  stroke: var(--color-accent-bright);
+  stroke-width: 2;
+}
+
+.elevation-guide {
+  stroke: var(--color-control-line);
+  stroke-dasharray: 2 3;
+  stroke-width: 1;
 }
 
 .elevation-stop-hit {
@@ -103,17 +165,204 @@
   fill: var(--color-charcoal);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 12px;
-  font-weight: 750;
-  paint-order: stroke;
-  stroke: var(--color-paper);
-  stroke-linejoin: round;
-  stroke-width: 3px;
+  font-weight: 700;
   pointer-events: none;
 }
 
 .elevation-current {
   fill: var(--color-accent-bright);
-  stroke: var(--color-charcoal);
+  stroke: var(--color-paper);
   stroke-width: 2.5;
   pointer-events: none;
+}
+
+.elevation-cursor {
+  pointer-events: none;
+}
+
+.elevation-cursor line {
+  stroke: var(--color-charcoal);
+  stroke-width: 1;
+}
+
+.elevation-cursor circle {
+  fill: var(--color-charcoal);
+  stroke: var(--color-paper);
+  stroke-width: 2;
+}
+
+/* Lecture au doigt : km, altitude, pente, passage estimé. */
+.elevation-readout {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  gap: 1px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: var(--color-tile);
+  color: var(--color-cream);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1.3;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.elevation-readout span + span {
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.elevation-readout[hidden] {
+  display: none;
+}
+
+.elevation-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin: 8px 0 0;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.elevation-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.elevation-swatch {
+  width: 14px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+.elevation-swatch.slope-easy {
+  background: var(--color-slope-easy);
+}
+
+.elevation-swatch.slope-medium {
+  background: var(--color-slope-medium);
+}
+
+.elevation-swatch.slope-hard {
+  background: var(--color-slope-hard);
+}
+
+.elevation-legend-peak {
+  margin-left: auto;
+}
+
+/* Sections entre ravitos : nom, distance, D+, D−. */
+.elevation-sections {
+  display: grid;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.elevation-sections li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 7px 0;
+  border-top: 1px solid var(--color-line-soft);
+}
+
+.elevation-sections li > span:not(.elevation-section-name) {
+  min-width: 52px;
+  text-align: right;
+}
+
+.elevation-section-name {
+  font-weight: 600;
+}
+
+.elevation-sections li.is-done {
+  color: var(--color-done-text);
+}
+
+/* Plein écran : tout l’écran, pensé pour le paysage ; zoom à deux doigts. */
+.elevation-full {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: max(10px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+    max(10px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  border: 0;
+  background: var(--color-paper);
+  color: var(--color-text);
+  overflow: hidden;
+}
+
+.elevation-full[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.elevation-full::backdrop {
+  background: var(--color-paper);
+}
+
+.elevation-full-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.elevation-full-bar h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.elevation-reset {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.elevation-reset[hidden] {
+  display: none;
+}
+
+.elevation-chart-wrap.is-full {
+  flex: 1;
+  min-height: 0;
+}
+
+.elevation-chart-wrap.is-full .elevation-chart {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  touch-action: none;
+}
+
+.elevation-full .elevation-legend {
+  margin: 0;
+}
+
+.elevation-full:focus {
+  outline: none;
 }

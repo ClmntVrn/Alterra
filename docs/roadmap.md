@@ -1,6 +1,6 @@
 # Plan de développement d’Alterra
 
-**Mis à jour le :** 4 novembre 2026  
+**Mis à jour le :** 5 novembre 2026  
 **État général :** version locale utilisable (0.8.28) ; entraînements, statistiques et onglet Stats, barre d’onglets, objectifs, courses validées et thème sombre en place, retours iPhone attendus sur les étapes 6 à 8 et les retours du 2 novembre. Prochaines étapes : ajout d’une course depuis l’application (fusion course et fiche), puis nutrition et équipement.
 
 ## Vision
@@ -117,6 +117,19 @@ Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à 
 - [x] Durée saisie en deux cases heures et minutes ; vitesse en km/h pour le vélo à la place de l’allure (0.8.27).
 - [x] Statistiques de l’accueil sur une carte normale, sans bandeau sombre ni relief de montagne (0.8.29).
 - [ ] À vérifier sur iPhone : barre d’état en appli installée (clair et sombre), lisibilité du sombre dehors, toucher des cartes, import d’une vraie sauvegarde en fusion.
+
+### Graphe de course (5 novembre 2026)
+
+**Statut :** réalisé en 0.8.33 — à vérifier sur iPhone
+
+Inspiré de LiveTrail (ravitos et sections) et des apps de trail qui colorent la pente (Footpath, Intervals.icu, Ultra-Trails).
+
+- [x] Échelle d’altitude ajustée au relief, point haut indiqué.
+- [x] Courbe colorée selon la pente : vert, jaune, rouge (décision de l’utilisateur).
+- [x] Ravitos en lignes verticales nommées ; sections (distance, D+, D−) sous le profil et, en plein écran, sous l’axe.
+- [x] Lecture au doigt : km, altitude, pente, passage estimé du scénario.
+- [x] Plein écran avec zoom à deux doigts (décision de l’utilisateur) et retour à la course entière.
+- [ ] À vérifier sur iPhone : pincer pour zoomer, glisser sans gêner le défilement, plein écran en paysage (encoche), lisibilité dehors et de nuit.
 
 ### Étape 9 — Ajout d’une course depuis l’application
 

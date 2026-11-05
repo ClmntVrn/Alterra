@@ -1,4 +1,4 @@
-const CACHE_NAME = "alterra-0.8.32";
+const CACHE_NAME = "alterra-0.8.33";
 
 const FILES = [
   "./",
@@ -53,6 +53,7 @@ const FILES = [
   "./src/domain/elevation-profile.js",
   "./src/domain/race-plan.js",
   "./src/domain/race-progress.js",
+  "./src/domain/race-timing.js",
   "./src/domain/objectives.js",
   "./src/domain/backup-format.js",
   "./src/domain/dates.js",
