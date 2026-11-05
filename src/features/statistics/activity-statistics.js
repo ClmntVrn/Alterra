@@ -15,8 +15,8 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const CHART_HEIGHT = 150;
 const PLOT_TOP = 10;
 const BASELINE = 126;
-/** Semaines visibles sans défiler : les 4 dernières, celle en cours et les 4 à venir. */
-const VISIBLE_WEEKS = 9;
+/** Semaines visibles sans défiler : les 12 dernières ; les semaines à venir sont à droite. */
+const VISIBLE_WEEKS = 12;
 /** Semaines terminées prises pour la moyenne. */
 const AVERAGE_WEEKS = 11;
 
@@ -34,8 +34,8 @@ const categories = Object.freeze({
 });
 
 /**
- * Carte d’activité de l’accueil : une barre par semaine (réalisé en barre pleine, prévu en barre
- * vide), sur une bande qui défile au doigt ; semaine choisie au toucher ou au clavier.
+ * Carte d’activité de l’accueil : courbe du réalisé par semaine et prévu en tirets, sur une bande
+ * qui défile au doigt ; semaine choisie au toucher ou au clavier.
  */
 export function initializeActivityStatistics(container) {
   const categoriesElement = container.querySelector("#activityCategories");
@@ -60,10 +60,10 @@ export function initializeActivityStatistics(container) {
   let plannedWeeks = [];
   let currentIndex = 0;
   /** @type {SVGGElement[]} */
-  let bars = [];
+  let points = [];
   let chartWidth = 0;
   let slotWidth = 0;
-  let weeksFromEnd = 0;
+  let weeksFromEnd = FUTURE_WEEKS;
   let dragStartX = 0;
   let dragStartScroll = 0;
   let dragTarget = null;
@@ -219,7 +219,7 @@ export function initializeActivityStatistics(container) {
     plannedLabel.textContent = showPlanned
       ? `Prévu : ${metrics[selectedMetric].format(plannedValue(index))}`
       : "";
-    bars.forEach((bar, barIndex) => {
+    points.forEach((bar, barIndex) => {
       const selected = barIndex === index;
       bar.classList.toggle("is-selected", selected);
       bar.setAttribute("aria-pressed", String(selected));
@@ -234,7 +234,7 @@ export function initializeActivityStatistics(container) {
       renderSelectedWeek();
     }
     if (focus) {
-      bars[next].focus({ preventScroll: true });
+      points[next].focus({ preventScroll: true });
       // La semaine choisie au clavier reste visible dans la bande.
       const left = slotWidth * next;
       if (left < viewport.scrollLeft) viewport.scrollLeft = left;
@@ -246,22 +246,22 @@ export function initializeActivityStatistics(container) {
 
   function renderChart() {
     const metric = metrics[selectedMetric];
-    // Position lue en semaines depuis la droite (bande cachée : position précédente gardée).
-    if (viewport.clientWidth && slotWidth) {
-      const fromEnd = viewport.scrollWidth - viewport.clientWidth - viewport.scrollLeft;
-      weeksFromEnd = Math.max(0, fromEnd / slotWidth);
+    // Position lue en semaines depuis la droite, sur le dessin précédent et à sa largeur ; s’il a
+    // été fait bande cachée, la position voulue est gardée.
+    if (chartWidth && slotWidth) {
+      const fromEnd = viewport.scrollWidth - chartWidth - viewport.scrollLeft;
+      weeksFromEnd = Math.max(0, Math.round(fromEnd / slotWidth));
     }
     chartWidth = viewport.clientWidth;
     const count = doneWeeks.length;
     slotWidth = Math.max(chartWidth, 240) / VISIBLE_WEEKS;
     const slot = slotWidth;
     const width = slot * count;
-    const barWidth = Math.min(22, slot * 0.6);
-    const radius = Math.min(5, barWidth / 2);
     const done = doneWeeks.map(week => week.totals[selectedMetric]);
     const planned = plannedWeeks.map(week => week.totals[selectedMetric]);
     const max = Math.max(...done, ...planned, 0) || 1;
-    const height = value => (value / max) * (BASELINE - PLOT_TOP);
+    const xAt = index => slot * index + slot / 2;
+    const yAt = value => BASELINE - (value / max) * (BASELINE - PLOT_TOP);
 
     const svg = svgElement("svg", {
       viewBox: `0 0 ${width} ${CHART_HEIGHT}`,
@@ -270,17 +270,15 @@ export function initializeActivityStatistics(container) {
       role: "group",
       "aria-label": `${metric.label} par semaine`
     });
-    const hatch = svgElement("pattern", {
-      id: "activityHatch",
-      width: 5,
-      height: 5,
-      patternUnits: "userSpaceOnUse",
-      patternTransform: "rotate(45)"
-    });
-    hatch.append(svgElement("line", { x1: 0, y1: 0, x2: 0, y2: 5, class: "activity-chart-hatch" }));
-    const defs = svgElement("defs");
-    defs.append(hatch);
-    svg.append(defs);
+    svg.append(
+      svgElement("line", {
+        x1: 0,
+        x2: width,
+        y1: BASELINE,
+        y2: BASELINE,
+        class: "activity-chart-axis"
+      })
+    );
 
     // Moyenne des semaines terminées les plus récentes (11 au plus).
     const recentWeeks = doneWeeks.slice(
@@ -290,7 +288,7 @@ export function initializeActivityStatistics(container) {
     const average = averageOfPastWeeks(recentWeeks, selectedMetric);
     averageLabel.hidden = average <= 0;
     if (average > 0) {
-      const y = BASELINE - height(average);
+      const y = yAt(average);
       svg.append(
         svgElement("line", { x1: 0, x2: width, y1: y, y2: y, class: "activity-chart-average" })
       );
@@ -298,11 +296,30 @@ export function initializeActivityStatistics(container) {
       averageLabel.replaceChildren("moy.", document.createElement("br"), metric.format(average));
     }
 
-    bars = done.map((value, index) => {
-      const center = slot * index + slot / 2;
-      const left = center - barWidth / 2;
+    // Réalisé : traits droits jusqu’à la semaine en cours, avec une aire légère dessous.
+    const doneLine = done
+      .slice(0, currentIndex + 1)
+      .map((value, index) => `${index ? "L" : "M"} ${xAt(index)} ${yAt(value)}`)
+      .join(" ");
+    svg.append(
+      svgElement("path", {
+        d: `${doneLine} L ${xAt(currentIndex)} ${BASELINE} L ${xAt(0)} ${BASELINE} Z`,
+        class: "activity-chart-area"
+      }),
+      svgElement("path", { d: doneLine, class: "activity-chart-line" })
+    );
+    // Prévu : tirets de la semaine en cours aux semaines à venir.
+    const plannedLine = planned
+      .slice(currentIndex)
+      .map((value, step) => `${step ? "L" : "M"} ${xAt(currentIndex + step)} ${yAt(value)}`)
+      .join(" ");
+    svg.append(svgElement("path", { d: plannedLine, class: "activity-chart-planned-line" }));
+
+    points = done.map((value, index) => {
+      const x = xAt(index);
       const remainder = hasPlannedRemainder(index);
       const isCurrent = index === currentIndex;
+      const isFuture = index > currentIndex;
       const group = svgElement("g", {
         class: `activity-chart-point${isCurrent ? " is-current" : ""}`,
         role: "button",
@@ -318,42 +335,33 @@ export function initializeActivityStatistics(container) {
           width: slot,
           height: BASELINE,
           class: "activity-chart-hit-area"
+        }),
+        svgElement("line", {
+          x1: x,
+          x2: x,
+          y1: PLOT_TOP - 4,
+          y2: BASELINE,
+          class: "activity-chart-guide"
         })
       );
       if (remainder) {
-        const plannedHeight = Math.max(height(planned[index]), 4);
         group.append(
-          svgElement("rect", {
-            x: left + 0.75,
-            y: BASELINE - plannedHeight + 0.75,
-            width: barWidth - 1.5,
-            height: plannedHeight - 1.5,
-            rx: radius,
-            class: "activity-chart-planned"
+          svgElement("circle", {
+            cx: x,
+            cy: yAt(planned[index]),
+            r: 3.5,
+            class: "activity-chart-planned-point"
           })
         );
       }
-      const barHeight = value > 0 ? Math.max(height(value), 4) : 2;
-      const bar = {
-        x: left,
-        y: BASELINE - barHeight,
-        width: barWidth,
-        height: barHeight,
-        rx: value > 0 ? radius : 1
-      };
-      group.append(
-        svgElement("rect", {
-          ...bar,
-          class: value > 0 ? "activity-chart-bar" : "activity-chart-bar is-empty"
-        })
-      );
-      // Semaine en cours hachurée : elle n’est pas finie.
-      if (isCurrent && value > 0) {
+      // Pas de point réalisé dans les semaines à venir.
+      if (!isFuture) {
         group.append(
-          svgElement("rect", {
-            ...bar,
-            fill: "url(#activityHatch)",
-            class: "activity-chart-hatched"
+          svgElement("circle", {
+            cx: x,
+            cy: yAt(value),
+            r: 3.5,
+            class: "activity-chart-done-point"
           })
         );
       }
@@ -369,12 +377,12 @@ export function initializeActivityStatistics(container) {
       });
       svg.append(group);
 
-      // Une date toutes les deux semaines, calée sur la semaine en cours.
-      if ((index - currentIndex) % 2 === 0) {
+      // Une date toutes les trois semaines, calée sur la semaine en cours.
+      if ((index - currentIndex) % 3 === 0) {
         svg.append(
           svgElement(
             "text",
-            { x: center, y: CHART_HEIGHT - 6, class: "activity-chart-week-label" },
+            { x, y: CHART_HEIGHT - 6, class: "activity-chart-week-label" },
             formatShortDayMonth(doneWeeks[index].start)
           )
         );

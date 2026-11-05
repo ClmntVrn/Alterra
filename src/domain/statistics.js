@@ -5,7 +5,7 @@ import { positiveOrZero } from "./numbers.js";
 
 export const WEEK_COUNT = 12;
 /** Graphique de l’accueil : semaines passées (au moins, au plus) et semaines à venir. */
-export const HISTORY_WEEKS = Object.freeze({ min: 4, max: 52 });
+export const HISTORY_WEEKS = Object.freeze({ min: 11, max: 52 });
 export const FUTURE_WEEKS = 4;
 
 /** @typedef {{ distance: number, duration: number, ascent: number, effort: number }} Totals */

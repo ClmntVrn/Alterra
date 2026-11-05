@@ -136,16 +136,20 @@ test("une séance réalisée est comptée une seule fois dans les statistiques",
   const chart = await page.evaluate(() => {
     const points = [...document.querySelectorAll(".activity-chart-point")];
     const viewport = document.querySelector(".activity-chart-viewport");
+    const slot = viewport.scrollWidth / points.length;
     return {
+      weeks: points.length,
       after: points.length - 1 - points.findIndex(point => point.classList.contains("is-current")),
-      atEnd: viewport.scrollLeft >= viewport.scrollWidth - viewport.clientWidth - 1,
-      scrolls: viewport.scrollWidth > viewport.clientWidth
+      visible: Math.round(viewport.clientWidth / slot),
+      hiddenRight: Math.round(
+        (viewport.scrollWidth - viewport.clientWidth - viewport.scrollLeft) / slot
+      )
     };
   });
   assert.deepEqual(
     chart,
-    { after: 4, atEnd: true, scrolls: false },
-    "4 semaines à venir, calées à droite"
+    { weeks: 16, after: 4, visible: 12, hiddenRight: 4 },
+    "12 dernières semaines visibles, les 4 à venir à droite"
   );
 });
 
@@ -210,9 +214,9 @@ test("la case ronde remet la séance à faire, puis le détail la supprime", asy
   assert.equal(await text(".calendar-training-item .calendar-event-category"), "PRÉVU");
   assert.equal(await text("#activityPlanned"), "Prévu : 12 km", "le prévu de la semaine");
   assert.equal(
-    await page.evaluate(() => document.querySelectorAll(".activity-chart-planned").length),
+    await page.evaluate(() => document.querySelectorAll(".activity-chart-planned-point").length),
     1,
-    "une barre vide pour la semaine prévue"
+    "un point du prévu pour la semaine"
   );
 
   await click(".calendar-training-item .calendar-item-open");

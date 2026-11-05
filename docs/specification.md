@@ -51,10 +51,10 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 
 ## Statistiques d’activité
 
-- Le graphique a une barre par semaine (du lundi au dimanche). Il s’ouvre sur les 4 dernières semaines, la semaine en cours et les 4 à venir ; il défile au doigt vers le passé jusqu’à la plus ancienne sortie enregistrée (52 semaines au plus, 4 au moins).
+- Le graphique a un point par semaine (du lundi au dimanche). Il s’ouvre sur les 12 dernières semaines, semaine en cours à droite ; il défile au doigt vers les 4 semaines à venir et vers le passé jusqu’à la plus ancienne sortie enregistrée (52 semaines au plus).
 - Seules les sorties marquées « réalisées » et les courses validées sont comptées ; une course validée compte comme une sortie de son type, dans la semaine de son départ. Les filtres sont Trail + course à pied (par défaut), Trail, Course à pied et Vélo.
 - La semaine choisie affiche ses totaux de distance, temps, D+ et km-effort ; toucher l’un d’eux en fait l’indicateur du graphique. Le km-effort vaut distance en km + D+ en mètres / 100.
-- Le réalisé est en barre pleine, le prévu en barre vide (contour) : c’est-à-dire toutes les sorties de la semaine, réalisées ou non ; le total prévu s’affiche à côté des dates quand il dépasse le réalisé. La semaine en cours est hachurée. Une ligne en pointillés donne la moyenne des 11 dernières semaines terminées ; l’échelle est la même sur toute la période.
+- Le réalisé est une courbe à traits droits jusqu’à la semaine en cours. Le prévu, c’est-à-dire toutes les sorties de la semaine, réalisées ou non, est un point vide quand il dépasse le réalisé, relié en tirets de la semaine en cours aux semaines à venir ; son total s’affiche à côté des dates. Une ligne en pointillés donne la moyenne des 11 dernières semaines terminées ; l’échelle est la même sur toute la période.
 - On choisit une semaine en touchant sa barre ou au clavier (flèches gauche et droite).
 - Les statistiques sont calculées depuis les sorties enregistrées dans Alterra ; aucune connexion à Strava ou autre service n’est intégrée.
 

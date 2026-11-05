@@ -191,7 +191,7 @@
   white-space: nowrap;
 }
 
-/* Barres par semaine : réalisé plein, prévu en barre vide, semaine en cours hachurée. */
+/* Courbe par semaine : réalisé en traits droits, prévu en tirets, moyenne en pointillés. */
 .activity-chart {
   --activity-axis-width: 46px;
   position: relative;
@@ -224,8 +224,9 @@
 
 .activity-chart-average {
   stroke: var(--color-muted);
-  stroke-dasharray: 3 4;
-  stroke-width: 1;
+  stroke-dasharray: 0.5 4;
+  stroke-linecap: round;
+  stroke-width: 1.5;
 }
 
 .activity-chart-average-label {
@@ -256,41 +257,64 @@
   fill: transparent;
 }
 
-.activity-chart-bar {
-  fill: rgb(var(--rgb-chart) / 45%);
-  transition: fill 0.15s ease;
+.activity-chart-axis {
+  stroke: var(--color-line);
+  stroke-width: 1;
 }
 
-.activity-chart-bar.is-empty {
-  fill: var(--color-line);
+.activity-chart-area {
+  fill: rgb(var(--rgb-chart) / 14%);
 }
 
-.activity-chart-planned {
+.activity-chart-line {
   fill: none;
-  stroke: var(--color-accent-line-strong);
-  stroke-width: 1.5;
+  stroke: var(--color-chart);
+  stroke-linejoin: round;
+  stroke-width: 2.5;
 }
 
-.activity-chart-hatch {
-  stroke: rgb(var(--rgb-paper) / 55%);
-  stroke-width: 2;
-}
-
-.activity-chart-point.is-selected .activity-chart-bar {
-  fill: var(--color-accent-bright);
-}
-
-.activity-chart-point.is-selected .activity-chart-planned {
+.activity-chart-planned-line {
+  fill: none;
   stroke: var(--color-accent-bright);
-}
-
-.activity-chart-point:focus-visible .activity-chart-bar {
-  stroke: var(--color-charcoal);
+  stroke-dasharray: 5 4;
+  stroke-linejoin: round;
   stroke-width: 2;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .activity-chart-bar {
-    transition: none;
-  }
+.activity-chart-guide {
+  stroke: var(--color-line);
+  stroke-width: 1;
+  visibility: hidden;
+}
+
+.activity-chart-done-point {
+  fill: var(--color-chart);
+  stroke: var(--color-paper);
+  stroke-width: 2;
+}
+
+.activity-chart-planned-point {
+  fill: var(--color-paper);
+  stroke: var(--color-accent-bright);
+  stroke-width: 2;
+}
+
+.activity-chart-point.is-selected .activity-chart-guide {
+  visibility: visible;
+}
+
+.activity-chart-point.is-selected .activity-chart-done-point {
+  r: 6px;
+  fill: var(--color-paper);
+  stroke: var(--color-accent-bright);
+  stroke-width: 3;
+}
+
+.activity-chart-point.is-selected .activity-chart-planned-point {
+  r: 5px;
+}
+
+.activity-chart-point:focus-visible .activity-chart-guide {
+  stroke: var(--color-charcoal);
+  visibility: visible;
 }
