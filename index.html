@@ -136,61 +136,55 @@
               </div>
             </div>
             <section class="activity-week-details" aria-labelledby="activitySelectedWeek">
-              <h2 class="activity-week-title" id="activitySelectedWeek" aria-live="polite"></h2>
-              <div class="activity-kpis">
-                <div class="activity-kpi">
+              <div class="activity-week-heading">
+                <h2 class="activity-week-title" id="activitySelectedWeek" aria-live="polite"></h2>
+                <p class="activity-planned" id="activityPlanned" hidden></p>
+              </div>
+              <div
+                class="activity-kpis"
+                id="activityMetrics"
+                role="group"
+                aria-label="Indicateur du graphique"
+              >
+                <button
+                  class="activity-kpi"
+                  type="button"
+                  data-metric="distance"
+                  aria-pressed="true"
+                >
                   <span>Distance</span>
                   <strong id="activityDistance">0 km</strong>
-                </div>
-                <div class="activity-kpi">
+                </button>
+                <button
+                  class="activity-kpi"
+                  type="button"
+                  data-metric="duration"
+                  aria-pressed="false"
+                >
                   <span>Temps</span>
                   <strong id="activityDuration">0 min</strong>
-                </div>
-                <div class="activity-kpi">
-                  <span>Dénivelé</span>
+                </button>
+                <button
+                  class="activity-kpi"
+                  type="button"
+                  data-metric="ascent"
+                  aria-pressed="false"
+                >
+                  <span>D+</span>
                   <strong id="activityAscent">0 m</strong>
-                </div>
+                </button>
+                <button
+                  class="activity-kpi"
+                  type="button"
+                  data-metric="effort"
+                  aria-pressed="false"
+                  title="1 km-effort = 1 km + 100 m de dénivelé positif"
+                >
+                  <span>Km-effort</span>
+                  <strong id="activityEffort">0 km</strong>
+                </button>
               </div>
             </section>
-            <div
-              class="activity-chart-controls"
-              id="activityMetrics"
-              role="group"
-              aria-label="Indicateur du graphique"
-            >
-              <button
-                class="activity-metric"
-                type="button"
-                data-metric="distance"
-                aria-pressed="true"
-              >
-                Distance
-              </button>
-              <button
-                class="activity-metric"
-                type="button"
-                data-metric="duration"
-                aria-pressed="false"
-              >
-                Temps
-              </button>
-              <button
-                class="activity-metric"
-                type="button"
-                data-metric="ascent"
-                aria-pressed="false"
-              >
-                D+
-              </button>
-              <button
-                class="activity-metric"
-                type="button"
-                data-metric="effort"
-                aria-pressed="false"
-              >
-                Km-effort
-              </button>
-            </div>
             <div class="activity-chart" id="activityChart"></div>
           </section>
         </section>
@@ -503,7 +497,7 @@
         <section class="personal-data-tools" aria-labelledby="applicationTitle">
           <h2 id="applicationTitle">Application</h2>
           <p class="app-version">
-            <span>Version <strong>0.8.36</strong></span>
+            <span>Version <strong>0.8.37</strong></span>
             <a href="./versions.html">Historique des versions</a>
           </p>
         </section>

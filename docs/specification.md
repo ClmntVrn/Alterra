@@ -53,8 +53,9 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 
 - Le graphique couvre les 12 semaines commençant le lundi, semaine actuelle incluse.
 - Seules les sorties marquées « réalisées » et les courses validées sont comptées ; une course validée compte comme une sortie de son type, dans la semaine de son départ. Les filtres sont Trail + course à pied (par défaut), Trail, Course à pied et Vélo.
-- L’indicateur sélectionnable est la distance, la durée, le D+ ou le km-effort. Le km-effort vaut distance en km + D+ en mètres / 100.
-- Sélectionner une semaine affiche ses totaux de distance, temps et D+. Le graphique indique à droite les valeurs de son échelle verticale.
+- La semaine choisie affiche ses totaux de distance, temps, D+ et km-effort ; toucher l’un d’eux en fait l’indicateur du graphique. Le km-effort vaut distance en km + D+ en mètres / 100.
+- Une barre par semaine : pleine pour le réalisé, vide (contour) pour le prévu, c’est-à-dire toutes les sorties de la semaine, réalisées ou non ; le total prévu s’affiche à côté des dates quand il dépasse le réalisé. La semaine en cours est hachurée. Une ligne en pointillés donne la moyenne des 11 semaines terminées.
+- On choisit une semaine en touchant sa barre, en glissant le doigt le long du graphique ou au clavier (flèches gauche et droite).
 - Les statistiques sont calculées depuis les sorties enregistrées dans Alterra ; aucune connexion à Strava ou autre service n’est intégrée.
 
 ## Onglet Stats

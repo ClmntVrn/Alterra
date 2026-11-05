@@ -3,9 +3,11 @@ import assert from "node:assert/strict";
 import { toDateKey } from "../../src/domain/dates.js";
 import {
   WEEK_COUNT,
+  averageOfPastWeeks,
   computeWeeklyTotals,
   createWeeks,
   filterCompletedWorkouts,
+  filterWorkouts,
   getWorkoutsInWeek,
   listRaceResultsAsWorkouts,
   sumWorkouts
@@ -99,4 +101,23 @@ test("listRaceResultsAsWorkouts compte seulement les courses validées, à leur 
     }
   ]);
   assert.equal(sumWorkouts(listRaceResultsAsWorkouts(races)).effort, 42.5 + 21);
+});
+
+test("filterWorkouts garde les séances prévues et réalisées des types demandés", () => {
+  const workouts = [
+    workout("2026-10-26"),
+    workout("2026-10-27", { status: "planned" }),
+    workout("2026-10-27", { status: "planned", type: "cycling" }),
+    workout("pas une date", { status: "planned" })
+  ];
+  assert.equal(filterWorkouts(workouts, ["trail"]).length, 2);
+});
+
+test("averageOfPastWeeks ignore la semaine en cours", () => {
+  const weeks = computeWeeklyTotals(createWeeks(new Date(2026, 9, 28)), [
+    workout("2026-10-19", { distanceKm: 22 }),
+    workout("2026-10-26", { distanceKm: 100 })
+  ]);
+  assert.equal(averageOfPastWeeks(weeks, "distance"), 2);
+  assert.equal(averageOfPastWeeks(weeks.slice(-1), "distance"), 0);
 });

@@ -194,6 +194,12 @@ test("la case ronde remet la séance à faire, puis le détail la supprime", asy
   );
   await page.waitFor(() => document.getElementById("activityDistance").textContent === "0 km");
   assert.equal(await text(".calendar-training-item .calendar-event-category"), "PRÉVU");
+  assert.equal(await text("#activityPlanned"), "Prévu : 12 km", "le prévu de la semaine");
+  assert.equal(
+    await page.evaluate(() => document.querySelectorAll(".activity-chart-planned").length),
+    1,
+    "une barre vide pour la semaine prévue"
+  );
 
   await click(".calendar-training-item .calendar-item-open");
   await click("#workoutDetail .workout-delete-button");

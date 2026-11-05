@@ -53,12 +53,29 @@ export function listRaceResultsAsWorkouts(races) {
  * @param {string[]} types
  */
 export function filterCompletedWorkouts(workouts, types) {
+  return filterWorkouts(workouts, types).filter(workout => workout.status === "completed");
+}
+
+/**
+ * Séances prévues ou réalisées des types demandés, avec une date valide : le prévu d’une semaine.
+ * @param {Array<Object>} workouts
+ * @param {string[]} types
+ */
+export function filterWorkouts(workouts, types) {
   return workouts.filter(
-    workout =>
-      workout.status === "completed" &&
-      types.includes(workout.type) &&
-      parseDateKey(workout.date) !== null
+    workout => types.includes(workout.type) && parseDateKey(workout.date) !== null
   );
+}
+
+/**
+ * Moyenne d’un total sur les semaines terminées (toutes sauf la dernière, en cours).
+ * @param {Week[]} weeks
+ * @param {keyof Totals} metric
+ */
+export function averageOfPastWeeks(weeks, metric) {
+  const past = weeks.slice(0, -1);
+  if (!past.length) return 0;
+  return past.reduce((sum, week) => sum + week.totals[metric], 0) / past.length;
 }
 
 /**

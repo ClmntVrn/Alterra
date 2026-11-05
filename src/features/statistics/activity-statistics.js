@@ -1,19 +1,27 @@
 import { formatDuration } from "../../domain/durations.js";
 import {
   WEEK_COUNT,
+  averageOfPastWeeks,
   computeWeeklyTotals,
   createWeeks,
   filterCompletedWorkouts,
-  getWorkoutsInWeek,
-  sumWorkouts
+  filterWorkouts
 } from "../../domain/statistics.js";
 import { formatLongDate, formatNumber, formatShortDayMonth } from "../../ui/format.js";
 
+const SVG_NS = "http://www.w3.org/2000/svg";
+/** Hauteur du graphique en pixels, haut des barres et ligne de base (dates en dessous). */
+const CHART_HEIGHT = 150;
+const PLOT_TOP = 10;
+const BASELINE = 126;
+/** Colonne de droite réservée à la moyenne. */
+const AXIS_WIDTH = 44;
+
 const metrics = Object.freeze({
-  distance: { label: "Distance", unit: "km" },
-  duration: { label: "Temps", unit: "min" },
-  ascent: { label: "Dénivelé", unit: "m" },
-  effort: { label: "Km-effort", unit: "km" }
+  distance: { label: "Distance", format: value => `${formatNumber(value)} km` },
+  duration: { label: "Temps", format: value => formatDuration(value) },
+  ascent: { label: "Dénivelé", format: value => `${formatNumber(Math.round(value))} m` },
+  effort: { label: "Km-effort", format: value => `${formatNumber(value)} km` }
 });
 const categories = Object.freeze({
   trail: { label: "Trail", types: ["trail"] },
@@ -22,19 +30,33 @@ const categories = Object.freeze({
   cycling: { label: "Vélo", types: ["cycling"] }
 });
 
+/**
+ * Carte d’activité de l’accueil : barres des douze dernières semaines (réalisé en barre pleine,
+ * prévu en barre vide), semaine choisie au toucher, au glisser ou au clavier.
+ */
 export function initializeActivityStatistics(container) {
   const categoriesElement = container.querySelector("#activityCategories");
   const categoriesViewport = container.querySelector("#activityFilterViewport");
   const metricsElement = container.querySelector("#activityMetrics");
   const weekLabel = container.querySelector("#activitySelectedWeek");
-  const distanceValue = container.querySelector("#activityDistance");
-  const durationValue = container.querySelector("#activityDuration");
-  const ascentValue = container.querySelector("#activityAscent");
+  const values = {
+    distance: container.querySelector("#activityDistance"),
+    duration: container.querySelector("#activityDuration"),
+    ascent: container.querySelector("#activityAscent"),
+    effort: container.querySelector("#activityEffort")
+  };
+  const plannedLabel = container.querySelector("#activityPlanned");
   const chart = container.querySelector("#activityChart");
   let sessions = [];
   let selectedCategory = "combined";
   let selectedMetric = "distance";
   let selectedWeekIndex = WEEK_COUNT - 1;
+  /** Totaux par semaine : réalisé, et prévu (réalisé compris). */
+  let doneWeeks = [];
+  let plannedWeeks = [];
+  /** @type {SVGGElement[]} */
+  let bars = [];
+  let chartWidth = 0;
   let dragStartX = 0;
   let dragStartScroll = 0;
   let dragTarget = null;
@@ -113,21 +135,22 @@ export function initializeActivityStatistics(container) {
     true
   );
   requestAnimationFrame(updateCategoriesViewport);
-  for (const [key, metric] of Object.entries(metrics)) {
-    const button = metricsElement.querySelector(`[data-metric="${key}"]`);
-    button.addEventListener("click", () => {
+
+  // Les chiffres de la semaine servent aussi à choisir l’indicateur du graphique.
+  for (const key of Object.keys(metrics)) {
+    metricsElement.querySelector(`[data-metric="${key}"]`).addEventListener("click", () => {
       selectedMetric = key;
       updateSelectedButtons(metricsElement, "metric", key);
-      renderChart(createWeeks(new Date()), filterSessions(sessions));
+      renderChart();
+      renderSelectedWeek();
     });
-    button.textContent = metric.label;
-    if (key === "effort") {
-      button.setAttribute(
-        "aria-label",
-        "Km-effort : distance + 1 km par 100 m de dénivelé positif"
-      );
-      button.title = "1 km-effort = 1 km + 100 m de dénivelé positif";
-    }
+  }
+  if (typeof ResizeObserver === "function") {
+    // Dessiné à la taille réelle : redessiné quand la carte change de largeur (rotation, onglet
+    // affiché après coup).
+    new ResizeObserver(() => {
+      if (chart.clientWidth && chart.clientWidth !== chartWidth) renderChart();
+    }).observe(chart);
   }
 
   render();
@@ -141,152 +164,218 @@ export function initializeActivityStatistics(container) {
 
   function render() {
     const weeks = createWeeks(new Date());
-    const filteredSessions = filterSessions(sessions);
-    renderSelectedWeek(weeks, filteredSessions);
-    renderChart(weeks, filteredSessions);
+    const types = categories[selectedCategory].types;
+    doneWeeks = computeWeeklyTotals(weeks, filterCompletedWorkouts(sessions, types));
+    plannedWeeks = computeWeeklyTotals(weeks, filterWorkouts(sessions, types));
+    renderChart();
+    renderSelectedWeek();
   }
 
-  function filterSessions(records) {
-    return filterCompletedWorkouts(records, categories[selectedCategory].types);
+  function plannedValue(index) {
+    return plannedWeeks[index].totals[selectedMetric];
   }
 
-  function renderSelectedWeek(weeks, records) {
-    const selectedWeek = weeks[selectedWeekIndex];
-    const dateLabel =
-      selectedWeek.start.getFullYear() === selectedWeek.end.getFullYear()
-        ? `${formatShortDayMonth(selectedWeek.start)} – ${formatShortDayMonth(selectedWeek.end)} ${selectedWeek.end.getFullYear()}`
-        : `${formatLongDate(selectedWeek.start)} – ${formatLongDate(selectedWeek.end)}`;
-    weekLabel.textContent = dateLabel;
-
-    const totals = sumWorkouts(getWorkoutsInWeek(records, selectedWeek));
-    distanceValue.textContent = `${formatNumber(totals.distance)} km`;
-    durationValue.textContent = formatDuration(totals.duration, { minuteUnit: true });
-    ascentValue.textContent = `${formatNumber(totals.ascent)} m`;
+  /** Une partie du prévu de la semaine n’est pas encore réalisée. */
+  function hasPlannedRemainder(index) {
+    return plannedValue(index) - doneWeeks[index].totals[selectedMetric] > 0.05;
   }
 
-  function renderChart(emptyWeeks, records) {
-    const weeks = computeWeeklyTotals(emptyWeeks, records);
-    selectedWeekIndex = Math.min(selectedWeekIndex, WEEK_COUNT - 1);
-    renderSelectedWeek(weeks, records);
-    chart.replaceChildren();
-
-    const values = weeks.map(week => week.totals[selectedMetric]);
-    const maxValue = Math.max(...values, 0);
-    const chartMax = maxValue || 1;
-    const points = values.map((value, index) => ({
-      x: 20 + index * 26.8,
-      y: 146 - (value / chartMax) * 112
-    }));
-
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 360 180");
-    svg.setAttribute("preserveAspectRatio", "none");
-    svg.setAttribute("role", "group");
-    svg.setAttribute(
-      "aria-label",
-      `${metrics[selectedMetric].label} sur les douze dernières semaines`
-    );
-    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-    title.textContent = `${metrics[selectedMetric].label} par semaine`;
-    svg.append(title);
-
-    const axisPositions = [34, 90, 146];
-    const axisValues = [maxValue, maxValue / 2, 0];
-    const axisLabels = [];
-    axisPositions.forEach((y, index) => {
-      const gridLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      gridLine.setAttribute("x1", "16");
-      gridLine.setAttribute("x2", "320");
-      gridLine.setAttribute("y1", y);
-      gridLine.setAttribute("y2", y);
-      gridLine.setAttribute("class", "activity-chart-gridline");
-      svg.append(gridLine);
-      const axisLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      axisLabel.setAttribute("x", "358");
-      axisLabel.setAttribute("y", y + 3);
-      axisLabel.setAttribute("class", "activity-chart-axis-label");
-      axisLabel.textContent = formatNumber(axisValues[index]);
-      axisLabels.push(axisLabel);
+  function renderSelectedWeek() {
+    const week = doneWeeks[selectedWeekIndex];
+    weekLabel.textContent =
+      week.start.getFullYear() === week.end.getFullYear()
+        ? `${formatShortDayMonth(week.start)} – ${formatShortDayMonth(week.end)} ${week.end.getFullYear()}`
+        : `${formatLongDate(week.start)} – ${formatLongDate(week.end)}`;
+    for (const [key, element] of Object.entries(values)) {
+      element.textContent = metrics[key].format(week.totals[key]);
+    }
+    const showPlanned = hasPlannedRemainder(selectedWeekIndex);
+    plannedLabel.hidden = !showPlanned;
+    plannedLabel.textContent = showPlanned
+      ? `Prévu : ${metrics[selectedMetric].format(plannedValue(selectedWeekIndex))}`
+      : "";
+    bars.forEach((bar, index) => {
+      const selected = index === selectedWeekIndex;
+      bar.classList.toggle("is-selected", selected);
+      bar.setAttribute("aria-pressed", String(selected));
+      bar.setAttribute("tabindex", selected ? "0" : "-1");
     });
+  }
 
-    const linePath = createCurvePath(points);
-    const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    area.setAttribute(
-      "d",
-      `${linePath} L ${points[points.length - 1].x} 156 L ${points[0].x} 156 Z`
-    );
-    area.setAttribute("class", "activity-chart-area");
-    svg.append(area);
+  function selectWeek(index, { focus = false } = {}) {
+    const next = Math.max(0, Math.min(WEEK_COUNT - 1, index));
+    if (next !== selectedWeekIndex) {
+      selectedWeekIndex = next;
+      renderSelectedWeek();
+    }
+    if (focus) bars[next].focus();
+  }
 
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    line.setAttribute("d", linePath);
-    line.setAttribute("class", "activity-chart-line");
-    svg.append(line);
-    svg.append(...axisLabels);
+  function renderChart() {
+    const metric = metrics[selectedMetric];
+    chartWidth = chart.clientWidth;
+    const width = Math.max(chartWidth, 240);
+    const slot = (width - AXIS_WIDTH) / WEEK_COUNT;
+    const barWidth = Math.min(20, slot * 0.62);
+    const radius = Math.min(5, barWidth / 2);
+    const done = doneWeeks.map(week => week.totals[selectedMetric]);
+    const planned = plannedWeeks.map(week => week.totals[selectedMetric]);
+    const max = Math.max(...done, ...planned, 0) || 1;
+    const height = value => (value / max) * (BASELINE - PLOT_TOP);
+    const currentIndex = WEEK_COUNT - 1;
 
-    points.forEach((point, index) => {
-      const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      group.setAttribute(
-        "class",
-        `activity-chart-point${index === selectedWeekIndex ? " is-selected" : ""}`
+    const svg = svgElement("svg", {
+      viewBox: `0 0 ${width} ${CHART_HEIGHT}`,
+      width,
+      height: CHART_HEIGHT,
+      role: "group",
+      "aria-label": `${metric.label} des douze dernières semaines`
+    });
+    const hatch = svgElement("pattern", {
+      id: "activityHatch",
+      width: 5,
+      height: 5,
+      patternUnits: "userSpaceOnUse",
+      patternTransform: "rotate(45)"
+    });
+    hatch.append(svgElement("line", { x1: 0, y1: 0, x2: 0, y2: 5, class: "activity-chart-hatch" }));
+    const defs = svgElement("defs");
+    defs.append(hatch);
+    svg.append(defs);
+
+    const average = averageOfPastWeeks(doneWeeks, selectedMetric);
+    if (average > 0) {
+      const y = BASELINE - height(average);
+      svg.append(
+        svgElement("line", {
+          x1: 0,
+          x2: width - AXIS_WIDTH + 4,
+          y1: y,
+          y2: y,
+          class: "activity-chart-average"
+        })
       );
-      group.setAttribute("role", "button");
-      group.setAttribute("tabindex", "0");
-      group.setAttribute("aria-pressed", index === selectedWeekIndex ? "true" : "false");
-      group.setAttribute(
-        "aria-label",
-        `${formatLongDate(weeks[index].start)}, ` +
-          `${formatNumber(weeks[index].totals[selectedMetric])} ${metrics[selectedMetric].unit}`
+      const label = svgElement("text", { y: y - 3, class: "activity-chart-axis-label" });
+      label.append(
+        svgElement("tspan", { x: width }, "moy."),
+        svgElement("tspan", { x: width, dy: 11 }, metric.format(average))
       );
-      const hitArea = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      hitArea.setAttribute("x", point.x - 13);
-      hitArea.setAttribute("y", "14");
-      hitArea.setAttribute("width", "26");
-      hitArea.setAttribute("height", "142");
-      hitArea.setAttribute("class", "activity-chart-hit-area");
-      group.append(hitArea);
-      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      circle.setAttribute("cx", point.x);
-      circle.setAttribute("cy", point.y);
-      circle.setAttribute("r", index === selectedWeekIndex ? "5" : "3.5");
-      group.append(circle);
-      const selectWeek = () => {
-        selectedWeekIndex = index;
-        renderSelectedWeek(weeks, records);
-        renderChart(weeks, records);
+      svg.append(label);
+    }
+
+    bars = done.map((value, index) => {
+      const center = slot * index + slot / 2;
+      const left = center - barWidth / 2;
+      const remainder = hasPlannedRemainder(index);
+      const group = svgElement("g", {
+        class: `activity-chart-point${index === currentIndex ? " is-current" : ""}`,
+        role: "button",
+        "aria-label":
+          `${formatLongDate(doneWeeks[index].start)}, ${metric.format(value)}` +
+          (remainder ? `, prévu ${metric.format(planned[index])}` : "") +
+          (index === currentIndex ? ", semaine en cours" : "")
+      });
+      group.append(
+        svgElement("rect", {
+          x: slot * index,
+          y: 0,
+          width: slot,
+          height: BASELINE,
+          class: "activity-chart-hit-area"
+        })
+      );
+      if (remainder) {
+        const plannedHeight = Math.max(height(planned[index]), 4);
+        group.append(
+          svgElement("rect", {
+            x: left + 0.75,
+            y: BASELINE - plannedHeight + 0.75,
+            width: barWidth - 1.5,
+            height: plannedHeight - 1.5,
+            rx: radius,
+            class: "activity-chart-planned"
+          })
+        );
+      }
+      const barHeight = value > 0 ? Math.max(height(value), 4) : 2;
+      const bar = {
+        x: left,
+        y: BASELINE - barHeight,
+        width: barWidth,
+        height: barHeight,
+        rx: value > 0 ? radius : 1
       };
-      group.addEventListener("click", selectWeek);
+      group.append(
+        svgElement("rect", {
+          ...bar,
+          class: value > 0 ? "activity-chart-bar" : "activity-chart-bar is-empty"
+        })
+      );
+      // Semaine en cours hachurée : elle n’est pas finie.
+      if (index === currentIndex && value > 0) {
+        group.append(
+          svgElement("rect", {
+            ...bar,
+            fill: "url(#activityHatch)",
+            class: "activity-chart-hatched"
+          })
+        );
+      }
+      group.addEventListener("click", () => selectWeek(index));
       group.addEventListener("keydown", event => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          selectWeek();
+          selectWeek(index);
+        } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+          event.preventDefault();
+          selectWeek(index + (event.key === "ArrowLeft" ? -1 : 1), { focus: true });
         }
       });
       svg.append(group);
 
-      if (index % 2 === 0 || index === WEEK_COUNT - 1) {
-        const weekLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        weekLabel.setAttribute("x", point.x);
-        weekLabel.setAttribute("y", "174");
-        weekLabel.setAttribute("class", "activity-chart-week-label");
-        weekLabel.textContent = formatShortDayMonth(weeks[index].start);
-        svg.append(weekLabel);
+      if (index % 3 === 2) {
+        svg.append(
+          svgElement(
+            "text",
+            { x: center, y: CHART_HEIGHT - 6, class: "activity-chart-week-label" },
+            formatShortDayMonth(doneWeeks[index].start)
+          )
+        );
       }
+      return group;
     });
 
-    chart.append(svg);
+    // Glisser le doigt le long du graphique fait défiler les semaines.
+    let scrubbing = false;
+    const weekAt = event => {
+      const box = svg.getBoundingClientRect();
+      return Math.floor((((event.clientX - box.left) / box.width) * width) / slot);
+    };
+    svg.addEventListener("pointerdown", event => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      scrubbing = true;
+      svg.setPointerCapture?.(event.pointerId);
+      selectWeek(weekAt(event));
+    });
+    svg.addEventListener("pointermove", event => {
+      if (scrubbing) selectWeek(weekAt(event));
+    });
+    const stopScrubbing = () => {
+      scrubbing = false;
+    };
+    svg.addEventListener("pointerup", stopScrubbing);
+    svg.addEventListener("pointercancel", stopScrubbing);
+
+    chart.replaceChildren(svg);
   }
 }
 
-function createCurvePath(points) {
-  return points
-    .map((point, index) => {
-      if (index === 0) return `M ${point.x} ${point.y}`;
-      const previous = points[index - 1];
-      const controlX = (previous.x + point.x) / 2;
-      return `C ${controlX} ${previous.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
-    })
-    .join(" ");
+/** Élément SVG avec ses attributs et, au besoin, son texte. */
+function svgElement(name, attributes = {}, text = "") {
+  const element = document.createElementNS(SVG_NS, name);
+  for (const [key, value] of Object.entries(attributes)) element.setAttribute(key, String(value));
+  if (text) element.textContent = text;
+  return element;
 }
 
 function updateSelectedButtons(container, attribute, selectedValue) {
