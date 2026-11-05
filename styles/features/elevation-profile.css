@@ -252,10 +252,6 @@
   background: var(--color-slope-hard);
 }
 
-.elevation-legend-peak {
-  margin-left: auto;
-}
-
 /* Plein écran : tout l’écran, pensé pour le paysage ; zoom à deux doigts. */
 .elevation-full {
   width: 100%;

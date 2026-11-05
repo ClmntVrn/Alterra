@@ -147,7 +147,7 @@ test("le profil colore la pente, liste les sections et donne le passage au doigt
   );
   assert.match(state.sectionText, /^Section 12 km · \+\d+ m · −\d+ m$/);
   assert.equal(state.listUnderProfile, false, "pas de liste des sections sous le profil");
-  assert.match(state.legend, /< 5 %5–10 %≥ 10 %Point haut \d+ m · km [\d,]+/);
+  assert.match(state.legend, /^< 5 %5–10 %≥ 10 %$/);
 
   const readout = await page.evaluate(() => {
     const chart = document.querySelector(".elevation-section .elevation-chart");

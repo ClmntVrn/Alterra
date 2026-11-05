@@ -124,7 +124,7 @@ Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à 
 
 Inspiré de LiveTrail (ravitos et sections) et des apps de trail qui colorent la pente (Footpath, Intervals.icu, Ultra-Trails).
 
-- [x] Échelle d’altitude ajustée au relief, point haut indiqué.
+- [x] Échelle d’altitude ajustée au relief (point haut retiré de la légende en 0.8.36).
 - [x] Courbe colorée selon la pente, en tons d’orange de plus en plus foncés (vert, jaune, rouge essayés en 0.8.33, remplacés en 0.8.35 à la demande de l’utilisateur).
 - [x] Ravitos en lignes verticales nommées ; section qui mène à chaque ravito (distance, D+, D−) dans sa carte et, en plein écran, sous l’axe (liste sous le profil retirée en 0.8.35, redondante avec le bloc « En course »).
 - [x] Lecture au doigt : km, altitude, pente, passage estimé du scénario.

@@ -543,11 +543,8 @@ function createChart(race, { full, track, checkpoints, getScenarioIndex, onZoom 
   };
 }
 
-/** Légende des couleurs de pente et point haut de la course. */
-function renderLegend(track) {
-  const highest = track.points.reduce((top, point) =>
-    point.elevation > top.elevation ? point : top
-  );
+/** Légende des couleurs de pente. */
+function renderLegend() {
   const swatch = (band, text) =>
     el("span", { className: "elevation-legend-item" }, [
       el("span", { className: `elevation-swatch slope-${band}`, attrs: { "aria-hidden": "true" } }),
@@ -556,11 +553,7 @@ function renderLegend(track) {
   return el("p", { className: "elevation-legend" }, [
     swatch("easy", "< 5 %"),
     swatch("medium", "5–10 %"),
-    swatch("hard", "≥ 10 %"),
-    el("span", {
-      className: "elevation-legend-peak",
-      text: `Point haut ${Math.round(highest.elevation)} m · km ${formatNumber(highest.distanceKm)}`
-    })
+    swatch("hard", "≥ 10 %")
   ]);
 }
 
@@ -626,7 +619,7 @@ export function createElevationSection(race, { getScenarioIndex = () => 0 } = {}
             reset
           ]),
           chart.element,
-          renderLegend(track)
+          renderLegend()
         ]
       );
       back.addEventListener("click", () => dialog.close());
@@ -661,7 +654,7 @@ export function createElevationSection(race, { getScenarioIndex = () => 0 } = {}
         sections: computeSections(measured.points, reference.markers)
       };
       inline = createChart(race, { full: false, track, checkpoints, getScenarioIndex });
-      body.replaceChildren(inline.element, renderLegend(track));
+      body.replaceChildren(inline.element, renderLegend());
       const profile = { ...inline.render(), sections: track.sections };
       expand.hidden = false;
       expand.addEventListener("click", () => openFull(track, checkpoints));
