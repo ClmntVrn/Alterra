@@ -167,8 +167,8 @@ Rangés dans l’onglet Profil.
 - [x] Repères du calendrier distinguant entraînement/course et prévu/réalisé sans reposer uniquement sur la couleur.
 - [x] Calculs KPI extraits dans `src/domain/statistics.js` et couverts par des tests.
 - [x] Onglet Stats (0.8.28) : semaine, mois ou année avec totaux et nombre de sorties, évolution par rapport à la période précédente (à la même date pour la période en cours), barres pour choisir la période, répartition par sport et records. Le graphique 12 semaines reste à l’accueil (décision du 4 novembre 2026).
-- [x] Graphique de l’accueil en barres (0.8.37) : prévu en barre vide, semaine en cours hachurée, moyenne en pointillés, chiffres de la semaine qui choisissent l’indicateur, semaine choisie au glisser du doigt.
-- [ ] À vérifier sur iPhone : lisibilité des barres et des évolutions, défilement des filtres si la police est plus large, glisser sur le graphique de l’accueil sans gêner le défilement de la page.
+- [x] Graphique de l’accueil en barres (0.8.37) : prévu en barre vide, semaine en cours hachurée, moyenne en pointillés, chiffres de la semaine qui choisissent l’indicateur ; défilement au doigt de 52 semaines passées au plus à 4 semaines à venir (0.8.38).
+- [ ] À vérifier sur iPhone : lisibilité des barres et des évolutions, défilement des filtres si la police est plus large, défilement horizontal du graphique de l’accueil sans gêner le défilement de la page.
 
 ### Étape 12 — Fiabiliser la version gratuite
 

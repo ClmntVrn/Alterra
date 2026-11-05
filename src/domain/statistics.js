@@ -4,6 +4,9 @@ import { addDays, daysBetween, parseDateKey, startOfWeek } from "./dates.js";
 import { positiveOrZero } from "./numbers.js";
 
 export const WEEK_COUNT = 12;
+/** Graphique de l’accueil : semaines passées (au moins, au plus) et semaines à venir. */
+export const HISTORY_WEEKS = Object.freeze({ min: 4, max: 52 });
+export const FUTURE_WEEKS = 4;
 
 /** @typedef {{ distance: number, duration: number, ascent: number, effort: number }} Totals */
 /** @typedef {{ start: Date, end: Date, totals: Totals }} Week */
@@ -88,6 +91,35 @@ export function createWeeks(today, count = WEEK_COUNT) {
     const start = addDays(currentWeek, -(count - index - 1) * 7);
     return { start, end: addDays(start, 6), totals: createTotals() };
   });
+}
+
+/**
+ * Semaines de `past` semaines avant celle de `today` à `future` semaines après, totaux à zéro.
+ * @returns {Week[]}
+ */
+export function createWeekRange(today, past, future) {
+  const currentWeek = startOfWeek(today);
+  return Array.from({ length: past + 1 + future }, (_, index) => {
+    const start = addDays(currentWeek, (index - past) * 7);
+    return { start, end: addDays(start, 6), totals: createTotals() };
+  });
+}
+
+/**
+ * Nombre de semaines passées à montrer : jusqu’à la semaine de la plus ancienne séance, dans les
+ * bornes `min` et `max`.
+ * @param {Array<Object>} workouts
+ * @param {{ min: number, max: number }} bounds
+ */
+export function countHistoryWeeks(workouts, today, { min, max } = HISTORY_WEEKS) {
+  const currentWeek = startOfWeek(today);
+  let weeks = min;
+  for (const workout of workouts) {
+    const date = parseDateKey(workout.date);
+    if (!date) continue;
+    weeks = Math.max(weeks, daysBetween(startOfWeek(date), currentWeek) / 7);
+  }
+  return Math.min(weeks, max);
 }
 
 /**

@@ -1,9 +1,10 @@
 import { formatDuration } from "../../domain/durations.js";
 import {
-  WEEK_COUNT,
+  FUTURE_WEEKS,
   averageOfPastWeeks,
   computeWeeklyTotals,
-  createWeeks,
+  countHistoryWeeks,
+  createWeekRange,
   filterCompletedWorkouts,
   filterWorkouts
 } from "../../domain/statistics.js";
@@ -14,8 +15,10 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 const CHART_HEIGHT = 150;
 const PLOT_TOP = 10;
 const BASELINE = 126;
-/** Colonne de droite réservée à la moyenne. */
-const AXIS_WIDTH = 44;
+/** Semaines visibles sans défiler : les 4 dernières, celle en cours et les 4 à venir. */
+const VISIBLE_WEEKS = 9;
+/** Semaines terminées prises pour la moyenne. */
+const AVERAGE_WEEKS = 11;
 
 const metrics = Object.freeze({
   distance: { label: "Distance", format: value => `${formatNumber(value)} km` },
@@ -31,8 +34,8 @@ const categories = Object.freeze({
 });
 
 /**
- * Carte d’activité de l’accueil : barres des douze dernières semaines (réalisé en barre pleine,
- * prévu en barre vide), semaine choisie au toucher, au glisser ou au clavier.
+ * Carte d’activité de l’accueil : une barre par semaine (réalisé en barre pleine, prévu en barre
+ * vide), sur une bande qui défile au doigt ; semaine choisie au toucher ou au clavier.
  */
 export function initializeActivityStatistics(container) {
   const categoriesElement = container.querySelector("#activityCategories");
@@ -50,13 +53,17 @@ export function initializeActivityStatistics(container) {
   let sessions = [];
   let selectedCategory = "combined";
   let selectedMetric = "distance";
-  let selectedWeekIndex = WEEK_COUNT - 1;
+  /** Semaine choisie, comptée depuis la semaine en cours (−1 : la précédente). */
+  let selectedOffset = 0;
   /** Totaux par semaine : réalisé, et prévu (réalisé compris). */
   let doneWeeks = [];
   let plannedWeeks = [];
+  let currentIndex = 0;
   /** @type {SVGGElement[]} */
   let bars = [];
   let chartWidth = 0;
+  let slotWidth = 0;
+  let weeksFromEnd = 0;
   let dragStartX = 0;
   let dragStartScroll = 0;
   let dragTarget = null;
@@ -145,12 +152,22 @@ export function initializeActivityStatistics(container) {
       renderSelectedWeek();
     });
   }
+
+  // Bande qui défile au doigt : la position est gardée depuis la droite, pour rester sur les
+  // mêmes semaines quand le graphique est redessiné.
+  const viewport = document.createElement("div");
+  viewport.className = "activity-chart-viewport";
+  const averageLabel = document.createElement("p");
+  averageLabel.className = "activity-chart-average-label";
+  averageLabel.setAttribute("aria-hidden", "true");
+  chart.replaceChildren(viewport, averageLabel);
+  enableMouseDrag(viewport);
   if (typeof ResizeObserver === "function") {
     // Dessiné à la taille réelle : redessiné quand la carte change de largeur (rotation, onglet
     // affiché après coup).
     new ResizeObserver(() => {
-      if (chart.clientWidth && chart.clientWidth !== chartWidth) renderChart();
-    }).observe(chart);
+      if (viewport.clientWidth && viewport.clientWidth !== chartWidth) renderChart();
+    }).observe(viewport);
   }
 
   render();
@@ -163,12 +180,19 @@ export function initializeActivityStatistics(container) {
   }
 
   function render() {
-    const weeks = createWeeks(new Date());
+    const today = new Date();
+    const past = countHistoryWeeks(sessions, today);
+    const weeks = createWeekRange(today, past, FUTURE_WEEKS);
     const types = categories[selectedCategory].types;
+    currentIndex = past;
     doneWeeks = computeWeeklyTotals(weeks, filterCompletedWorkouts(sessions, types));
     plannedWeeks = computeWeeklyTotals(weeks, filterWorkouts(sessions, types));
     renderChart();
     renderSelectedWeek();
+  }
+
+  function selectedIndex() {
+    return Math.max(0, Math.min(doneWeeks.length - 1, currentIndex + selectedOffset));
   }
 
   function plannedValue(index) {
@@ -181,7 +205,8 @@ export function initializeActivityStatistics(container) {
   }
 
   function renderSelectedWeek() {
-    const week = doneWeeks[selectedWeekIndex];
+    const index = selectedIndex();
+    const week = doneWeeks[index];
     weekLabel.textContent =
       week.start.getFullYear() === week.end.getFullYear()
         ? `${formatShortDayMonth(week.start)} – ${formatShortDayMonth(week.end)} ${week.end.getFullYear()}`
@@ -189,13 +214,13 @@ export function initializeActivityStatistics(container) {
     for (const [key, element] of Object.entries(values)) {
       element.textContent = metrics[key].format(week.totals[key]);
     }
-    const showPlanned = hasPlannedRemainder(selectedWeekIndex);
+    const showPlanned = hasPlannedRemainder(index);
     plannedLabel.hidden = !showPlanned;
     plannedLabel.textContent = showPlanned
-      ? `Prévu : ${metrics[selectedMetric].format(plannedValue(selectedWeekIndex))}`
+      ? `Prévu : ${metrics[selectedMetric].format(plannedValue(index))}`
       : "";
-    bars.forEach((bar, index) => {
-      const selected = index === selectedWeekIndex;
+    bars.forEach((bar, barIndex) => {
+      const selected = barIndex === index;
       bar.classList.toggle("is-selected", selected);
       bar.setAttribute("aria-pressed", String(selected));
       bar.setAttribute("tabindex", selected ? "0" : "-1");
@@ -203,33 +228,47 @@ export function initializeActivityStatistics(container) {
   }
 
   function selectWeek(index, { focus = false } = {}) {
-    const next = Math.max(0, Math.min(WEEK_COUNT - 1, index));
-    if (next !== selectedWeekIndex) {
-      selectedWeekIndex = next;
+    const next = Math.max(0, Math.min(doneWeeks.length - 1, index));
+    if (next !== selectedIndex()) {
+      selectedOffset = next - currentIndex;
       renderSelectedWeek();
     }
-    if (focus) bars[next].focus();
+    if (focus) {
+      bars[next].focus({ preventScroll: true });
+      // La semaine choisie au clavier reste visible dans la bande.
+      const left = slotWidth * next;
+      if (left < viewport.scrollLeft) viewport.scrollLeft = left;
+      else if (left + slotWidth > viewport.scrollLeft + viewport.clientWidth) {
+        viewport.scrollLeft = left + slotWidth - viewport.clientWidth;
+      }
+    }
   }
 
   function renderChart() {
     const metric = metrics[selectedMetric];
-    chartWidth = chart.clientWidth;
-    const width = Math.max(chartWidth, 240);
-    const slot = (width - AXIS_WIDTH) / WEEK_COUNT;
-    const barWidth = Math.min(20, slot * 0.62);
+    // Position lue en semaines depuis la droite (bande cachée : position précédente gardée).
+    if (viewport.clientWidth && slotWidth) {
+      const fromEnd = viewport.scrollWidth - viewport.clientWidth - viewport.scrollLeft;
+      weeksFromEnd = Math.max(0, fromEnd / slotWidth);
+    }
+    chartWidth = viewport.clientWidth;
+    const count = doneWeeks.length;
+    slotWidth = Math.max(chartWidth, 240) / VISIBLE_WEEKS;
+    const slot = slotWidth;
+    const width = slot * count;
+    const barWidth = Math.min(22, slot * 0.6);
     const radius = Math.min(5, barWidth / 2);
     const done = doneWeeks.map(week => week.totals[selectedMetric]);
     const planned = plannedWeeks.map(week => week.totals[selectedMetric]);
     const max = Math.max(...done, ...planned, 0) || 1;
     const height = value => (value / max) * (BASELINE - PLOT_TOP);
-    const currentIndex = WEEK_COUNT - 1;
 
     const svg = svgElement("svg", {
       viewBox: `0 0 ${width} ${CHART_HEIGHT}`,
       width,
       height: CHART_HEIGHT,
       role: "group",
-      "aria-label": `${metric.label} des douze dernières semaines`
+      "aria-label": `${metric.label} par semaine`
     });
     const hatch = svgElement("pattern", {
       id: "activityHatch",
@@ -243,37 +282,34 @@ export function initializeActivityStatistics(container) {
     defs.append(hatch);
     svg.append(defs);
 
-    const average = averageOfPastWeeks(doneWeeks, selectedMetric);
+    // Moyenne des semaines terminées les plus récentes (11 au plus).
+    const recentWeeks = doneWeeks.slice(
+      Math.max(0, currentIndex - AVERAGE_WEEKS),
+      currentIndex + 1
+    );
+    const average = averageOfPastWeeks(recentWeeks, selectedMetric);
+    averageLabel.hidden = average <= 0;
     if (average > 0) {
       const y = BASELINE - height(average);
       svg.append(
-        svgElement("line", {
-          x1: 0,
-          x2: width - AXIS_WIDTH + 4,
-          y1: y,
-          y2: y,
-          class: "activity-chart-average"
-        })
+        svgElement("line", { x1: 0, x2: width, y1: y, y2: y, class: "activity-chart-average" })
       );
-      const label = svgElement("text", { y: y - 3, class: "activity-chart-axis-label" });
-      label.append(
-        svgElement("tspan", { x: width }, "moy."),
-        svgElement("tspan", { x: width, dy: 11 }, metric.format(average))
-      );
-      svg.append(label);
+      averageLabel.style.top = `${y - 13}px`;
+      averageLabel.replaceChildren("moy.", document.createElement("br"), metric.format(average));
     }
 
     bars = done.map((value, index) => {
       const center = slot * index + slot / 2;
       const left = center - barWidth / 2;
       const remainder = hasPlannedRemainder(index);
+      const isCurrent = index === currentIndex;
       const group = svgElement("g", {
-        class: `activity-chart-point${index === currentIndex ? " is-current" : ""}`,
+        class: `activity-chart-point${isCurrent ? " is-current" : ""}`,
         role: "button",
         "aria-label":
           `${formatLongDate(doneWeeks[index].start)}, ${metric.format(value)}` +
           (remainder ? `, prévu ${metric.format(planned[index])}` : "") +
-          (index === currentIndex ? ", semaine en cours" : "")
+          (isCurrent ? ", semaine en cours" : "")
       });
       group.append(
         svgElement("rect", {
@@ -312,7 +348,7 @@ export function initializeActivityStatistics(container) {
         })
       );
       // Semaine en cours hachurée : elle n’est pas finie.
-      if (index === currentIndex && value > 0) {
+      if (isCurrent && value > 0) {
         group.append(
           svgElement("rect", {
             ...bar,
@@ -333,7 +369,8 @@ export function initializeActivityStatistics(container) {
       });
       svg.append(group);
 
-      if (index % 3 === 2) {
+      // Une date toutes les deux semaines, calée sur la semaine en cours.
+      if ((index - currentIndex) % 2 === 0) {
         svg.append(
           svgElement(
             "text",
@@ -345,29 +382,55 @@ export function initializeActivityStatistics(container) {
       return group;
     });
 
-    // Glisser le doigt le long du graphique fait défiler les semaines.
-    let scrubbing = false;
-    const weekAt = event => {
-      const box = svg.getBoundingClientRect();
-      return Math.floor((((event.clientX - box.left) / box.width) * width) / slot);
-    };
-    svg.addEventListener("pointerdown", event => {
-      if (event.pointerType === "mouse" && event.button !== 0) return;
-      scrubbing = true;
-      svg.setPointerCapture?.(event.pointerId);
-      selectWeek(weekAt(event));
-    });
-    svg.addEventListener("pointermove", event => {
-      if (scrubbing) selectWeek(weekAt(event));
-    });
-    const stopScrubbing = () => {
-      scrubbing = false;
-    };
-    svg.addEventListener("pointerup", stopScrubbing);
-    svg.addEventListener("pointercancel", stopScrubbing);
-
-    chart.replaceChildren(svg);
+    viewport.replaceChildren(svg);
+    viewport.scrollLeft = viewport.scrollWidth - viewport.clientWidth - weeksFromEnd * slotWidth;
   }
+}
+
+/**
+ * À la souris, la bande se fait glisser comme au doigt ; un glisser ne choisit pas de semaine.
+ * @param {HTMLElement} viewport
+ */
+function enableMouseDrag(viewport) {
+  let startX = 0;
+  let startScroll = 0;
+  let pressed = false;
+  let dragged = false;
+  viewport.addEventListener("pointerdown", event => {
+    if (event.pointerType !== "mouse" || event.button !== 0) return;
+    pressed = true;
+    dragged = false;
+    startX = event.clientX;
+    startScroll = viewport.scrollLeft;
+  });
+  viewport.addEventListener("pointermove", event => {
+    if (!pressed) return;
+    const distance = event.clientX - startX;
+    if (!dragged && Math.abs(distance) > 4) {
+      dragged = true;
+      viewport.classList.add("is-dragging");
+      viewport.setPointerCapture(event.pointerId);
+    }
+    if (dragged) viewport.scrollLeft = startScroll - distance;
+  });
+  const release = event => {
+    pressed = false;
+    viewport.classList.remove("is-dragging");
+    if (viewport.hasPointerCapture(event.pointerId))
+      viewport.releasePointerCapture(event.pointerId);
+  };
+  viewport.addEventListener("pointerup", release);
+  viewport.addEventListener("pointercancel", release);
+  viewport.addEventListener(
+    "click",
+    event => {
+      if (!dragged) return;
+      dragged = false;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    true
+  );
 }
 
 /** Élément SVG avec ses attributs et, au besoin, son texte. */

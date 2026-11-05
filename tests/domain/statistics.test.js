@@ -5,6 +5,8 @@ import {
   WEEK_COUNT,
   averageOfPastWeeks,
   computeWeeklyTotals,
+  countHistoryWeeks,
+  createWeekRange,
   createWeeks,
   filterCompletedWorkouts,
   filterWorkouts,
@@ -120,4 +122,20 @@ test("averageOfPastWeeks ignore la semaine en cours", () => {
   ]);
   assert.equal(averageOfPastWeeks(weeks, "distance"), 2);
   assert.equal(averageOfPastWeeks(weeks.slice(-1), "distance"), 0);
+});
+
+test("createWeekRange va des semaines passées aux semaines à venir", () => {
+  const weeks = createWeekRange(new Date(2026, 9, 28), 4, 4);
+  assert.equal(weeks.length, 9);
+  assert.equal(toDateKey(weeks[0].start), "2026-09-28");
+  assert.equal(toDateKey(weeks[4].start), "2026-10-26");
+  assert.equal(toDateKey(weeks.at(-1).end), "2026-11-29");
+});
+
+test("countHistoryWeeks remonte à la plus ancienne séance, entre 4 et 52 semaines", () => {
+  const today = new Date(2026, 9, 28);
+  assert.equal(countHistoryWeeks([], today), 4);
+  assert.equal(countHistoryWeeks([workout("2026-10-01")], today), 4);
+  assert.equal(countHistoryWeeks([workout("2026-08-12"), workout("2026-11-20")], today), 11);
+  assert.equal(countHistoryWeeks([workout("2020-01-01"), workout("pas une date")], today), 52);
 });

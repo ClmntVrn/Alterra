@@ -191,19 +191,35 @@
   white-space: nowrap;
 }
 
-/* Barres des douze semaines : réalisé plein, prévu en barre vide, semaine en cours hachurée. */
+/* Barres par semaine : réalisé plein, prévu en barre vide, semaine en cours hachurée. */
 .activity-chart {
+  --activity-axis-width: 46px;
+  position: relative;
   margin: 10px 0 0;
+  padding-right: var(--activity-axis-width);
 }
 
 .activity-chart svg {
   display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-  touch-action: pan-y;
+  max-width: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Bande des semaines, qui défile au doigt ; la moyenne reste lisible à droite. */
+.activity-chart-viewport {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.activity-chart-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.activity-chart-viewport.is-dragging {
+  cursor: grabbing;
 }
 
 .activity-chart-average {
@@ -212,18 +228,22 @@
   stroke-width: 1;
 }
 
-.activity-chart-axis-label,
+.activity-chart-average-label {
+  position: absolute;
+  right: 0;
+  width: var(--activity-axis-width);
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 10px;
+  line-height: 12px;
+  pointer-events: none;
+  text-align: right;
+}
+
 .activity-chart-week-label {
   fill: var(--color-muted);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 10px;
-}
-
-.activity-chart-axis-label {
-  text-anchor: end;
-}
-
-.activity-chart-week-label {
   text-anchor: middle;
 }
 

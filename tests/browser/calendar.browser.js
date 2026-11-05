@@ -47,11 +47,11 @@ const click = selector =>
   page.evaluate(selector => document.querySelector(selector).click(), selector);
 const isHidden = id => page.evaluate(id => document.getElementById(id).hidden, id);
 const sheetIsOpen = () => page.evaluate(() => document.getElementById("calendarSheet").open);
-const lastPointDistance = () =>
+const currentWeekDistance = () =>
   page.evaluate(
     () =>
-      [...document.querySelectorAll(".activity-chart-point")]
-        .at(-1)
+      document
+        .querySelector(".activity-chart-point.is-current")
         .getAttribute("aria-label")
         .split(", ")[1]
   );
@@ -124,15 +124,29 @@ test("une séance réalisée est comptée une seule fois dans les statistiques",
   await page.waitFor(() => document.querySelector(".calendar-training-item"));
   assert.equal(await sheetIsOpen(), false, "l’écran plein se ferme après l’ajout");
   await page.waitFor(() => document.getElementById("activityDistance").textContent === "10 km");
-  assert.equal(await lastPointDistance(), "10 km");
+  assert.equal(await currentWeekDistance(), "10 km");
   for (let click = 0; click < 3; click += 1) {
     await page.evaluate(() =>
-      [...document.querySelectorAll(".activity-chart-point")]
-        .at(-1)
+      document
+        .querySelector(".activity-chart-point.is-current")
         .dispatchEvent(new MouseEvent("click", { bubbles: true }))
     );
   }
-  assert.equal(await lastPointDistance(), "10 km", "pas de double comptage après sélection");
+  assert.equal(await currentWeekDistance(), "10 km", "pas de double comptage après sélection");
+  const chart = await page.evaluate(() => {
+    const points = [...document.querySelectorAll(".activity-chart-point")];
+    const viewport = document.querySelector(".activity-chart-viewport");
+    return {
+      after: points.length - 1 - points.findIndex(point => point.classList.contains("is-current")),
+      atEnd: viewport.scrollLeft >= viewport.scrollWidth - viewport.clientWidth - 1,
+      scrolls: viewport.scrollWidth > viewport.clientWidth
+    };
+  });
+  assert.deepEqual(
+    chart,
+    { after: 4, atEnd: true, scrolls: false },
+    "4 semaines à venir, calées à droite"
+  );
 });
 
 test("la carte d’une séance se limite au type, à l’état et aux chiffres clés", async () => {
