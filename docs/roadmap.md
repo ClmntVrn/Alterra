@@ -120,15 +120,15 @@ Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à 
 
 ### Graphe de course (5 novembre 2026)
 
-**Statut :** réalisé en 0.8.33 (bloc « En course » sans chevauchement en 0.8.34) — à vérifier sur iPhone
+**Statut :** réalisé en 0.8.33 à 0.8.35 — à vérifier sur iPhone
 
 Inspiré de LiveTrail (ravitos et sections) et des apps de trail qui colorent la pente (Footpath, Intervals.icu, Ultra-Trails).
 
 - [x] Échelle d’altitude ajustée au relief, point haut indiqué.
-- [x] Courbe colorée selon la pente : vert, jaune, rouge (décision de l’utilisateur).
-- [x] Ravitos en lignes verticales nommées ; sections (distance, D+, D−) sous le profil et, en plein écran, sous l’axe.
+- [x] Courbe colorée selon la pente, en tons d’orange de plus en plus foncés (vert, jaune, rouge essayés en 0.8.33, remplacés en 0.8.35 à la demande de l’utilisateur).
+- [x] Ravitos en lignes verticales nommées ; section qui mène à chaque ravito (distance, D+, D−) dans sa carte et, en plein écran, sous l’axe (liste sous le profil retirée en 0.8.35, redondante avec le bloc « En course »).
 - [x] Lecture au doigt : km, altitude, pente, passage estimé du scénario.
-- [x] Plein écran avec zoom à deux doigts (décision de l’utilisateur) et retour à la course entière.
+- [x] Plein écran toujours à l’horizontale (tourné si le téléphone est tenu droit), zoom à deux doigts (décision de l’utilisateur) et retour à la course entière.
 - [ ] À vérifier sur iPhone : pincer pour zoomer, glisser sans gêner le défilement, plein écran en paysage (encoche), lisibilité dehors et de nuit.
 
 ### Étape 9 — Ajout d’une course depuis l’application

@@ -181,6 +181,25 @@ export function createCheckpointsSection(race, { onChange }) {
     /** @param {string} id */
     isChecked: id => Boolean(find(id)?.checked),
     getScenarioIndex: () => scenarioIndex,
+    /**
+     * Section qui mène à chaque ravito (distance, D+, D−), calculée sur la trace GPX.
+     * @param {Array<{ toId: string, distanceKm: number, ascentMeters: number, descentMeters: number }>} sections
+     */
+    setSections(sections) {
+      for (const section of sections || []) {
+        const details = list.querySelector(
+          `.checkpoint[data-id="${CSS.escape(section.toId)}"] .place`
+        )?.parentElement;
+        if (!details) continue;
+        details.querySelector(".checkpoint-section")?.remove();
+        details.append(
+          el("div", {
+            className: "checkpoint-section",
+            text: `Section ${formatNumber(section.distanceKm)} km · +${section.ascentMeters} m · −${section.descentMeters} m`
+          })
+        );
+      }
+    },
     /** Coche ou décoche un ravito comme le ferait un toucher sur sa case. */
     toggle(id) {
       const checkbox = find(id);

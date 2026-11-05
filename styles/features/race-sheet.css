@@ -118,6 +118,14 @@
   margin: 0;
 }
 
+/* Section qui mène au ravito, mesurée sur la trace GPX. */
+.checkpoint-section {
+  margin-top: 2px;
+  color: var(--color-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
 .checkpoint-plan {
   grid-column: 1 / -1;
   align-self: stretch;

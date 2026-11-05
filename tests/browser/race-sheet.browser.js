@@ -131,13 +131,22 @@ test("le profil colore la pente, liste les sections et donne le passage au doigt
         )
       )
     ].sort(),
-    sections: [...document.querySelectorAll(".elevation-sections li")].map(
-      row => row.querySelector(".elevation-section-name").textContent
+    sections: [...document.querySelectorAll(".checkpoint")].map(
+      card => `${card.dataset.id}:${Boolean(card.querySelector(".checkpoint-section"))}`
     ),
+    sectionText: document.querySelector('.checkpoint[data-id="r1"] .checkpoint-section')
+      ?.textContent,
+    listUnderProfile: Boolean(document.querySelector(".elevation-section ol")),
     legend: document.querySelector(".elevation-legend").textContent
   }));
   assert.ok(state.bands.length >= 2, `plusieurs classes de pente : ${state.bands}`);
-  assert.deepEqual(state.sections, ["Départ → Col A", "Col A → Refuge B", "Refuge B → Arrivée"]);
+  assert.deepEqual(
+    state.sections,
+    ["r1:true", "r2:true", "finish:true"],
+    "section sur chaque ravito"
+  );
+  assert.match(state.sectionText, /^Section 12 km · \+\d+ m · −\d+ m$/);
+  assert.equal(state.listUnderProfile, false, "pas de liste des sections sous le profil");
   assert.match(state.legend, /< 5 %5–10 %≥ 10 %Point haut \d+ m · km [\d,]+/);
 
   const readout = await page.evaluate(() => {
@@ -183,7 +192,9 @@ test("le profil s’ouvre en plein écran, zoome et revient à la course entièr
         reset: !dialog.querySelector(".elevation-reset").hidden,
         stops: chart.querySelectorAll("[data-profile-stop]").length,
         figures: chart.querySelectorAll(".elevation-section-figures").length,
-        fills: Math.round(chart.getBoundingClientRect().height) >= window.innerHeight * 0.5
+        fills: Math.round(chart.getBoundingClientRect().height) >= window.innerHeight * 0.5,
+        // Téléphone tenu droit (viewport des tests) : le plein écran est tourné.
+        rotated: getComputedStyle(dialog).transform !== "none"
       };
     });
   assert.deepEqual(await full(), {
@@ -192,7 +203,8 @@ test("le profil s’ouvre en plein écran, zoome et revient à la course entièr
     reset: false,
     stops: 4,
     figures: 3,
-    fills: true
+    fills: true,
+    rotated: true
   });
 
   await page.evaluate(() => {

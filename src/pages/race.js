@@ -79,7 +79,10 @@ function renderRace(race, personalPlan = null, storageError = null) {
       isChecked: id => checkpoints?.isChecked(id) ?? false,
       toggle: id => checkpoints?.toggle(id)
     })
-    .then(profile => live?.setProfile(profile));
+    .then(profile => {
+      live?.setProfile(profile);
+      if (profile) checkpoints?.setSections(profile.sections);
+    });
 }
 
 function showError(message, error) {

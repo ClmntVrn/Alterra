@@ -60,13 +60,13 @@
   --rgb-chart: 242 154 98;
   --rgb-warning-strong: 183 121 31;
 
-  /* Pentes du profil de course (demande explicite : vert, jaune, rouge). */
-  --color-slope-easy: #28a745;
-  --color-slope-medium: #e0a800;
-  --color-slope-hard: #e5352b;
-  --rgb-slope-easy: 40 167 69;
-  --rgb-slope-medium: 224 168 0;
-  --rgb-slope-hard: 229 53 43;
+  /* Pentes du profil de course : orange de plus en plus foncé quand c’est plus raide. */
+  --color-slope-easy: #f4ae80;
+  --color-slope-medium: #e4642a;
+  --color-slope-hard: #9a3412;
+  --rgb-slope-easy: 244 174 128;
+  --rgb-slope-medium: 228 100 42;
+  --rgb-slope-hard: 154 52 18;
 
   /* Cartes à plat : pas d’ombre portée, seulement la fenêtre et les commandes flottantes. */
   --shadow-card: none;
@@ -112,12 +112,12 @@
     --rgb-paper: 28 28 30;
     --rgb-slate: 209 209 214;
     --rgb-muted: 152 152 157;
-    --color-slope-easy: #30d158;
-    --color-slope-medium: #ffd60a;
-    --color-slope-hard: #ff453a;
-    --rgb-slope-easy: 48 209 88;
-    --rgb-slope-medium: 255 214 10;
-    --rgb-slope-hard: 255 69 58;
+    --color-slope-easy: #f6c19c;
+    --color-slope-medium: #f07a3e;
+    --color-slope-hard: #c2410c;
+    --rgb-slope-easy: 246 193 156;
+    --rgb-slope-medium: 240 122 62;
+    --rgb-slope-hard: 194 65 12;
     --shadow-control: 0 1px 4px rgb(0 0 0 / 50%);
     --shadow-dialog: 0 20px 50px rgb(0 0 0 / 60%);
   }
@@ -160,12 +160,12 @@
   --rgb-paper: 28 28 30;
   --rgb-slate: 209 209 214;
   --rgb-muted: 152 152 157;
-  --color-slope-easy: #30d158;
-  --color-slope-medium: #ffd60a;
-  --color-slope-hard: #ff453a;
-  --rgb-slope-easy: 48 209 88;
-  --rgb-slope-medium: 255 214 10;
-  --rgb-slope-hard: 255 69 58;
+  --color-slope-easy: #f6c19c;
+  --color-slope-medium: #f07a3e;
+  --color-slope-hard: #c2410c;
+  --rgb-slope-easy: 246 193 156;
+  --rgb-slope-medium: 240 122 62;
+  --rgb-slope-hard: 194 65 12;
   --shadow-control: 0 1px 4px rgb(0 0 0 / 50%);
   --shadow-dialog: 0 20px 50px rgb(0 0 0 / 60%);
 }

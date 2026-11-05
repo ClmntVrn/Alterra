@@ -70,12 +70,10 @@
   stroke-width: 1;
 }
 
-/* Trait de secours sous les tronçons colorés. */
+/* Courbe complète, invisible : les tronçons colorés la dessinent. */
 .elevation-line {
   fill: none;
-  stroke: var(--color-slate);
-  stroke-linejoin: round;
-  stroke-width: 1;
+  stroke: none;
 }
 
 .elevation-slope-area {
@@ -90,15 +88,15 @@
 }
 
 .elevation-slope-area.slope-easy {
-  fill: rgb(var(--rgb-slope-easy) / 26%);
+  fill: rgb(var(--rgb-slope-easy) / 30%);
 }
 
 .elevation-slope-area.slope-medium {
-  fill: rgb(var(--rgb-slope-medium) / 30%);
+  fill: rgb(var(--rgb-slope-medium) / 42%);
 }
 
 .elevation-slope-area.slope-hard {
-  fill: rgb(var(--rgb-slope-hard) / 28%);
+  fill: rgb(var(--rgb-slope-hard) / 62%);
 }
 
 .elevation-slope-line.slope-easy {
@@ -113,7 +111,7 @@
   stroke: var(--color-slope-hard);
 }
 
-/* Partie parcourue : voilée et grisée, la position reste en orange. */
+/* Partie parcourue : voilée et grisée ; la position est marquée d’un trait foncé. */
 .elevation-completed-area {
   fill: rgb(var(--rgb-paper) / 62%);
 }
@@ -127,7 +125,7 @@
 }
 
 .elevation-position {
-  stroke: var(--color-accent-bright);
+  stroke: var(--color-charcoal);
   stroke-width: 2;
 }
 
@@ -170,7 +168,7 @@
 }
 
 .elevation-current {
-  fill: var(--color-accent-bright);
+  fill: var(--color-charcoal);
   stroke: var(--color-paper);
   stroke-width: 2.5;
   pointer-events: none;
@@ -258,38 +256,6 @@
   margin-left: auto;
 }
 
-/* Sections entre ravitos : nom, distance, D+, D−. */
-.elevation-sections {
-  display: grid;
-  margin: 10px 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
-
-.elevation-sections li {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto auto;
-  gap: 10px;
-  align-items: baseline;
-  padding: 7px 0;
-  border-top: 1px solid var(--color-line-soft);
-}
-
-.elevation-sections li > span:not(.elevation-section-name) {
-  min-width: 52px;
-  text-align: right;
-}
-
-.elevation-section-name {
-  font-weight: 600;
-}
-
-.elevation-sections li.is-done {
-  color: var(--color-done-text);
-}
-
 /* Plein écran : tout l’écran, pensé pour le paysage ; zoom à deux doigts. */
 .elevation-full {
   width: 100%;
@@ -365,4 +331,19 @@
 
 .elevation-full:focus {
   outline: none;
+}
+
+/* Téléphone tenu droit : le plein écran est tourné d’un quart de tour pour être lu à l’horizontale.
+   Le haut du graphe est à droite de l’écran ; les marges suivent l’encoche et la barre d’accueil. */
+@media (orientation: portrait) {
+  .elevation-full {
+    inset: 0 auto auto 0;
+    width: 100vh;
+    width: 100dvh;
+    height: 100vw;
+    padding: max(10px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left)) max(14px, env(safe-area-inset-top));
+    transform: translateX(100vw) rotate(90deg);
+    transform-origin: top left;
+  }
 }

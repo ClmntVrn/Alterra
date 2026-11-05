@@ -299,9 +299,10 @@ function createChart(race, { full, track, checkpoints, getScenarioIndex, onZoom 
   let progressNodes = null;
 
   function measure() {
-    const width = Math.max(240, Math.round(wrapper.getBoundingClientRect().width));
+    // Dimensions de mise en page : justes aussi quand le plein écran est tourné.
+    const width = Math.max(240, Math.round(wrapper.clientWidth));
     const height = full
-      ? Math.max(220, Math.round(wrapper.getBoundingClientRect().height))
+      ? Math.max(220, Math.round(wrapper.clientHeight))
       : Math.round(Math.min(320, Math.max(220, width * 0.62)));
     const bottom = MARGIN.bottom + (full ? SECTION_BAND_HEIGHT : 0);
     return {
@@ -393,9 +394,15 @@ function createChart(race, { full, track, checkpoints, getScenarioIndex, onZoom 
     if (cursorKm !== null) showReadout(cursorKm);
   }
 
-  const kmAtClientX = clientX => {
+  // Plein écran tenu droit : le graphe est tourné d’un quart de tour, l’axe des km suit l’écran
+  // de haut en bas.
+  const isRotated = () => full && matchMedia("(orientation: portrait)").matches;
+  /** Abscisse dans le graphe d’un point touché, en pixels. */
+  const localX = event => {
     const rect = chart.getBoundingClientRect();
-    const x = clientX - rect.left;
+    return isRotated() ? event.clientY - rect.top : event.clientX - rect.left;
+  };
+  const kmAtX = x => {
     const { plot } = profile;
     const ratio = Math.max(0, Math.min(1, (x - plot.left) / (plot.right - plot.left)));
     return profile.fromKm + ratio * (profile.toKm - profile.fromKm);
@@ -454,13 +461,9 @@ function createChart(race, { full, track, checkpoints, getScenarioIndex, onZoom 
   }
 
   /** Zoom autour d’une distance qui reste sous le même point de l’écran. */
-  function zoomAround(km, clientX, span) {
-    const rect = chart.getBoundingClientRect();
+  function zoomAround(km, x, span) {
     const { plot } = profile;
-    const ratio = Math.max(
-      0,
-      Math.min(1, (clientX - rect.left - plot.left) / (plot.right - plot.left))
-    );
+    const ratio = Math.max(0, Math.min(1, (x - plot.left) / (plot.right - plot.left)));
     setView(km - ratio * span, km - ratio * span + span);
   }
 
@@ -475,33 +478,33 @@ function createChart(race, { full, track, checkpoints, getScenarioIndex, onZoom 
 
   chart.addEventListener("pointerdown", event => {
     if (!profile) return;
-    pointers.set(event.pointerId, event.clientX);
+    pointers.set(event.pointerId, localX(event));
     if (full && pointers.size === 2) {
       const [a, b] = [...pointers.values()];
       pinch = {
         distance: Math.max(20, Math.abs(a - b)),
         span: profile.toKm - profile.fromKm,
-        km: kmAtClientX((a + b) / 2)
+        km: kmAtX((a + b) / 2)
       };
       hideReadout();
       return;
     }
-    if (pointers.size === 1) showReadout(kmAtClientX(event.clientX));
+    if (pointers.size === 1) showReadout(kmAtX(localX(event)));
   });
   chart.addEventListener("pointermove", event => {
     if (!profile) return;
     if (!pointers.has(event.pointerId)) {
-      if (event.pointerType === "mouse") showReadout(kmAtClientX(event.clientX));
+      if (event.pointerType === "mouse") showReadout(kmAtX(localX(event)));
       return;
     }
-    pointers.set(event.pointerId, event.clientX);
+    pointers.set(event.pointerId, localX(event));
     if (pinch && pointers.size >= 2) {
       const [a, b] = [...pointers.values()];
       const span = (pinch.span * pinch.distance) / Math.max(20, Math.abs(a - b));
       schedule(() => zoomAround(pinch.km, (a + b) / 2, span));
       return;
     }
-    if (!pinch) showReadout(kmAtClientX(event.clientX));
+    if (!pinch) showReadout(kmAtX(localX(event)));
   });
   const release = event => {
     pointers.delete(event.pointerId);
@@ -525,7 +528,8 @@ function createChart(race, { full, track, checkpoints, getScenarioIndex, onZoom 
         if (!profile) return;
         event.preventDefault();
         const span = (profile.toKm - profile.fromKm) * Math.exp(event.deltaY * 0.002);
-        zoomAround(kmAtClientX(event.clientX), event.clientX, span);
+        const x = localX(event);
+        zoomAround(kmAtX(x), x, span);
       },
       { passive: false }
     );
@@ -560,31 +564,6 @@ function renderLegend(track) {
   ]);
 }
 
-/** Liste des sections entre ravitos : distance, D+ et D−. */
-function renderSectionList(track, race) {
-  const names = new Map((race.checkpoints || []).map(item => [item.id, item.name]));
-  const nameOf = id =>
-    id === "start" ? "Départ" : names.get(id) || (id === "finish" ? "Arrivée" : id);
-  const rows = track.sections.map(section => {
-    const row = el("li", {}, [
-      el("span", {
-        className: "elevation-section-name",
-        text: `${nameOf(section.fromId)} → ${nameOf(section.toId)}`
-      }),
-      el("span", { text: `${formatNumber(section.distanceKm)} km` }),
-      el("span", { text: `+${section.ascentMeters} m` }),
-      el("span", { text: `−${section.descentMeters} m` })
-    ]);
-    row.dataset.toKm = String(section.toKm);
-    return row;
-  });
-  return el(
-    "ol",
-    { className: "elevation-sections", attrs: { "aria-label": "Sections entre ravitos" } },
-    rows
-  );
-}
-
 /**
  * @param {Object} race Fiche avec plan personnel appliqué ; `profile.gpx` est présent.
  * @param {{ getScenarioIndex?: () => number }} [options]
@@ -611,20 +590,6 @@ export function createElevationSection(race, { getScenarioIndex = () => 0 } = {}
 
   let inline = null;
   let full = null;
-  let sectionList = null;
-
-  /** Sections déjà parcourues, jusqu’au dernier ravito atteint sur le profil. */
-  function markSections() {
-    if (!sectionList || !inline) return;
-    const reachedId = inline.element.querySelector(".elevation-chart").dataset.reached;
-    const reachedKm =
-      reachedId === "finish"
-        ? Infinity
-        : ((race.checkpoints || []).find(item => item.id === reachedId)?.km ?? 0);
-    for (const row of sectionList.children) {
-      row.classList.toggle("is-done", Number(row.dataset.toKm) <= reachedKm + 0.05);
-    }
-  }
 
   function openFull(track, checkpoints) {
     if (!full) {
@@ -696,10 +661,8 @@ export function createElevationSection(race, { getScenarioIndex = () => 0 } = {}
         sections: computeSections(measured.points, reference.markers)
       };
       inline = createChart(race, { full: false, track, checkpoints, getScenarioIndex });
-      sectionList = renderSectionList(track, race);
-      body.replaceChildren(inline.element, renderLegend(track), sectionList);
-      const profile = inline.render();
-      markSections();
+      body.replaceChildren(inline.element, renderLegend(track));
+      const profile = { ...inline.render(), sections: track.sections };
       expand.hidden = false;
       expand.addEventListener("click", () => openFull(track, checkpoints));
       // Rotation de l’écran ou fenêtre redimensionnée : le tracé suit la nouvelle largeur.
@@ -724,7 +687,6 @@ export function createElevationSection(race, { getScenarioIndex = () => 0 } = {}
     update: () => {
       inline?.update();
       full?.chart.update();
-      markSections();
     }
   };
 }
