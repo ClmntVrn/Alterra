@@ -26,36 +26,37 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
   base « alterra-personal-data » sur l’appareil
 ```
 
-| Fichier                                          | Rôle                                                                                                                       |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `src/pages/home.js`                              | Initialise les onglets, l’accueil, les objectifs, le service worker, le stockage persistant et la sauvegarde.              |
-| `src/pages/race.js`                              | Fiche course : chargement de la fiche et du plan personnel, assemblage des blocs.                                          |
-| `src/features/race-sheet/`                       | Blocs de la fiche : en-tête, profil GPX, ravitos et scénarios, matériel, infos.                                            |
-| `src/features/calendar/calendar.js`              | Calendrier : vue mois/jour, plein écran partagé des détails et formulaires, rafraîchissement, sans état global.            |
-| `src/features/calendar/month-grid.js`            | Grille du calendrier, générique.                                                                                           |
-| `src/features/calendar/month-picker.js`          | Choix du mois avec le sélecteur natif (`<input type="month">`).                                                            |
-| `src/features/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines.                                                                             |
-| `src/features/workouts/`                         | Carte et formulaire d’une séance, libellés des types et états.                                                             |
-| `src/features/races/`                            | Cartes des courses et formulaire d’une course personnelle.                                                                 |
-| `src/features/objectives/`                       | Onglet Objectifs : prochaine course, courses à venir avec compte à rebours, courses passées.                               |
-| `src/domain/`                                    | Règles pures, sans DOM ni stockage : dates, durées, séances, statistiques, calendrier, objectifs.                          |
-| `src/domain/backup-format.js`                    | Format de sauvegarde versionné et validation.                                                                              |
-| `src/domain/race-plan.js`                        | Application du plan personnel à la fiche de référence.                                                                     |
-| `src/domain/elevation-profile.js`                | Distances de la trace, points du profil, graduations et progression.                                                       |
-| `src/storage/personal-data.js`                   | Export/restauration complète, y compris les clés `localStorage` `alterra-*`.                                               |
-| `src/storage/race-catalog.js`                    | Chargement du catalogue de courses depuis la base locale.                                                                  |
-| `src/ui/format.js`                               | Formats d’affichage français partagés (dates, nombres, périodes).                                                          |
-| `src/ui/dom.js`                                  | Création d’éléments HTML (`el()`).                                                                                         |
-| `src/ui/tab-bar.js`                              | Barre d’onglets : vue affichée sans rechargement, position conservée par vue.                                              |
-| `styles/`                                        | `tokens.css`, `base.css`, `layout.css`, puis une feuille par composant et fonctionnalité ; chaque page charge les siennes. |
-| `assets/icons/`                                  | Icônes du site et de l’écran d’accueil.                                                                                    |
-| `sw.js`, `manifest.json`                         | Précache hors ligne et manifeste de la PWA, à la racine pour couvrir tout le site.                                         |
-| `tests/`                                         | Tests `node --test` du domaine, des formats, des sauvegardes et du précache du service worker (`npm test`).                |
-| `tests/browser/`                                 | Parcours dans Chrome ou Edge sans interface, sur données fictives (`npm run test:browser`).                                |
-| `tools/browser.js`                               | Pilotage du navigateur pour ces tests, sans dépendance.                                                                    |
-| `tools/release.js`                               | Nouvelle version en une commande (`npm run release`), sans commit ni push.                                                 |
-| `tools/github-reporter.js`                       | Rapporteur de tests pour la CI : chaque échec devient une annotation GitHub.                                               |
-| `.github/workflows/ci.yml`                       | Vérifications GitHub à chaque push : `npm run check` puis tests navigateur ; sans effet sur la publication.                |
+| Fichier                                          | Rôle                                                                                                                        |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `src/pages/home.js`                              | Initialise les onglets, l’accueil, les objectifs, le service worker, le stockage persistant et la sauvegarde.               |
+| `src/pages/race.js`                              | Fiche course : chargement de la fiche et du plan personnel, assemblage des blocs.                                           |
+| `src/features/race-sheet/`                       | Blocs de la fiche : en-tête, profil GPX, ravitos et scénarios, matériel, infos.                                             |
+| `src/features/calendar/calendar.js`              | Calendrier : vue mois/jour, plein écran partagé des détails et formulaires, rafraîchissement, sans état global.             |
+| `src/features/calendar/month-grid.js`            | Grille du calendrier, générique.                                                                                            |
+| `src/features/calendar/month-picker.js`          | Choix du mois avec le sélecteur natif (`<input type="month">`).                                                             |
+| `src/features/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines.                                                                              |
+| `src/features/workouts/`                         | Carte et formulaire d’une séance, libellés des types et états.                                                              |
+| `src/features/races/`                            | Cartes des courses et formulaire d’une course personnelle.                                                                  |
+| `src/features/objectives/`                       | Onglet Objectifs : prochaine course, courses à venir avec compte à rebours, courses passées.                                |
+| `src/domain/`                                    | Règles pures, sans DOM ni stockage : dates, durées, séances, statistiques, calendrier, objectifs.                           |
+| `src/domain/backup-format.js`                    | Format de sauvegarde versionné et validation.                                                                               |
+| `src/domain/race-plan.js`                        | Application du plan personnel à la fiche de référence.                                                                      |
+| `src/domain/elevation-profile.js`                | Distances de la trace, points du profil, graduations et progression.                                                        |
+| `src/storage/personal-data.js`                   | Export/restauration complète, y compris les clés `localStorage` `alterra-*`.                                                |
+| `src/storage/race-catalog.js`                    | Chargement du catalogue de courses depuis la base locale.                                                                   |
+| `src/ui/format.js`                               | Formats d’affichage français partagés (dates, nombres, périodes).                                                           |
+| `src/ui/dom.js`                                  | Création d’éléments HTML (`el()`).                                                                                          |
+| `src/ui/tab-bar.js`                              | Barre d’onglets : vue affichée sans rechargement, position conservée par vue.                                               |
+| `styles/`                                        | `tokens.css`, `base.css`, `layout.css`, puis une feuille par composant et fonctionnalité ; chaque page charge les siennes.  |
+| `assets/icons/`                                  | Icônes du site et de l’écran d’accueil.                                                                                     |
+| `sw.js`, `manifest.json`                         | Précache hors ligne et manifeste de la PWA, à la racine pour couvrir tout le site.                                          |
+| `tests/`                                         | Tests `node --test` du domaine, des formats, des sauvegardes et du précache du service worker (`npm test`).                 |
+| `tests/browser/`                                 | Parcours dans Chrome ou Edge sans interface, sur données fictives (`npm run test:browser`).                                 |
+| `tools/browser.js`                               | Pilotage du navigateur pour ces tests, sans dépendance.                                                                     |
+| `tools/release.js`                               | Nouvelle version en une commande (`npm run release`), sans commit ni push.                                                  |
+| `tools/github-reporter.js`                       | Rapporteur de tests pour la CI : chaque échec devient une annotation GitHub.                                                |
+| `tools/data.js`                                  | Lecture et écriture des données du compte en ligne (`npm run data`), avec les identifiants de `.env.local` (non versionné). |
+| `.github/workflows/ci.yml`                       | Vérifications GitHub à chaque push : `npm run check` puis tests navigateur ; sans effet sur la publication.                 |
 
 Le code des écrans délègue les calculs à `src/domain/` ; c’est la partie couverte par les tests. Un test vérifie aussi que chaque ressource livrée figure dans le précache de `sw.js`.
 

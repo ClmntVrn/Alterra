@@ -2,3 +2,7 @@ node_modules/
 
 # Sauvegardes personnelles : ne jamais les versionner.
 alterra-sauvegarde-*.json
+
+# Identifiants du compte et données lues en ligne (npm run data) : jamais versionnés.
+.env.local
+.local/
