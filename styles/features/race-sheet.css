@@ -322,11 +322,16 @@
   line-height: 1.15;
 }
 
+/* Chaque valeur prend la largeur de son texte : « 14,5 km » ne touche pas la suivante. */
 .live-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
-  gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
   margin: 14px 0 0;
+}
+
+.live-stats > div {
+  flex: 1 0 auto;
 }
 
 .live-stats dt {
@@ -338,7 +343,7 @@
 .live-stats dd {
   margin: 0;
   color: var(--color-charcoal);
-  font-size: 22px;
+  font-size: clamp(19px, 5.6vw, 22px);
   font-weight: 850;
   font-variant-numeric: tabular-nums;
   line-height: 1.25;

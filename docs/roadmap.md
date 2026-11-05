@@ -1,4 +1,4 @@
-# Plan de développement d’Alterra
+﻿# Plan de développement d’Alterra
 
 **Mis à jour le :** 5 novembre 2026  
 **État général :** version locale utilisable (0.8.28) ; entraînements, statistiques et onglet Stats, barre d’onglets, objectifs, courses validées et thème sombre en place, retours iPhone attendus sur les étapes 6 à 8 et les retours du 2 novembre. Prochaines étapes : ajout d’une course depuis l’application (fusion course et fiche), puis nutrition et équipement.
@@ -120,7 +120,7 @@ Décisions du 27 octobre 2026 : l’onglet ne liste que les courses ; compte à 
 
 ### Graphe de course (5 novembre 2026)
 
-**Statut :** réalisé en 0.8.33 — à vérifier sur iPhone
+**Statut :** réalisé en 0.8.33 (bloc « En course » sans chevauchement en 0.8.34) — à vérifier sur iPhone
 
 Inspiré de LiveTrail (ravitos et sections) et des apps de trail qui colorent la pente (Footpath, Intervals.icu, Ultra-Trails).
 
