@@ -222,6 +222,10 @@
   cursor: grabbing;
 }
 
+.activity-chart-gridline {
+  stroke: var(--color-line);
+  stroke-width: 1;
+}
 .activity-chart-average {
   stroke: var(--color-muted);
   stroke-dasharray: 0.5 4;
@@ -229,7 +233,7 @@
   stroke-width: 1.5;
 }
 
-.activity-chart-average-label {
+.activity-chart-axis-label {
   position: absolute;
   right: 0;
   width: var(--activity-axis-width);

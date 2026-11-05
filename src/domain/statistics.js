@@ -147,3 +147,33 @@ export function getWorkoutsInWeek(workouts, week) {
     return date !== null && date >= week.start && date <= week.end;
   });
 }
+
+/**
+ * Lignes de repère d’un graphique : le maximum, la moyenne et, dans un écart d’au moins deux fois
+ * `minGap` pixels (zéro compris), une ligne au milieu, arrondie à deux chiffres significatifs.
+ * @param {number} max Haut de l’échelle.
+ * @param {number} average Zéro s’il n’y en a pas.
+ * @param {number} height Hauteur du tracé en pixels, de zéro au maximum.
+ * @returns {Array<{ value: number, kind: "max" | "average" | "middle" }>} Du haut vers le bas.
+ */
+export function computeGuideLevels(max, average, height, minGap) {
+  if (!(max > 0)) return [];
+  const levels = [{ value: max, kind: "max" }];
+  if (average > 0 && average < max) levels.push({ value: average, kind: "average" });
+  const bounds = [...levels.map(level => level.value), 0];
+  const result = [];
+  bounds.slice(0, -1).forEach((upper, index) => {
+    result.push(levels[index]);
+    const lower = bounds[index + 1];
+    const middle = roundToTwoDigits((upper + lower) / 2);
+    if (((upper - lower) / max) * height >= 2 * minGap && middle > lower && middle < upper) {
+      result.push({ value: middle, kind: "middle" });
+    }
+  });
+  return result;
+}
+
+/** Arrondi lisible pour une ligne de repère : 604 → 600, 15,1 → 15, 7,4 → 7. */
+function roundToTwoDigits(value) {
+  return value >= 10 ? Number(value.toPrecision(2)) : Math.round(value);
+}

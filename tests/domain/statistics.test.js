@@ -4,6 +4,7 @@ import { toDateKey } from "../../src/domain/dates.js";
 import {
   WEEK_COUNT,
   averageOfPastWeeks,
+  computeGuideLevels,
   computeWeeklyTotals,
   countHistoryWeeks,
   createWeekRange,
@@ -138,4 +139,26 @@ test("countHistoryWeeks remonte à la plus ancienne séance, entre 11 et 52 sema
   assert.equal(countHistoryWeeks([workout("2026-10-01")], today), 11);
   assert.equal(countHistoryWeeks([workout("2026-07-01"), workout("2026-11-20")], today), 17);
   assert.equal(countHistoryWeeks([workout("2020-01-01"), workout("pas une date")], today), 52);
+});
+
+test("computeGuideLevels ajoute une ligne au milieu des grands écarts", () => {
+  const kinds = levels => levels.map(level => `${level.kind} ${level.value}`);
+  assert.deepEqual(kinds(computeGuideLevels(47, 30, 116, 28)), [
+    "max 47",
+    "average 30",
+    "middle 15"
+  ]);
+  assert.deepEqual(kinds(computeGuideLevels(40, 0, 116, 28)), ["max 40", "middle 20"]);
+  assert.deepEqual(kinds(computeGuideLevels(40, 38, 116, 28)), [
+    "max 40",
+    "average 38",
+    "middle 19"
+  ]);
+  assert.deepEqual(kinds(computeGuideLevels(40, 20, 100, 28)), ["max 40", "average 20"]);
+  assert.deepEqual(kinds(computeGuideLevels(1880, 1207, 116, 28)), [
+    "max 1880",
+    "average 1207",
+    "middle 600"
+  ]);
+  assert.deepEqual(computeGuideLevels(0, 0, 116, 28), []);
 });

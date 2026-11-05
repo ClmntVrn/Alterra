@@ -2,6 +2,7 @@ import { formatDuration } from "../../domain/durations.js";
 import {
   FUTURE_WEEKS,
   averageOfPastWeeks,
+  computeGuideLevels,
   computeWeeklyTotals,
   countHistoryWeeks,
   createWeekRange,
@@ -19,6 +20,8 @@ const BASELINE = 126;
 const VISIBLE_WEEKS = 12;
 /** Semaines terminées prises pour la moyenne. */
 const AVERAGE_WEEKS = 11;
+/** Écart minimal, en pixels, entre deux lignes de repère. */
+const GUIDE_MIN_GAP = 26;
 
 const metrics = Object.freeze({
   distance: { label: "Distance", format: value => `${formatNumber(value)} km` },
@@ -157,10 +160,11 @@ export function initializeActivityStatistics(container) {
   // mêmes semaines quand le graphique est redessiné.
   const viewport = document.createElement("div");
   viewport.className = "activity-chart-viewport";
-  const averageLabel = document.createElement("p");
-  averageLabel.className = "activity-chart-average-label";
-  averageLabel.setAttribute("aria-hidden", "true");
-  chart.replaceChildren(viewport, averageLabel);
+  // Valeurs des lignes de repère, fixes à droite pendant le défilement.
+  const axisLabels = document.createElement("div");
+  axisLabels.className = "activity-chart-axis-labels";
+  axisLabels.setAttribute("aria-hidden", "true");
+  chart.replaceChildren(viewport, axisLabels);
   enableMouseDrag(viewport);
   if (typeof ResizeObserver === "function") {
     // Dessiné à la taille réelle : redessiné quand la carte change de largeur (rotation, onglet
@@ -286,15 +290,40 @@ export function initializeActivityStatistics(container) {
       currentIndex + 1
     );
     const average = averageOfPastWeeks(recentWeeks, selectedMetric);
-    averageLabel.hidden = average <= 0;
-    if (average > 0) {
-      const y = yAt(average);
-      svg.append(
-        svgElement("line", { x1: 0, x2: width, y1: y, y2: y, class: "activity-chart-average" })
-      );
-      averageLabel.style.top = `${y - 13}px`;
-      averageLabel.replaceChildren("moy.", document.createElement("br"), metric.format(average));
-    }
+    // Lignes de repère : maximum, moyenne et, si l’écart est grand, une ligne entre les deux.
+    const levels = computeGuideLevels(
+      Math.max(...done, ...planned, 0),
+      average,
+      BASELINE - PLOT_TOP,
+      GUIDE_MIN_GAP
+    );
+    const averageY = levels.some(level => level.kind === "average") ? yAt(average) : null;
+    axisLabels.replaceChildren(
+      ...levels.flatMap(level => {
+        const y = yAt(level.value);
+        svg.append(
+          svgElement("line", {
+            x1: 0,
+            x2: width,
+            y1: y,
+            y2: y,
+            class: level.kind === "average" ? "activity-chart-average" : "activity-chart-gridline"
+          })
+        );
+        // Le maximum cède sa valeur à la moyenne quand elles se chevauchent.
+        if (level.kind === "max" && averageY !== null && averageY - y < 24) return [];
+        const label = document.createElement("p");
+        label.className = `activity-chart-axis-label is-${level.kind}`;
+        if (level.kind === "average") {
+          label.style.top = `${y - 13}px`;
+          label.append("moy.", document.createElement("br"), metric.format(level.value));
+        } else {
+          label.style.top = `${y - 6}px`;
+          label.textContent = metric.format(level.value);
+        }
+        return [label];
+      })
+    );
 
     // Réalisé : traits droits jusqu’à la semaine en cours, avec une aire légère dessous.
     const doneLine = done
