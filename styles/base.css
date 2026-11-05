@@ -12,7 +12,7 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  padding: max(16px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  padding: max(8px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
   background: var(--color-stone);
   color: var(--color-text);
   font:

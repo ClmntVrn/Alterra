@@ -6,7 +6,7 @@
   height: 100%;
   max-height: none;
   margin: 0;
-  padding: max(16px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  padding: max(8px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
   border: 0;
   background: var(--color-stone);
   color: var(--color-text);
