@@ -1,9 +1,9 @@
 # Architecture d’Alterra
 
-**Statut :** architecture validée le 22 octobre 2026, en place pour la version locale  
-**Mise à jour :** 27 octobre 2026
+**Statut :** architecture validée le 22 octobre 2026, comptes et synchronisation en place depuis novembre 2026  
+**Mise à jour :** 6 novembre 2026
 
-Ce document décrit l’architecture actuelle et son évolution prévue, sans backend ni frais au départ.
+Ce document décrit l’architecture actuelle et son évolution prévue : site statique, base locale sur l’appareil et synchronisation avec Supabase (offre gratuite).
 
 ## 1. Vue d’ensemble
 
@@ -101,12 +101,11 @@ Les dates sont des clés locales `AAAA-MM-JJ`, interprétées dans le fuseau de 
 
 Limites :
 
-- sans compte, pas de synchronisation entre appareils ;
-- l’effacement des données du navigateur ou la perte de l’appareil supprime la base ;
+- l’effacement des données du navigateur ou la perte de l’appareil supprime la base locale ; les données déjà synchronisées se retrouvent à la connexion suivante ;
 - les exports contiennent des données personnelles et doivent être conservés en lieu sûr ;
 - IndexedDB n’est pas chiffré : la protection de l’appareil reste importante.
 
-Le service worker ne met en cache que l’interface ; les données personnelles ne transitent pas par son cache. Son cache porte le numéro de version (`alterra-<version>`) : chaque version publiée avec `npm run release` le renouvelle.
+Le service worker ne met en cache que l’interface ; les données personnelles ne transitent pas par son cache. Son cache porte le numéro de version (`alterra-<version>`) : chaque version publiée avec `npm run release` le renouvelle. À l’installation, les fichiers sont téléchargés à neuf (`cache: "reload"`), puis chaque requête est revalidée (`cache: "no-cache"`) : le cache HTTP de GitHub Pages (10 minutes) ne peut plus servir un ancien script avec une page à jour.
 
 ## 4. Compte et synchronisation
 

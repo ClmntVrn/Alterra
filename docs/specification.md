@@ -1,6 +1,6 @@
 # Alterra — spécification fonctionnelle
 
-Alterra est une application web statique, mobile-first, de préparation au trail et à la montagne. Elle fonctionne sans compte ni synchronisation serveur ; les données personnelles restent dans le navigateur.
+Alterra est une application web statique, mobile-first, de préparation au trail et à la montagne. Elle demande un compte : les données sont enregistrées sur l’appareil, qui fonctionne hors ligne, et synchronisées avec le compte dès que le réseau le permet.
 
 ## Navigation
 
@@ -86,10 +86,10 @@ Alterra est une application web statique, mobile-first, de préparation au trail
 
 - IndexedDB stocke les sorties (prévues ou réalisées), courses personnelles et de référence, plans de course et réglages ; les collections de produits de nutrition et de matériel sont prévues. La collection `activities` reste dans le format de sauvegarde pour compatibilité mais n’est pas utilisée.
 - L’export produit un JSON autonome incluant les données de référence et les états locaux Alterra. À l’import, on choisit « Fusionner » ou « Remplacer tout ». La fusion ajoute ce qui manque sans rien supprimer ; pour un même identifiant ou un même état local, la donnée de l’appareil est conservée. Le remplacement efface d’abord toutes les données de l’appareil. Le format courant est la version 3 ; les formats 1 et 2 restent acceptés et sont convertis à l’import. Une sauvegarde au format 3 ne peut pas être importée dans une version d’Alterra antérieure à 0.8.15.
-- Les données ne sont pas synchronisées entre appareils. La sauvegarde doit être transférée manuellement et conservée en lieu sûr.
+- La synchronisation avec le compte remplace le transfert de fichiers entre appareils (voir « Compte et synchronisation »). Le serveur ne fait pas de sauvegarde automatique : un export de temps en temps, conservé en lieu sûr, reste conseillé.
 - Le Profil indique la date de la dernière sauvegarde exportée ; le rappel est mis en avant, avec une pastille sur l’onglet Profil, lorsqu’aucune sauvegarde n’existe ou qu’elle date de 7 jours ou plus. La date est incluse dans l’export, si bien qu’une restauration reprend celle du fichier importé.
 - Au démarrage, l’application demande au navigateur un stockage persistant pour limiter le risque d’effacement automatique de la base locale.
-- Le manifeste permet l’installation comme application. Le service worker précache les ressources de l’application pour un usage hors ligne ; chaque changement de ressources livrées hors ligne nécessite une nouvelle version de cache.
+- Le manifeste permet l’installation comme application. Le service worker précache les ressources de l’application pour un usage hors ligne ; chaque changement de ressources livrées hors ligne nécessite une nouvelle version de cache. En ligne, chaque fichier est revalidé auprès du serveur : une nouvelle version s’affiche entière dès la réouverture de l’application.
 
 ## Règles d’interface et de contenu
 
