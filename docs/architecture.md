@@ -10,7 +10,7 @@ Ce document décrit l’architecture actuelle et son évolution prévue, sans ba
 Alterra est une PWA statique en HTML, CSS et JavaScript natif (modules ES), sans framework ni étape de build.
 
 ```text
-Pages (index.html, race.html, versions.html, styles/)
+Pages (index.html, pages/race.html, pages/versions.html, styles/)
   onglets Accueil · Objectifs · Profil · plein écran des formulaires · fiches de course
                      │
                      ▼
@@ -33,6 +33,7 @@ Adaptateur IndexedDB (src/storage/indexeddb.js)
 | `src/features/race-sheet/`                       | Blocs de la fiche : en-tête, profil GPX, ravitos et scénarios, matériel, infos.                                             |
 | `src/features/calendar/calendar.js`              | Calendrier : vue mois/jour, plein écran partagé des détails et formulaires, rafraîchissement, sans état global.             |
 | `src/features/calendar/month-grid.js`            | Grille du calendrier, générique.                                                                                            |
+| `src/features/calendar/event-icons.js`           | Repère d’une case du mois : icône du sport, ou « ×N » pour plusieurs activités.                                             |
 | `src/features/calendar/month-picker.js`          | Choix du mois avec le sélecteur natif (`<input type="month">`).                                                             |
 | `src/features/statistics/activity-statistics.js` | Graphique et totaux des 12 dernières semaines.                                                                              |
 | `src/features/workouts/`                         | Carte et formulaire d’une séance, libellés des types et états.                                                              |
@@ -115,7 +116,7 @@ Décidé le 4 novembre 2026 : Supabase (offre gratuite, région Europe), connexi
 - **Clés :** l’adresse et la clé publique du projet sont dans `src/storage/supabase-config.js` : elles n’ouvrent aucune donnée sans session. La clé `service_role` ne sort jamais du tableau de bord.
 - **Client :** `src/storage/supabase.js` appelle Supabase par simples requêtes HTTP, sans bibliothèque. Le service worker laisse passer ces requêtes sans cache.
 - **Synchronisation :** `src/storage/sync.js`. L’appareil reste la source de l’affichage et fonctionne hors ligne. Chaque écriture locale entre dans `syncQueue` dans la même transaction ; à l’ouverture, au retour au premier plan, au retour du réseau et 1,5 s après une modification, la file part en ligne puis les lignes modifiées depuis le dernier repère (moins une minute de marge) sont récupérées. La modification la plus récente l’emporte (`modified_at`, vérifié par la base) ; une modification locale pas encore envoyée n’est jamais écrasée. Règles pures dans `src/domain/sync.js`.
-- **Accès réservé :** sans session, `index.html` n’affiche que l’écran de connexion (`#viewSignIn`) ; la classe `is-auth-pending` du `<body>` masque tout jusqu’à la lecture de la session, puis `is-signed-out` garde l’application masquée. La session reste sur l’appareil : l’ouverture hors ligne ne demande pas le réseau. La fiche course (`race.html`) n’est pas filtrée : elle ne lit que la base de l’appareil.
+- **Accès réservé :** sans session, `index.html` n’affiche que l’écran de connexion (`#viewSignIn`) ; la classe `is-auth-pending` du `<body>` masque tout jusqu’à la lecture de la session, puis `is-signed-out` garde l’application masquée. La session reste sur l’appareil : l’ouverture hors ligne ne demande pas le réseau. La fiche course (`pages/race.html`) n’est pas filtrée : elle ne lit que la base de l’appareil.
 - **Première connexion d’un compte sur un appareil :** toutes les données de l’appareil sont envoyées et fusionnées avec celles du compte, sans confirmation ni téléchargement (sur iPhone, la feuille du fichier interrompait la connexion).
 - **Limites de l’offre gratuite :** projet mis en pause après une semaine sans aucune requête (l’application continue en local ; le projet se relance depuis le tableau de bord), pas de sauvegarde automatique côté serveur : un export de temps en temps reste conseillé.
 

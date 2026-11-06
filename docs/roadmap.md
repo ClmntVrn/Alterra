@@ -227,6 +227,10 @@ Décisions du 4 novembre 2026 : connexion par e-mail et mot de passe ; inscripti
 
 Chantier R1 à R8 terminé le 26 octobre 2026 (0.8.8 à 0.8.16) : outils, domaine testé, arborescence, découpage du calendrier et de la fiche, feuilles de styles, renommage des données, automatisation. Détail dans [l’historique](./historique.md).
 
+Rangement du 6 novembre 2026 (0.8.42) : fiche course et historique des versions dans `pages/`, réglages Prettier dans `package.json`, `npm start` pour lancer l’app en local, README réécrit (utilisation, lancement, organisation et gestion du dépôt). Service worker : fichiers revalidés auprès du serveur, pour qu’une nouvelle version s’affiche entière dès la réouverture.
+
+- [ ] À vérifier sur iPhone : la fiche course s’ouvre depuis Objectifs et le calendrier, l’historique depuis le Profil ; une prochaine version s’affiche dès la réouverture.
+
 ## Suivi
 
 - Mettre à jour les cases et le statut de l’étape concernée après chaque évolution notable.
