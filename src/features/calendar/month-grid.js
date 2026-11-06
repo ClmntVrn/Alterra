@@ -8,7 +8,7 @@ export function renderCalendarGrid({
   today,
   onSelectDate,
   getEventLabel,
-  getEventMarkerClass
+  renderEventMarker
 }) {
   container.replaceChildren();
   const firstWeekday = (currentMonth.getDay() + 6) % 7;
@@ -60,13 +60,7 @@ export function renderCalendarGrid({
       dateButton.append(dateNumber);
       if (events.length) {
         dayCell.classList.add("has-event");
-        for (const event of events.slice(0, 3)) {
-          const eventDot = document.createElement("span");
-          const markerClass = getEventMarkerClass(event);
-          eventDot.className = `calendar-event-dot${markerClass ? ` ${markerClass}` : ""}`;
-          eventDot.setAttribute("aria-hidden", "true");
-          dateButton.append(eventDot);
-        }
+        dateButton.append(renderEventMarker(events));
       }
       dateButton.addEventListener("click", () => onSelectDate(date));
       dayCell.append(dateButton);

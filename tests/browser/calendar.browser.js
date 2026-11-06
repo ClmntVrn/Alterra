@@ -4,7 +4,7 @@
 import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { launchBrowser } from "../../tools/browser.js";
-import { openHome, openToday, readDatabase } from "./helpers.js";
+import { openHome, openToday, readDatabase, saveRecords } from "./helpers.js";
 
 let browser;
 let page;
@@ -353,6 +353,55 @@ test("le sélecteur de mois natif change de mois et ignore un champ vidé", asyn
   assert.equal(
     await page.evaluate(() => document.getElementById("calendarMonthInput").value),
     "2027-04"
+  );
+});
+
+test("une case du mois montre l’icône du sport, ou le nombre d’activités", async () => {
+  const workout = (id, date, type, status = "planned") => ({
+    id,
+    date,
+    type,
+    title: "Séance",
+    status,
+    createdAt: "2026-10-27T08:00:00.000Z"
+  });
+  await saveRecords(page, "workouts", [
+    workout("icone-trail", "2020-05-04", "trail", "completed"),
+    workout("icone-velo", "2020-05-05", "cycling"),
+    workout("icone-renfo", "2020-05-06", "strength"),
+    workout("icone-1", "2020-05-07", "running"),
+    workout("icone-2", "2020-05-07", "cycling"),
+    workout("icone-3", "2020-05-07", "strength", "completed")
+  ]);
+  await saveRecords(page, "personalRaces", [
+    { id: "icone-course", name: "Course test", date: "2020-05-08", createdAt: "2026-10-27" }
+  ]);
+  await openHome(page);
+  await page.evaluate(() => {
+    const input = document.getElementById("calendarMonthInput");
+    input.value = "2020-05";
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  const markers = await page.evaluate(() =>
+    [...document.querySelectorAll(".calendar-day.has-event .calendar-date-button")].map(button => [
+      button.querySelector(".calendar-date").textContent,
+      button.querySelector(".calendar-event-icon")?.getAttribute("class") ??
+        button.querySelector(".calendar-event-count")?.textContent,
+      button.querySelectorAll(".calendar-event-icon").length
+    ])
+  );
+  assert.deepEqual(markers, [
+    ["4", "calendar-event-icon is-completed", 1],
+    ["5", "calendar-event-icon is-toCheck", 1],
+    ["6", "calendar-event-icon is-toCheck", 1],
+    ["7", "×3", 0],
+    ["8", "calendar-event-icon is-race", 1]
+  ]);
+  assert.match(
+    await page.evaluate(
+      () => document.querySelectorAll(".calendar-day.has-event .calendar-date-button")[3].ariaLabel
+    ),
+    /^Entraînement .+, Entraînement .+, Entraînement .+, 7 mai 2020/
   );
 });
 

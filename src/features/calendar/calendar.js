@@ -1,5 +1,6 @@
 // Calendrier de l’accueil : vue mois, vue jour et formulaires de la journée.
 
+import { renderDayMarker } from "./event-icons.js";
 import { renderCalendarGrid } from "./month-grid.js";
 import { createMonthPicker } from "./month-picker.js";
 import { groupMonthEventsByDate, listEventsOnDate } from "../../domain/calendar.js";
@@ -24,12 +25,6 @@ function getEventLabel(event, todayKey) {
   const status = WORKOUT_STATE_LABELS[getWorkoutState(event, todayKey)];
   const time = event.time ? ` à ${event.time}` : "";
   return `Entraînement ${status}${time} : ${event.title}`;
-}
-
-function getEventMarkerClass(event, todayKey) {
-  if (event.eventType === "race") return "";
-  if (event.eventType === "personalRace") return "calendar-session-dot";
-  return `calendar-session-dot calendar-training-dot is-${getWorkoutState(event, todayKey)}`;
 }
 
 /**
@@ -216,7 +211,8 @@ export function initializeCalendar(racesPromise, repository, onEventsUpdated = (
       today,
       onSelectDate: showDay,
       getEventLabel: event => getEventLabel(event, todayKey),
-      getEventMarkerClass: event => getEventMarkerClass(event, todayKey)
+      renderEventMarker: events =>
+        renderDayMarker(events, event => getWorkoutState(event, todayKey))
     });
   }
 
