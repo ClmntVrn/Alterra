@@ -174,7 +174,7 @@ test("le bouton du Profil passe du thème automatique au clair, au sombre, puis 
   assert.notEqual(dark[3], lightBackground, "le fond change");
 
   // Le choix vaut aussi pour les autres pages, dès leur chargement.
-  await page.goto("/versions.html");
+  await page.goto("/pages/versions.html");
   assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), "dark");
   await openHome(page);
   await tap('.tab[href="#profil"]');
@@ -184,7 +184,7 @@ test("le bouton du Profil passe du thème automatique au clair, au sombre, puis 
 });
 
 test("la fiche course n’a pas de barre d’onglets", async () => {
-  await page.goto("/race.html?id=inconnue");
+  await page.goto("/pages/race.html?id=inconnue");
   await page.waitFor(() => document.querySelector(".race-error"));
   assert.equal(await page.evaluate(() => document.querySelector(".tab-bar")), null);
 });

@@ -10,7 +10,7 @@ const files = () => ({
     packages: { "": { name: "alterra", version: "0.8.7" } }
   }),
   "index.html": "<footer><span>Version <strong>0.8.16</strong></span></footer>",
-  "versions.html": [
+  "pages/versions.html": [
     '<p class="sub">Version actuelle : <strong>0.8.16</strong></p>',
     '<section class="section version-list">',
     '<article class="version-entry"><h2>0.8.16</h2></article>',
@@ -34,14 +34,14 @@ test("la version est mise à jour partout, y compris le cache hors ligne", () =>
   const lock = JSON.parse(updated["package-lock.json"]);
   assert.deepEqual([lock.version, lock.packages[""].version], ["0.8.17", "0.8.17"]);
   assert.match(updated["index.html"], /Version <strong>0\.8\.17<\/strong>/);
-  assert.match(updated["versions.html"], /Version actuelle : <strong>0\.8\.17<\/strong>/);
+  assert.match(updated["pages/versions.html"], /Version actuelle : <strong>0\.8\.17<\/strong>/);
   assert.match(updated["sw.js"], /const CACHE_NAME = "alterra-0\.8\.17";/);
   assert.equal(cacheName("0.8.17"), "alterra-0.8.17");
 });
 
 test("l’entrée d’historique est ajoutée en tête, datée et échappée", () => {
   const html = release("0.8.17", ["Première ligne.", "  ", "Corriger <tout> & le reste."])[
-    "versions.html"
+    "pages/versions.html"
   ];
   assert.ok(html.indexOf("<h2>0.8.17</h2>") < html.indexOf("<h2>0.8.16</h2>"));
   assert.equal(html.match(/<article class="version-entry">/g).length, 2, "deux entrées ouvertes");

@@ -14,7 +14,7 @@ export const RELEASE_FILES = Object.freeze([
   "package.json",
   "package-lock.json",
   "index.html",
-  "versions.html",
+  "pages/versions.html",
   "sw.js"
 ]);
 
@@ -84,16 +84,16 @@ export function applyRelease(files, version, items, date) {
   ].join("\n");
 
   let versions = replaceOnce(
-    files["versions.html"],
+    files["pages/versions.html"],
     /(Version actuelle : <strong>)[^<]*(<\/strong>)/,
     `$1${version}$2`,
-    "la version actuelle dans versions.html"
+    "la version actuelle dans pages/versions.html"
   );
   versions = replaceOnce(
     versions,
     /<article class="version-entry">/,
     entry,
-    "la première entrée de versions.html"
+    "la première entrée de pages/versions.html"
   );
 
   return {
@@ -105,7 +105,7 @@ export function applyRelease(files, version, items, date) {
       `$1${version}$2`,
       "le numéro de version du Profil de index.html"
     ),
-    "versions.html": versions,
+    "pages/versions.html": versions,
     "sw.js": replaceOnce(
       files["sw.js"],
       /const CACHE_NAME = "[^"]*";/,

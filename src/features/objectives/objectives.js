@@ -84,7 +84,7 @@ function renderOpen(race, onEdit) {
     return el("a", {
       className: "calendar-item-open",
       text: race.name,
-      attrs: { href: `./race.html?id=${encodeURIComponent(race.id)}` }
+      attrs: { href: `./pages/race.html?id=${encodeURIComponent(race.id)}` }
     });
   }
   const button = el("button", {

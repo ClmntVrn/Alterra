@@ -42,7 +42,7 @@ test("le calendrier mène à la fiche de la course du jour", async () => {
   await openHome(page);
   await openToday(page);
   const link = await page.waitFor(() => document.querySelector(".calendar-event-link")?.href);
-  assert.equal(new URL(link).pathname + new URL(link).search, "/race.html?id=fiche-test");
+  assert.equal(new URL(link).pathname + new URL(link).search, "/pages/race.html?id=fiche-test");
   await page.goto(link);
   await page.waitFor(() => document.querySelector(".elevation-chart .elevation-line"), {
     message: "Le profil d’altitude ne s’est pas affiché."
@@ -421,7 +421,7 @@ test("la checklist du matériel compte les éléments obligatoires", async () =>
 });
 
 test("une fiche inconnue affiche un message clair", async () => {
-  await page.goto("/race.html?id=inconnue");
+  await page.goto("/pages/race.html?id=inconnue");
   await page.waitFor(() => document.querySelector(".race-error"));
   assert.equal(await text(".race-error h1"), "Fiche course indisponible");
 });

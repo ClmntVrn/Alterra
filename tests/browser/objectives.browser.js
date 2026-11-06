@@ -105,7 +105,7 @@ test("la prochaine course est mise en avant, puis les autres ; les passées sont
         document.querySelector(".objectives-past summary").textContent.replace("⌄", "")
       ];
     }),
-    ["./race.html?id=fiche-test", "J-10, dans 10 jours", false, "Courses passées (1)"]
+    ["./pages/race.html?id=fiche-test", "J-10, dans 10 jours", false, "Courses passées (1)"]
   );
   // Une course passée rappelle sa date complète, avec l’année.
   const [pastCard] = await cards(".objectives-past > .objective-card");
@@ -193,7 +193,9 @@ async function waitAcrossNavigation(fn) {
 test("« Retour » de la fiche ramène à l’onglet Objectifs", async () => {
   // Clic différé : la page peut changer avant que la commande de test ait sa réponse.
   await page.evaluate(() => {
-    const link = document.querySelector('.objective-card a[href="./race.html?id=fiche-test"]');
+    const link = document.querySelector(
+      '.objective-card a[href="./pages/race.html?id=fiche-test"]'
+    );
     setTimeout(() => link.click());
   });
   await waitAcrossNavigation(() => document.querySelector(".hero h1")?.textContent);

@@ -3,8 +3,8 @@ const CACHE_NAME = "alterra-0.8.41";
 const FILES = [
   "./",
   "./index.html",
-  "./race.html",
-  "./versions.html",
+  "./pages/race.html",
+  "./pages/versions.html",
   "./manifest.json",
   "./styles/tokens.css",
   "./styles/base.css",

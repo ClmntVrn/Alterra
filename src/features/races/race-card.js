@@ -16,7 +16,7 @@ export function renderRaceCard(race) {
       el("a", {
         className: "calendar-item-open calendar-event-link",
         text: race.name,
-        attrs: { href: `./race.html?id=${encodeURIComponent(race.id)}` }
+        attrs: { href: `./pages/race.html?id=${encodeURIComponent(race.id)}` }
       })
     ])
   ]);
