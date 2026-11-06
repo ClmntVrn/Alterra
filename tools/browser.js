@@ -47,7 +47,8 @@ export function findBrowser() {
   throw new Error("Aucun Chrome ni Edge trouvé : indique son chemin dans la variable CHROME_PATH.");
 }
 
-function startServer() {
+/** Sert le dépôt tel quel, sans cache ; `port` 0 en choisit un libre. */
+export function startServer(port = 0) {
   const server = createServer(async (request, response) => {
     let path = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
     if (path === BLANK_PAGE) {
@@ -74,7 +75,7 @@ function startServer() {
       response.end();
     }
   });
-  return new Promise(done => server.listen(0, "127.0.0.1", () => done(server)));
+  return new Promise(done => server.listen(port, "127.0.0.1", () => done(server)));
 }
 
 async function waitForDevToolsPort(profile, browser) {

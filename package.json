@@ -5,6 +5,7 @@
   "description": "PWA mobile de préparation au trail et à la montagne.",
   "type": "module",
   "scripts": {
+    "start": "node tools/serve.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
