@@ -82,7 +82,8 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches
       .open(CACHE_NAME)
-      .then(cache => cache.addAll(FILES))
+      // Téléchargés à neuf : le cache HTTP du navigateur pourrait rendre d’anciennes versions.
+      .then(cache => cache.addAll(FILES.map(file => new Request(file, { cache: "reload" }))))
       .then(() => self.skipWaiting())
   );
 });
@@ -108,7 +109,9 @@ self.addEventListener("fetch", event => {
   }
 
   event.respondWith(
-    fetch(event.request)
+    // Toujours revalidé auprès du serveur (réponse « inchangé » légère), jamais pris tel quel
+    // dans le cache HTTP, qui garde les fichiers 10 minutes sur GitHub Pages.
+    fetch(event.request, { cache: "no-cache" })
       .then(response => {
         if (response.ok && new URL(event.request.url).origin === self.location.origin) {
           const copy = response.clone();
