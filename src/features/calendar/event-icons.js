@@ -4,9 +4,17 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 
 // Formes remplies quand l’activité est faite ; les traits restent visibles dans tous les états.
 const ICONS = {
+  // Basket penchée, talon levé, avec des traits de vitesse : une chaussure qui court.
   shoe: [
-    ["path", { d: "M3 15.5V7.5l3.2.6 2.3 2.2 2-2.6h2.2l2 3.4 5.4 2.1a1.8 1.8 0 0 1-.6 3.3z" }],
-    ["path", { d: "M3 19h18", fill: "none" }]
+    [
+      "path",
+      {
+        d: "M5 17V9.5c1.4.8 2.9.8 4-.1L11.5 6l6 4.6 3.6 1.2a2 2 0 0 1 1.4 1.9V17z",
+        transform: "rotate(15 14 12)"
+      }
+    ],
+    ["path", { d: "M5 20h17.5", fill: "none", transform: "rotate(15 14 12)" }],
+    ["path", { d: "M1 8h2.5M1 11.5h2", fill: "none" }]
   ],
   bike: [
     ["circle", { cx: "5.5", cy: "16", r: "3.5" }],

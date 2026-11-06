@@ -164,7 +164,7 @@ Rangés dans l’onglet Profil.
 
 - [x] Graphique des 12 dernières semaines sur les sorties réalisées : distance, durée, D+ et km-effort.
 - [x] Filtres Trail + course à pied, Trail, Course à pied, Vélo ; totaux de la semaine sélectionnée.
-- [x] Repères du calendrier distinguant entraînement/course et prévu/réalisé sans reposer uniquement sur la couleur ; icônes du sport (pleines si faites, en contour sinon) et « ×N » pour plusieurs activités (0.8.41).
+- [x] Repères du calendrier distinguant entraînement/course et prévu/réalisé sans reposer uniquement sur la couleur ; icônes du sport (pleines si faites, en contour sinon) et « ×N » pour plusieurs activités (0.8.41), chaussure penchée avec traits de vitesse (0.8.43).
 - [x] Calculs KPI extraits dans `src/domain/statistics.js` et couverts par des tests.
 - [x] Onglet Stats (0.8.28) : semaine, mois ou année avec totaux et nombre de sorties, évolution par rapport à la période précédente (à la même date pour la période en cours), barres pour choisir la période, répartition par sport et records. Le graphique 12 semaines reste à l’accueil (décision du 4 novembre 2026).
 - [x] Graphique de l’accueil (0.8.37 à 0.8.39) : courbe à traits droits du réalisé, prévu en tirets, moyenne en pointillés, lignes du maximum et intermédiaire (0.8.40), chiffres de la semaine qui choisissent l’indicateur ; 12 dernières semaines à l’ouverture, défilement au doigt vers les 4 semaines à venir et le passé (52 semaines au plus). Barres essayées en 0.8.37–0.8.38, courbe préférée par l’utilisateur.
