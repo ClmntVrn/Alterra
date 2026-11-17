@@ -91,3 +91,35 @@ $$;
 
 revoke all on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- Connexion Strava d’un compte (import des activités). Seules les fonctions du serveur (Edge
+-- Functions, clé service_role) lisent et écrivent cette table : les jetons Strava ne passent
+-- jamais par le navigateur. Elle est supprimée avec le compte.
+create table if not exists public.strava_connections (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  athlete_id bigint not null unique,
+  access_token text not null,
+  refresh_token text not null,
+  expires_at timestamptz not null,
+  scope text not null default '',
+  connected_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- RLS sans règle : aucun accès depuis l’application, la clé service_role passe outre.
+alter table public.strava_connections enable row level security;
+revoke all on public.strava_connections from anon, authenticated;
+
+-- État de la connexion du compte connecté, sans les jetons, pour le Profil.
+create or replace function public.my_strava_connection()
+returns table (athlete_id bigint, connected_at timestamptz)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select athlete_id, connected_at from public.strava_connections where user_id = auth.uid();
+$$;
+
+revoke all on function public.my_strava_connection() from public, anon;
+grant execute on function public.my_strava_connection() to authenticated;

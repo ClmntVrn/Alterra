@@ -153,7 +153,7 @@ Décisions du 17 novembre 2026 :
 
 - [x] Types randonnée et ski de rando (0.8.44) : libellés, icônes (montagne, ski et bâton), carte (km, D+, durée), formulaire, vitesse à ski ; comptés dans « Tout » et la répartition par sport de l’onglet Stats.
 - [x] Règles de conversion et de rapprochement (`src/domain/strava.js`), testées ; une séance créée par l’import suit le nom donné sur Strava, une séance rapprochée garde le sien.
-- [ ] Table `strava_connections` dans `supabase/schema.sql`.
+- [x] Table `strava_connections` dans `supabase/schema.sql` (jetons lisibles par le serveur seul) et fonction `my_strava_connection()` pour l’état affiché dans le Profil.
 - [ ] Connexion à Strava depuis le Profil (Edge Functions `strava-connect` et `strava-callback`).
 - [ ] Import automatique (Edge Function `strava-webhook`, abonnement par `npm run strava -- subscribe`).
 - [ ] Import de l’historique à la connexion et bouton « Récupérer mes activités ».
