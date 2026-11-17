@@ -1,6 +1,6 @@
 ﻿# Plan de développement d’Alterra
 
-**Mis à jour le :** 5 novembre 2026  
+**Mis à jour le :** 17 novembre 2026  
 **État général :** version locale utilisable (0.8.28) ; entraînements, statistiques et onglet Stats, barre d’onglets, objectifs, courses validées et thème sombre en place, retours iPhone attendus sur les étapes 6 à 8 et les retours du 2 novembre. Prochaines étapes : ajout d’une course depuis l’application (fusion course et fiche), puis nutrition et équipement.
 
 ## Vision
@@ -29,7 +29,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 - [ ] Ajout d’une fiche de course complète depuis l’application.
 - [ ] Nutrition et équipement personnels.
 - [x] Compte et synchronisation multi-appareils (Supabase, 0.8.30).
-- [ ] Intégrations (Garmin, IA).
+- [ ] Intégrations : import Strava en cours (17 novembre 2026), IA à venir.
 
 ## Décisions de référence
 
@@ -45,7 +45,7 @@ Les données personnelles doivent rester privées. Chaque personne possède son 
 
 - **Une sortie est un seul enregistrement** (`workouts`, anciennement `plannedSessions`) avec un statut `planned` ou `completed`. Une fois réalisée, ses valeurs sont les valeurs réelles : **l’objectif prévu n’est pas conservé** (décision du 26 octobre 2026, qui remplace la règle initiale « garder le prévu consultable après réalisation »).
 - La collection `activities` n’est pas utilisée. Elle reste dans le format de sauvegarde pour compatibilité ; un futur import (Garmin, GPX) marquera ou créera directement une sortie réalisée plutôt qu’une activité séparée.
-- Types de sortie : trail, course à pied, renforcement musculaire, vélo. Météo : une catégorie au choix (ensoleillé, nuageux, pluie, neige, vent, orage).
+- Types de sortie : trail, course à pied, renforcement musculaire, vélo ; randonnée et ski de rando ajoutés pour l’import Strava (17 novembre 2026). Météo : une catégorie au choix (ensoleillé, nuageux, pluie, neige, vent, orage).
 - Une sortie n’a qu’une date de début saisie ; sa date de fin est calculée depuis l’heure et la durée (26 octobre 2026). Une sortie prévue dont la date est passée est « à vérifier », sans être déclarée manquée.
 - Ressenti, FC et météo ne sont enregistrés que sur une sortie réalisée.
 - Une sortie prévue peut être supprimée ; une sortie réalisée ne l’est pas depuis le calendrier (repasser d’abord en « prévu »).
@@ -130,6 +130,36 @@ Inspiré de LiveTrail (ravitos et sections) et des apps de trail qui colorent la
 - [x] Lecture au doigt : km, altitude, pente, passage estimé du scénario.
 - [x] Plein écran toujours à l’horizontale (tourné si le téléphone est tenu droit), zoom à deux doigts (décision de l’utilisateur) et retour à la course entière.
 - [ ] À vérifier sur iPhone : pincer pour zoomer, glisser sans gêner le défilement, plein écran en paysage (encoche), lisibilité dehors et de nuit.
+
+### Import Strava (17 novembre 2026)
+
+**Statut :** en cours
+
+But : ne plus saisir ses sorties à la main. La montre envoie l’activité à Strava, qui prévient Alterra ; la séance arrive au calendrier à la prochaine ouverture.
+
+Garmin écarté : son API officielle est réservée aux entreprises, les accès non officiels sont fragiles. Une montre Garmin reliée à Strava est couverte par cet import.
+
+Fonctionnement : des Edge Functions Supabase gardent le secret Strava et les jetons (table `strava_connections`, inaccessible au navigateur) ; elles reçoivent l’avis de Strava (webhook), lisent l’activité et écrivent la séance dans `records`, que la synchronisation existante ramène sur l’appareil.
+
+Décisions du 17 novembre 2026 :
+
+- Activité rapprochée, dans l’ordre : d’une séance prévue du même jour et du même type (la plus proche en heure), sinon d’une séance réalisée du même jour et du même type sans lien Strava (saisie à la main), sinon nouvelle séance réalisée. Les chiffres de Strava remplacent ceux de la séance, comme en la cochant réalisée ; ressenti, météo et notes ne sont pas touchés.
+- Durée : temps total (`elapsed_time`, arrêts compris).
+- Types : TrailRun → trail ; Run → course à pied ; Ride, GravelRide, MountainBikeRide, VirtualRide → vélo ; WeightTraining, Workout → renforcement ; Hike, Walk → randonnée ; BackcountrySki, NordicSki → ski de rando. Les autres sports sont ignorés.
+- Tout l’historique Strava est importé à la connexion.
+- Champ `stravaActivityId` sur la séance (évite les doublons, lien vers Strava) ; une séance créée par l’import a pour identifiant `strava-<id>`. Format de sauvegarde inchangé.
+- Activité supprimée sur Strava : la séance créée par l’import est supprimée, une séance prévue rapprochée reste telle quelle.
+
+- [ ] Types randonnée et ski de rando (libellés, icônes, carte, formulaire, statistiques).
+- [ ] Règles de conversion et de rapprochement (`src/domain/strava.js`), testées.
+- [ ] Table `strava_connections` dans `supabase/schema.sql`.
+- [ ] Connexion à Strava depuis le Profil (Edge Functions `strava-connect` et `strava-callback`).
+- [ ] Import automatique (Edge Function `strava-webhook`, abonnement par `npm run strava -- subscribe`).
+- [ ] Import de l’historique à la connexion et bouton « Récupérer mes activités ».
+- [ ] Lien « Voir sur Strava » et logo dans le détail de la séance ; documentation.
+- [ ] À vérifier sur iPhone : autorisation Strava et retour dans l’app installée, arrivée d’une sortie après l’avoir terminée.
+
+**Validation :** une sortie enregistrée à la montre apparaît dans Alterra, rapprochée de la séance prévue, sans saisie.
 
 ### Étape 9 — Ajout d’une course depuis l’application
 
@@ -216,7 +246,7 @@ Décisions du 4 novembre 2026 : connexion par e-mail et mot de passe ; inscripti
 **Statut :** à faire — seulement si le besoin est confirmé
 
 - Évaluer un hébergement et un backend payants si les limites de l’offre gratuite gênent l’usage ; décider si un nom de domaine est utile.
-- Étudier l’intégration Garmin (ou Strava) via les accès officiels ; conserver un import de fichier comme solution de repli. Une activité importée marque ou crée la sortie réalisée du jour.
+- Intégration Strava : avancée en étape à part (« Import Strava », 17 novembre 2026), sur l’offre gratuite de Supabase et de Strava.
 - Ajouter une IA côté serveur, sans clé dans le navigateur, avec limites de dépenses configurables ; les séances proposées sont examinées et validées avant ajout au calendrier.
 - Onglet IA : assistant conversationnel pour créer une séance spécifique ou une fiche de course à partir d’un lien, avec validation avant tout enregistrement.
 - Présenter les coûts récurrents et obtenir l’accord de l’utilisateur avant d’activer tout service payant.
