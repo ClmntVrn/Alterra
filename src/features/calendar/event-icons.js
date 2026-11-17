@@ -26,6 +26,14 @@ const ICONS = {
     ["rect", { x: "15.5", y: "7", width: "4", height: "10", rx: "1" }],
     ["path", { d: "M8.5 12h7M2.5 10v4M21.5 10v4", fill: "none" }]
   ],
+  // Sommet et son épaulement.
+  mountain: [["path", { d: "M2 20 9.5 6.5l4.5 7 2.5-3.5L22 20z" }]],
+  // Ski penché à spatule relevée, et un bâton planté dont la rondelle est près de la pointe.
+  ski: [
+    ["path", { d: "M2 12.5 17 19.8c1.7.8 3.6.2 4.2-1.5", fill: "none" }],
+    ["path", { d: "M7.5 2.5 12.5 17.5", fill: "none" }],
+    ["circle", { cx: "11.6", cy: "14.6", r: "2.3" }]
+  ],
   flag: [
     ["path", { d: "M5.5 4h12l-2.5 4 2.5 4h-12z" }],
     ["path", { d: "M5.5 21V4", fill: "none" }]
@@ -33,7 +41,14 @@ const ICONS = {
   dot: [["circle", { cx: "12", cy: "12", r: "5" }]]
 };
 
-const WORKOUT_ICONS = { running: "shoe", trail: "shoe", cycling: "bike", strength: "dumbbell" };
+const WORKOUT_ICONS = {
+  running: "shoe",
+  trail: "shoe",
+  cycling: "bike",
+  strength: "dumbbell",
+  hiking: "mountain",
+  skiTouring: "ski"
+};
 
 /**
  * @param {Object} event Événement du calendrier (course ou séance).

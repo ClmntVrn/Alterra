@@ -97,6 +97,14 @@ test("l’allure et une fin le lendemain sont calculées ; une durée impossible
   );
   assert.equal(await computed(), "1 h 30 · Vitesse 14,1 km/h · Fin 08:30", "vitesse à vélo");
   await page.evaluate(() =>
+    document.querySelector('#trainingForm [name="type"][value="skiTouring"]').click()
+  );
+  assert.equal(await computed(), "1 h 30 · Vitesse 14,1 km/h · Fin 08:30", "vitesse à ski");
+  await page.evaluate(() =>
+    document.querySelector('#trainingForm [name="type"][value="hiking"]').click()
+  );
+  assert.equal(await computed(), "1 h 30 · Allure 4:16 min/km · Fin 08:30", "allure en randonnée");
+  await page.evaluate(() =>
     document.querySelector('#trainingForm [name="type"][value="trail"]').click()
   );
   await fill("time", "22h");
@@ -371,7 +379,9 @@ test("une case du mois montre l’icône du sport, ou le nombre d’activités",
     workout("icone-renfo", "2020-05-06", "strength"),
     workout("icone-1", "2020-05-07", "running"),
     workout("icone-2", "2020-05-07", "cycling"),
-    workout("icone-3", "2020-05-07", "strength", "completed")
+    workout("icone-3", "2020-05-07", "strength", "completed"),
+    workout("icone-rando", "2020-05-11", "hiking", "completed"),
+    workout("icone-ski", "2020-05-12", "skiTouring", "completed")
   ]);
   await saveRecords(page, "personalRaces", [
     { id: "icone-course", name: "Course test", date: "2020-05-08", createdAt: "2026-10-27" }
@@ -395,8 +405,17 @@ test("une case du mois montre l’icône du sport, ou le nombre d’activités",
     ["5", "calendar-event-icon is-toCheck", 1],
     ["6", "calendar-event-icon is-toCheck", 1],
     ["7", "×3", 0],
-    ["8", "calendar-event-icon is-race", 1]
+    ["8", "calendar-event-icon is-race", 1],
+    ["11", "calendar-event-icon is-completed", 1],
+    ["12", "calendar-event-icon is-completed", 1]
   ]);
+  // Randonnée et ski ont leur propre dessin, pas le point des types inconnus.
+  const shapes = await page.evaluate(() =>
+    [...document.querySelectorAll(".calendar-day.has-event .calendar-event-icon")]
+      .slice(-2)
+      .map(icon => icon.childElementCount)
+  );
+  assert.deepEqual(shapes, [1, 3]);
   assert.match(
     await page.evaluate(
       () => document.querySelectorAll(".calendar-day.has-event .calendar-date-button")[3].ariaLabel

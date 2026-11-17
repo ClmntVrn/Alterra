@@ -8,7 +8,9 @@ export const WORKOUT_TYPE_LABELS = Object.freeze({
   trail: "Trail",
   running: "Course à pied",
   strength: "Renforcement musculaire",
-  cycling: "Vélo"
+  cycling: "Vélo",
+  hiking: "Randonnée",
+  skiTouring: "Ski de rando"
 });
 
 export const DEFAULT_WORKOUT_TITLE = "Entraînement";

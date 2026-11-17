@@ -14,22 +14,25 @@ const CHECK_ICON =
   '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 12.5 4 4 8-9"></path></svg>';
 
 // Chiffres de la carte selon le type, comme sur Strava : l’allure compte en course à pied,
-// le dénivelé en trail et à vélo (le détail y ajoute l’allure, ou la vitesse à vélo).
+// le dénivelé en trail, à vélo, en randonnée et à ski (le détail y ajoute l’allure, ou la
+// vitesse à vélo et à ski).
 const SUMMARY_STATS = {
   trail: ["distance", "ascent", "duration"],
   running: ["distance", "pace", "duration"],
   cycling: ["distance", "ascent", "duration"],
-  strength: ["duration"]
+  strength: ["duration"],
+  hiking: ["distance", "ascent", "duration"],
+  skiTouring: ["distance", "ascent", "duration"]
 };
 const DEFAULT_SUMMARY_STATS = ["distance", "ascent", "duration"];
 
 /**
- * Allure en min/km à pied, vitesse en km/h à vélo ; rien en renforcement.
+ * Allure en min/km à pied, vitesse en km/h à vélo et à ski ; rien en renforcement.
  * @returns {{ label: string, value: string } | null}
  */
 export function formatRate(type, distanceKm, durationMinutes) {
   if (type === "strength") return null;
-  if (type === "cycling") {
+  if (type === "cycling" || type === "skiTouring") {
     const speed = computeSpeed(distanceKm, durationMinutes);
     return Number.isFinite(speed)
       ? { label: "Vitesse", value: `${formatNumber(speed)} km/h` }
