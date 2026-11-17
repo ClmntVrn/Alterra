@@ -1,7 +1,7 @@
 // Import des activités Strava : conversion d’une activité en séance et rapprochement avec les
 // séances déjà enregistrées. Règles pures, partagées par l’application et le serveur.
 
-import { isDateKey } from "./dates.js";
+import { isDateKey, isDateKeyInRange } from "./dates.js";
 import { computeWorkoutEnd } from "./workouts.js";
 
 /** Sports Strava importés (`sport_type`) et type de séance correspondant ; les autres sont ignorés. */
@@ -26,6 +26,9 @@ const IMPORTED_ID_PREFIX = "strava-";
 /** Chiffres que l’activité remplace sur la séance ; la FC n’est remplacée que si Strava la donne. */
 const REPLACED_MEASURES = ["distanceKm", "ascentMeters", "durationMinutes"];
 const HEART_RATE_MEASURES = ["heartRateAvg", "heartRateMax"];
+
+/** Types qu’accepte le résultat d’une course. */
+const RACE_RESULT_TYPES = ["trail", "running"];
 
 /** @returns {string} Identifiant de la séance créée pour une activité. */
 export function importedWorkoutId(activityId) {
@@ -93,6 +96,49 @@ export function findMatchingWorkout(workouts, fields) {
   );
 }
 
+/** Remplace sur place distance, D+ et durée par ceux de Strava, et la FC si Strava la donne. */
+function replaceMeasures(record, fields) {
+  for (const key of REPLACED_MEASURES) {
+    if (key in fields) record[key] = fields[key];
+    else delete record[key];
+  }
+  for (const key of HEART_RATE_MEASURES) {
+    if (key in fields) record[key] = fields[key];
+  }
+}
+
+/**
+ * Course à valider avec une activité Strava de trail ou de course à pied faite pendant ses dates :
+ * son résultat reçoit les chiffres de Strava, au lieu d’une séance qui doublerait la course dans
+ * les statistiques. Ressenti, météo et notes du résultat sont gardés. Un jour de course, la plus
+ * longue activité l’emporte : un échauffement ne remplace pas la course déjà importée.
+ * @param {Object[]} races Courses de référence et personnelles, avec `date` et `endDate`.
+ * @param {Object} activity Activité Strava.
+ * @returns {Object|null} Course mise à jour ; null si aucune n’est concernée ou si l’activité est
+ *   plus courte que celle déjà importée : elle devient alors une séance.
+ */
+export function applyActivityToRace(races, activity) {
+  const fields = convertActivity(activity);
+  if (!fields || !RACE_RESULT_TYPES.includes(fields.type)) return null;
+  const linked = races.find(race => race.result?.stravaActivityId === fields.stravaActivityId);
+  const race =
+    linked ??
+    races.find(race => isDateKeyInRange(fields.date, race.date, race.endDate || race.date));
+  if (!race) return null;
+  const previous = race.result && typeof race.result === "object" ? race.result : null;
+  if (
+    !linked &&
+    previous?.stravaActivityId &&
+    (fields.distanceKm ?? 0) <= (previous.distanceKm ?? 0)
+  ) {
+    return null;
+  }
+  const result = { ...previous };
+  replaceMeasures(result, fields);
+  Object.assign(result, { type: fields.type, stravaActivityId: fields.stravaActivityId });
+  return { ...race, result };
+}
+
 /**
  * Séance à enregistrer pour une activité Strava : la séance rapprochée, marquée réalisée avec les
  * chiffres de Strava, ou une nouvelle séance réalisée. Le ressenti, la météo et les notes sont
@@ -109,13 +155,7 @@ export function applyActivity(workouts, activity, nowIso) {
   const workout = existing
     ? { ...existing }
     : { id: importedWorkoutId(fields.stravaActivityId), createdAt: nowIso };
-  for (const key of REPLACED_MEASURES) {
-    if (key in fields) workout[key] = fields[key];
-    else delete workout[key];
-  }
-  for (const key of HEART_RATE_MEASURES) {
-    if (key in fields) workout[key] = fields[key];
-  }
+  replaceMeasures(workout, fields);
   // Une séance créée par l’import suit le nom donné sur Strava ; une séance rapprochée garde le sien.
   if (
     fields.title &&

@@ -147,6 +147,7 @@ Décisions du 17 novembre 2026 :
 - Durée : temps total (`elapsed_time`, arrêts compris).
 - Types : TrailRun → trail ; Run → course à pied ; Ride, GravelRide, MountainBikeRide, VirtualRide → vélo ; WeightTraining, Workout → renforcement ; Hike, Walk → randonnée ; BackcountrySki, NordicSki → ski de rando. Les autres sports sont ignorés.
 - Tout l’historique Strava est importé à la connexion.
+- Jour de course : une activité de trail ou de course à pied faite pendant les dates d’une course remplit le résultat de la course (distance, D+, durée, FC ; ressenti, météo et notes gardés) au lieu de créer une séance, pour ne pas compter la sortie deux fois. La plus longue activité du jour l’emporte ; une plus courte (échauffement) devient une séance.
 - Champ `stravaActivityId` sur la séance (évite les doublons, lien vers Strava) ; une séance créée par l’import a pour identifiant `strava-<id>`. Format de sauvegarde inchangé.
 - Activité supprimée sur Strava : la séance créée par l’import est supprimée, une séance prévue rapprochée reste telle quelle.
 

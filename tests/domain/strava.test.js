@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   applyActivity,
+  applyActivityToRace,
   convertActivity,
   findMatchingWorkout,
   findWorkoutToRemove,
@@ -215,4 +216,50 @@ test("findWorkoutToRemove ne vise que la séance créée par l’import", () => 
   const matched = workout("prevue", { stravaActivityId: "1002" });
   assert.equal(findWorkoutToRemove([created, matched], 1001), created);
   assert.equal(findWorkoutToRemove([created, matched], 1002), null);
+});
+
+function race(id, overrides = {}) {
+  return { id, name: "Trail des Cimes", date: "2026-11-17", createdAt: "2026-09-01", ...overrides };
+}
+
+test("applyActivityToRace remplit le résultat de la course du jour en gardant ressenti et notes", () => {
+  const races = [
+    race("autre-jour", { date: "2026-11-10" }),
+    race("cimes", { result: { type: "trail", distanceKm: 40, perceivedEffort: 8, notes: "Dur" } })
+  ];
+  assert.deepEqual(applyActivityToRace(races, activity()), {
+    ...races[1],
+    result: {
+      type: "trail",
+      distanceKm: 15.23,
+      ascentMeters: 812,
+      durationMinutes: 110,
+      heartRateAvg: 149,
+      heartRateMax: 171,
+      perceivedEffort: 8,
+      notes: "Dur",
+      stravaActivityId: "1001"
+    }
+  });
+  assert.equal(races[1].result.distanceKm, 40, "la course d’origine n’est pas modifiée");
+});
+
+test("applyActivityToRace couvre une course sur plusieurs jours, mais seulement à pied", () => {
+  const races = [race("ultra", { date: "2026-11-16", endDate: "2026-11-18" })];
+  assert.equal(applyActivityToRace(races, activity({ sport_type: "Run" })).result.type, "running");
+  assert.equal(applyActivityToRace(races, activity({ sport_type: "Ride" })), null);
+  assert.equal(applyActivityToRace(races, activity({ sport_type: "Hike" })), null);
+  assert.equal(applyActivityToRace([race("passee", { date: "2026-11-01" })], activity()), null);
+});
+
+test("applyActivityToRace garde l’activité la plus longue du jour de course", () => {
+  const warmUp = activity({ id: 1, sport_type: "Run", distance: 2000 });
+  const main = activity({ id: 2, distance: 42000 });
+  const afterWarmUp = applyActivityToRace([race("cimes")], warmUp);
+  const afterMain = applyActivityToRace([afterWarmUp], main);
+  assert.equal(afterMain.result.stravaActivityId, "2");
+  assert.equal(afterMain.result.distanceKm, 42);
+  assert.equal(applyActivityToRace([afterMain], warmUp), null, "l’échauffement devient une séance");
+  const renamed = applyActivityToRace([afterMain], activity({ id: 2, distance: 42500 }));
+  assert.equal(renamed.result.distanceKm, 42.5, "l’activité déjà reliée est mise à jour");
 });
