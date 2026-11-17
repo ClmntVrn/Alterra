@@ -62,6 +62,7 @@ const FILES = [
   "./src/domain/numbers.js",
   "./src/domain/period-statistics.js",
   "./src/domain/statistics.js",
+  "./src/domain/strava.js",
   "./src/domain/sync.js",
   "./src/domain/workouts.js",
   "./src/storage/repository.js",

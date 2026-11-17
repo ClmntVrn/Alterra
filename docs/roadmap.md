@@ -151,7 +151,7 @@ Décisions du 17 novembre 2026 :
 - Activité supprimée sur Strava : la séance créée par l’import est supprimée, une séance prévue rapprochée reste telle quelle.
 
 - [x] Types randonnée et ski de rando (0.8.44) : libellés, icônes (montagne, ski et bâton), carte (km, D+, durée), formulaire, vitesse à ski ; comptés dans « Tout » et la répartition par sport de l’onglet Stats.
-- [ ] Règles de conversion et de rapprochement (`src/domain/strava.js`), testées.
+- [x] Règles de conversion et de rapprochement (`src/domain/strava.js`), testées ; une séance créée par l’import suit le nom donné sur Strava, une séance rapprochée garde le sien.
 - [ ] Table `strava_connections` dans `supabase/schema.sql`.
 - [ ] Connexion à Strava depuis le Profil (Edge Functions `strava-connect` et `strava-callback`).
 - [ ] Import automatique (Edge Function `strava-webhook`, abonnement par `npm run strava -- subscribe`).
